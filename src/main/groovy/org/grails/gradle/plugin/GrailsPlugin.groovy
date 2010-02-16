@@ -125,7 +125,7 @@ class GrailsPlugin implements Plugin<Project> {
                              "org.springframework:spring-core:3.0.0.RELEASE",
                              "org.springframework:spring-beans:3.0.0.RELEASE",
                              "org.springframework:spring-context:3.0.0.RELEASE",
-                             "org.springframework:spring-web:3.0.0.RELEASE"
+                             "org.springframework:spring-webmvc:3.0.0.RELEASE"
 
             if (RUNTIME_CLASSPATH_COMMANDS.contains(cmd)) {
                 // Add the project's runtime dependencies to 'grails_bootstrap'.
@@ -169,7 +169,6 @@ class GrailsPlugin implements Plugin<Project> {
         // dependencies don't conflict with it.
         def rootLoader = new GrailsRootLoader(classpath as URL[], ClassLoader.systemClassLoader)
         def grailsHelper = new GrailsBuildHelper(rootLoader, null, project.projectDir.absolutePath)
-        grailsHelper.dependenciesExternallyConfigured = true
         grailsHelper.compileDependencies = project.configurations.compile.files as List
         grailsHelper.testDependencies = project.configurations.test.files as List
         grailsHelper.runtimeDependencies = project.configurations.runtime.files as List
@@ -178,6 +177,19 @@ class GrailsPlugin implements Plugin<Project> {
         grailsHelper.testClassesDir = new File(project.buildDir, "test-classes")
         grailsHelper.resourcesDir = new File(project.buildDir, "resources")
         grailsHelper.projectPluginsDir = new File(project.buildDir, "plugins")
+
+        // Grails 1.2+ only. Previous versions of Grails don't have the
+        // 'dependenciesExternallyConfigured' property. Note that this
+        // is a HACK because the 'settings' field is private.
+        //
+        // We can't simply check whether the property exists on the
+        // helper because it's the 1.2 version, whereas the project may
+        // be using Grails version 1.1. That's why we have to get hold
+        // of the actual BuildSettings instance.
+        def buildSettings = grailsHelper.settings
+        if (buildSettings.metaClass.hasProperty(buildSettings, "dependenciesExternallyConfigured")) {
+            grailsHelper.dependenciesExternallyConfigured = true
+        }
         
         // Using a Groovy trick here, because we either want to call
         // the execute() method that takes two arguments, or the one
