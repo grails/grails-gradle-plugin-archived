@@ -15,7 +15,7 @@ class GrailsPlugin implements Plugin<Project> {
      */
     static final RUNTIME_CLASSPATH_COMMANDS = [ "RunApp", "TestApp" ] as Set
 
-    void use(Project project) {
+    void apply(Project project) {
         project.configurations {
             grails_bootstrap
             compile
