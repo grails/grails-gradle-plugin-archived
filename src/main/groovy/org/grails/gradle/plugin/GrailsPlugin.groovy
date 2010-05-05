@@ -45,13 +45,13 @@ class GrailsPlugin implements Plugin<Project> {
 
         // Most people are used to a "test" target or task, but Grails
         // has "test-app". So we hard-code a "test" task.
-        project.task("test") << {
+        project.task(overwrite: true, "test") << {
             runGrailsWithProps("TestApp", project)
         }
 
         // Gradle's Java plugin provides an "assemble" task. We map that
         // to the War command here.
-        project.task("assemble") << {
+        project.task(overwrite: true, "assemble") << {
             runGrailsWithProps("War", project)
         }
 
