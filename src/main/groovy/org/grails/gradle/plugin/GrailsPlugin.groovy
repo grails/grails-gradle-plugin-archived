@@ -60,19 +60,18 @@ class GrailsPlugin implements Plugin<Project> {
         // Convert any task executed from the command line into the
         // Grails equivalent command.
         project.gradle.afterProject { p, ex ->
-            project.tasks.addRule("Grails command") { String name ->
-                // Only add the task to the project that applied the plugin
-                if (p != project) return
-                
-                // Gradle has a tendency to want to create 'args' and 'env'
-                // tasks, so block it from doing so.
-                if (name == "args" || name == "env") return
+            if (p == project) { // Only add the task to the project that applied the plugin
+                project.tasks.addRule("Grails command") { String name ->
+                    // Gradle has a tendency to want to create 'args' and 'env'
+                    // tasks, so block it from doing so.
+                    if (name == "args" || name == "env") return
 
-                // Add a task for the given Grails command.
-                project.task(name) << {
-                    runGrailsWithProps(GrailsNameUtils.getNameFromScript(name), project)
+                    // Add a task for the given Grails command.
+                    project.task(name) << {
+                        runGrailsWithProps(GrailsNameUtils.getNameFromScript(name), project)
+                    }
+                    addDependencyToProjectLibTasks(project."$name")
                 }
-                addDependencyToProjectLibTasks(project."$name")
             }
         }
     }
