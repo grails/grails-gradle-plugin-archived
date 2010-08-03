@@ -48,12 +48,14 @@ class GrailsPlugin implements Plugin<Project> {
         project.task(overwrite: true, "test") << {
             runGrailsWithProps("TestApp", project)
         }
+        addDependencyToProjectLibTasks(project.test)
 
         // Gradle's Java plugin provides an "assemble" task. We map that
         // to the War command here.
         project.task(overwrite: true, "assemble") << {
             runGrailsWithProps("War", project)
         }
+        addDependencyToProjectLibTasks(project.assemble)
 
         // Convert any task executed from the command line into the
         // Grails equivalent command.
@@ -70,10 +72,21 @@ class GrailsPlugin implements Plugin<Project> {
                 project.task(name) << {
                     runGrailsWithProps(GrailsNameUtils.getNameFromScript(name), project)
                 }
+                addDependencyToProjectLibTasks(project."$name")
             }
         }
     }
 
+    /**
+     * Evaluate any project lib dependencies in any of the configurations
+     * and add the jar task of that project as a dependency of the task we created
+     */
+    private void addDependencyToProjectLibTasks(task) {
+        task.project.configurations.each {
+            task.dependsOn(it.getTaskDependencyFromProjectDependency(true, "jar"))
+        }
+    }
+    
     /**
      * Launches Grails and executes the given command. Any command
      * arguments or environment are picked up from the "args" and "env"
