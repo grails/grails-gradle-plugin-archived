@@ -194,6 +194,7 @@ class GrailsPlugin implements Plugin<Project> {
         grailsHelper.testClassesDir = new File(project.buildDir, "test-classes")
         grailsHelper.resourcesDir = new File(project.buildDir, "resources")
         grailsHelper.projectPluginsDir = new File(project.buildDir, "plugins")
+        grailsHelper.testReportsDir = new File(project.buildDir, "test-results")
 
         // Grails 1.2+ only. Previous versions of Grails don't have the
         // 'dependenciesExternallyConfigured' property. Note that this
