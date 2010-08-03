@@ -19,16 +19,18 @@ dependencies {
     deploy 'org.apache.maven.wagon:wagon-webdav-jackrabbit:1.0-beta-6'
 }
 
-uploadArchives {
-    repositories.mavenDeployer {
-        configuration = configurations.deploy
+if (hasProperty('codehausUsername') && hasProperty('codehausPassword')) {
+    uploadArchives {
+        repositories.mavenDeployer {
+            configuration = configurations.deploy
 
-        repository(url: 'dav:https://dav.codehaus.org/repository/grails') {
-            authentication(userName: codehausUsername, password: codehausPassword)
-        }
+            repository(url: 'dav:https://dav.codehaus.org/repository/grails') {
+                authentication(userName: codehausUsername, password: codehausPassword)
+            }
 
-        snapshotRepository(url: 'dav:https://dav.codehaus.org/snapshots.repository/grails') {
-            authentication(userName: codehausUsername, password: codehausPassword)
+            snapshotRepository(url: 'dav:https://dav.codehaus.org/snapshots.repository/grails') {
+                authentication(userName: codehausUsername, password: codehausPassword)
+            }
         }
     }
 }
