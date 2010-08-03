@@ -59,6 +59,9 @@ class GrailsPlugin implements Plugin<Project> {
         // Grails equivalent command.
         project.gradle.afterProject { p, ex ->
             project.tasks.addRule("Grails command") { String name ->
+                // Only add the task to the project that applied the plugin
+                if (p != project) return
+                
                 // Gradle has a tendency to want to create 'args' and 'env'
                 // tasks, so block it from doing so.
                 if (name == "args" || name == "env") return
