@@ -15,6 +15,8 @@ class GrailsPlugin implements Plugin<Project> {
      */
     static final RUNTIME_CLASSPATH_COMMANDS = [ "RunApp", "TestApp" ] as Set
 
+    static public final GRAILS_TASK_PREFIX = "grails-"
+
     void apply(Project project) {
         project.configurations {
             grails_bootstrap
@@ -57,20 +59,18 @@ class GrailsPlugin implements Plugin<Project> {
         }
         addDependencyToProjectLibTasks(project.assemble)
 
-        // Convert any task executed from the command line into the
-        // Grails equivalent command.
+        // Convert any task executed from the command line 
+        // with the special prefix into the Grails equivalent command.
         project.gradle.afterProject { p, ex ->
             if (p == project) { // Only add the task to the project that applied the plugin
                 project.tasks.addRule("Grails command") { String name ->
-                    // Gradle has a tendency to want to create 'args' and 'env'
-                    // tasks, so block it from doing so.
-                    if (name == "args" || name == "env") return
-
-                    // Add a task for the given Grails command.
-                    project.task(name) << {
-                        runGrailsWithProps(GrailsNameUtils.getNameFromScript(name), project)
+                    if (name.startsWith(GRAILS_TASK_PREFIX)) {
+                        // Add a task for the given Grails command.
+                        project.task(name) << {
+                            runGrailsWithProps(GrailsNameUtils.getNameFromScript(name - GRAILS_TASK_PREFIX), project)
+                        }
+                        addDependencyToProjectLibTasks(project."$name")
                     }
-                    addDependencyToProjectLibTasks(project."$name")
                 }
             }
         }
