@@ -46,7 +46,7 @@ class GrailsPlugin implements Plugin<Project> {
         }
 
         // Make the Grails 'clean' command available as a 'clean' task.
-        project.task("clean") << {
+        project.task("clean", overwrite: true) << {
             runGrailsWithProps("Clean", project)
         }
         addDependencyToProjectLibTasks(project.clean)
