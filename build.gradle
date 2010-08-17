@@ -14,8 +14,8 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi(), 'org.grails:grails-bootstrap:1.2.0'
-    groovy  'org.codehaus.groovy:groovy:1.6.7'
+    compile gradleApi(), 'org.grails:grails-bootstrap:1.2.2'
+    groovy  'org.codehaus.groovy:groovy:1.6.8'
     deploy 'org.apache.maven.wagon:wagon-webdav-jackrabbit:1.0-beta-6'
 }
 

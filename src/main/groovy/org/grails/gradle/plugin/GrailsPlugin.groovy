@@ -45,6 +45,12 @@ class GrailsPlugin implements Plugin<Project> {
             runGrails("CreateApp", project, "--inplace --appVersion=" + project.version + " " + projName)
         }
 
+        // Make the Grails 'clean' command available as a 'clean' task.
+        project.task("clean") << {
+            runGrailsWithProps("Clean", project)
+        }
+        addDependencyToProjectLibTasks(project.clean)
+
         // Most people are used to a "test" target or task, but Grails
         // has "test-app". So we hard-code a "test" task.
         project.task(overwrite: true, "test") << {
@@ -137,12 +143,7 @@ class GrailsPlugin implements Plugin<Project> {
                              "org.grails:grails-scripts:${grailsDep.version}",
                              "org.apache.ivy:ivy:2.1.0",
                              // The Grails build system requires a logging implementation of some sort.
-                             "org.slf4j:${loggingDep.name}:${loggingDep.version}",
-                             // Not included automatically for some reason - even though they are transitive dependencies.
-                             "org.springframework:spring-core:3.0.0.RELEASE",
-                             "org.springframework:spring-beans:3.0.0.RELEASE",
-                             "org.springframework:spring-context:3.0.0.RELEASE",
-                             "org.springframework:spring-webmvc:3.0.0.RELEASE"
+                             "org.slf4j:${loggingDep.name}:${loggingDep.version}"
 
             if (RUNTIME_CLASSPATH_COMMANDS.contains(cmd)) {
                 // Add the project's runtime dependencies to 'grails_bootstrap'.
