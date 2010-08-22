@@ -29,6 +29,10 @@ This plugin for Gradle allows you to build Grails projects. To use it, simply in
 
 You must include a version of the 'grails-bootstrap' artifact in the 'classpath' configuration. You should also add whichever Grails artifacts you need. 'grails-crud' and 'grails-gorm' will give you everything you need for a standard Grails web application.
 
+*Warning* If you're using a pre-1.3.5 or pre-1.2.4 version of Grails, you'll need to add this runtime dependency to your project's build file:
+
+    runtime org.aspectj:aspectjrt:1.6.8
+
 Once you have this build file, you can create a Grails application with the 'init' task:
 
     gradle init
