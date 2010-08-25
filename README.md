@@ -15,6 +15,8 @@ This plugin for Gradle allows you to build Grails projects. To use it, simply in
         }
     }
 
+    grailsVersion = "1.3.4"
+    
     apply plugin: "grails"
 
     repositories {
@@ -23,11 +25,16 @@ This plugin for Gradle allows you to build Grails projects. To use it, simply in
     }
 
     dependencies {
-        compile "org.grails:grails-crud:1.3.4",
-                "org.grails:grails-gorm:1.3.4"
+        logging "org.slf4j:slf4j-log4j12:1.5.5"
+        compile "org.grails:grails-crud:${grailsVersion}",
+                "org.grails:grails-gorm:${grailsVersion}"
     }
 
-You must include a version of the 'grails-bootstrap' artifact in the 'classpath' configuration. You should also add whichever Grails artifacts you need. 'grails-crud' and 'grails-gorm' will give you everything you need for a standard Grails web application.
+You **must** declare the `grailsVersion` property *before* applying the Grails plugin.
+
+You **must** declare an `slf4j` dependency as part of the `logging` configuration.
+
+You **must** include a version of the 'grails-bootstrap' artifact in the 'classpath' configuration. You should also add whichever Grails artifacts you need. 'grails-crud' and 'grails-gorm' will give you everything you need for a standard Grails web application.
 
 *Warning* If you're using a pre-1.3.5 or pre-1.2.4 version of Grails, you'll need to add this runtime dependency to your project's build file:
 
@@ -55,5 +62,3 @@ If you want to pass in some arguments, you can do so via the `args` project prop
 You can also change the environment via the `env` project property:
 
     gradle -Penv=prod grails-run-app
-
-*Warning* Version 1.0 of the plugin does not allow you to execute multiple tasks in one command line. So `gradle clean test` will fail even if `clean` and `test` individually succeed.
