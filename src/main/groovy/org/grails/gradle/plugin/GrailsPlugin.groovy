@@ -18,13 +18,30 @@ class GrailsPlugin implements Plugin<Project> {
     static public final GRAILS_TASK_PREFIX = "grails-"
 
     void apply(Project project) {
+        if (!project.hasProperty("grailsVersion")) {
+            throw new RuntimeException("[GrailsPlugin] the 'grailsVersion' project property is not set - you need to set this before applying the plugin")
+        }
+        
         project.configurations {
-            grails_bootstrap
-            compile
+            logging
+            
+            compile.extendsFrom logging
             runtime.extendsFrom compile
             test.extendsFrom compile
+            
+            bootstrap.extendsFrom logging
+            bootstrapRuntime.extendsFrom bootstrap, runtime
         }
 
+        // Set up the 'bootstrap' configuration so that it contains
+        // all the dependencies required by the Grails build system. This
+        // pretty much means everything used by the scripts too.
+        project.dependencies {
+            bootstrap "org.grails:grails-bootstrap:${project.grailsVersion}",
+                      "org.grails:grails-scripts:${project.grailsVersion}",
+                      "org.apache.ivy:ivy:2.1.0"
+        }
+        
         // Provide a task that allows the user to create a fresh Grails
         // project from a basic Gradle build file.
         project.task("init") << {
@@ -135,21 +152,6 @@ class GrailsPlugin implements Plugin<Project> {
             throw new RuntimeException("[GrailsPlugin] Your project does not contain an SLF4J logging implementation dependency.")
         }
 
-        // Set up the 'grails_bootstrap' configuration so that it contains
-        // all the dependencies required by the Grails build system. This
-        // pretty much means everything used by the scripts too.
-        project.dependencies {
-            grails_bootstrap "org.grails:grails-bootstrap:${grailsDep.version}",
-                             "org.grails:grails-scripts:${grailsDep.version}",
-                             "org.apache.ivy:ivy:2.1.0",
-                             // The Grails build system requires a logging implementation of some sort.
-                             "org.slf4j:${loggingDep.name}:${loggingDep.version}"
-
-            if (RUNTIME_CLASSPATH_COMMANDS.contains(cmd)) {
-                // Add the project's runtime dependencies to 'grails_bootstrap'.
-                grails_bootstrap project.configurations.runtime
-            }
-        }
 
         // Add the "tools.jar" to the classpath so that the Grails
         // scripts can run native2ascii. First assume that "java.home"
@@ -168,10 +170,12 @@ class GrailsPlugin implements Plugin<Project> {
         if (!toolsJar.exists() && !System.getProperty('os.name') == 'Mac OS X') {
             project.logger.warn "[GrailsPlugin] Cannot find tools.jar in JAVA_HOME, so native2ascii may not work."
         }
-
-        // Get the 'grails_bootstrap' configuration as a list of URLs
+        
+        def bootsrapConfiguration = cmd in RUNTIME_CLASSPATH_COMMANDS ? project.configurations.bootstrapRuntime : project.configurations.bootstrap
+        
+        // Get the bootstrap configuration as a list of URLs
         // and add tools.jar to it.
-        def classpath = project.configurations.grails_bootstrap.files.collect { it.toURI().toURL() }
+        def classpath = bootsrapConfiguration.files.collect { it.toURI().toURL() }
         classpath << toolsJar.toURI().toURL()
 
         // So we know what files are on what classpaths.
