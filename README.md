@@ -57,3 +57,10 @@ You can also change the environment via the `env` project property:
     gradle -Penv=prod grails-run-app
 
 *Warning* Version 1.0 of the plugin does not allow you to execute multiple tasks in one command line. So `gradle clean test` will fail even if `clean` and `test` individually succeed.
+
+Troubleshooting
+===============
+
+* Caused by: org.apache.tools.ant.BuildException: java.lang.NoClassDefFoundError: org/apache/commons/cli/Options
+
+  This happens if your project depends on the 'groovy' JAR rather than 'groovy-all'. Change your dependency to the latter and all will be well.
