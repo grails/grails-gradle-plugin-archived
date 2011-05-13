@@ -66,9 +66,15 @@ class GrailsPlugin implements Plugin<Project> {
         addDependencyToProjectLibTasks(project.test)
 
         // Gradle's Java plugin provides an "assemble" task. We map that
-        // to the War command here.
+        // to the War command here for applications and PackagePlugin for
+        // Grails plugins.
         project.task(overwrite: true, "assemble") << {
-            GrailsTask.runGrailsWithProps("War", project)
+            if (project.projectDir.listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter)) {
+                GrailsTask.runGrailsWithProps("PackagePlugin", project)
+            }
+            else {
+                GrailsTask.runGrailsWithProps("War", project)
+            }
         }
         addDependencyToProjectLibTasks(project.assemble)
         
