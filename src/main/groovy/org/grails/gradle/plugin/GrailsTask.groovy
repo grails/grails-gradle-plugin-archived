@@ -57,13 +57,13 @@ class GrailsTask extends DefaultTask {
         // Start by checking that the project has both Grails and a
         // logging implementation as dependencies. Otherwise we fail
         // the build.
-        def runtimeDeps = project.configurations.runtime.allDependencies
-        def grailsDep = runtimeDeps.find { it.group == 'org.grails' && it.name.startsWith('grails-') }
+        def runtimeDeps = project.configurations.runtime.resolvedConfiguration.resolvedArtifacts
+        def grailsDep = runtimeDeps.find { it.resolvedDependency.moduleGroup == 'org.grails' && it.name.startsWith('grails-') }
         if (!grailsDep) {
             throw new RuntimeException("[GrailsPlugin] Your project does not contain any 'grails-*' dependencies in 'compile' or 'runtime'.")
         }
 
-        def loggingDep = runtimeDeps.find { it.group == 'org.slf4j' && it.name.startsWith('slf4j-') }
+        def loggingDep = runtimeDeps.find { it.resolvedDependency.moduleGroup == 'org.slf4j' && it.name.startsWith('slf4j-') }
         if (!loggingDep) {
             throw new RuntimeException("[GrailsPlugin] Your project does not contain an SLF4J logging implementation dependency.")
         }
