@@ -1,3 +1,5 @@
+import org.apache.ivy.plugins.resolver.URLResolver
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
@@ -11,10 +13,14 @@ configurations {
 repositories {
     mavenCentral()
     mavenRepo urls: [ 'http://download.java.net/maven/2/' ]
+    add(new URLResolver()) {
+        name = "grails-exec"
+        addArtifactPattern "http://cloud.github.com/downloads/alkemist/grails-exec/[module]-[revision].[ext]"
+    }
 }
 
 dependencies {
-    compile gradleApi(), 'org.grails:grails-bootstrap:1.2.2'
+    compile gradleApi(), ':grails-exec:1.0-SNAPSHOT'
     groovy  'org.codehaus.groovy:groovy:1.6.8'
     deploy 'org.apache.maven.wagon:wagon-webdav-jackrabbit:1.0-beta-6'
 }

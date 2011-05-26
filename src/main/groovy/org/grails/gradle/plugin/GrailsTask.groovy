@@ -1,9 +1,10 @@
 package org.grails.gradle.plugin
 
-import grails.util.GrailsNameUtils
 
-import org.codehaus.groovy.grails.cli.support.GrailsRootLoader
-import org.codehaus.groovy.grails.cli.support.GrailsBuildHelper
+import org.grails.exec.RootLoader
+import org.grails.exec.GrailsExecutor
+import org.grails.exec.NameUtils
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
@@ -104,17 +105,17 @@ class GrailsTask extends DefaultTask {
         // various lists of dependencies. It also ensures that the Grails
         // build system runs in its own class loader so that Gradle's
         // dependencies don't conflict with it.
-        def rootLoader = new GrailsRootLoader(classpath as URL[], ClassLoader.systemClassLoader)
-        def grailsHelper = new GrailsBuildHelper(rootLoader, null, project.projectDir.absolutePath)
-        grailsHelper.compileDependencies = project.configurations.compile.files as List
-        grailsHelper.testDependencies = project.configurations.test.files as List
-        grailsHelper.runtimeDependencies = project.configurations.runtime.files as List
-        grailsHelper.projectWorkDir = project.buildDir
-        grailsHelper.classesDir = new File(project.buildDir, "classes")
-        grailsHelper.testClassesDir = new File(project.buildDir, "test-classes")
-        grailsHelper.resourcesDir = new File(project.buildDir, "resources")
-        grailsHelper.projectPluginsDir = new File(project.buildDir, "plugins")
-        grailsHelper.testReportsDir = new File(project.buildDir, "test-results")
+        def rootLoader = new RootLoader(classpath as URL[])
+        def executor = new GrailsExecutor(rootLoader, null, project.projectDir.absolutePath)
+        executor.compileDependencies = project.configurations.compile.files as List
+        executor.testDependencies = project.configurations.test.files as List
+        executor.runtimeDependencies = project.configurations.runtime.files as List
+        executor.projectWorkDir = project.buildDir
+        executor.classesDir = new File(project.buildDir, "classes")
+        executor.testClassesDir = new File(project.buildDir, "test-classes")
+        executor.resourcesDir = new File(project.buildDir, "resources")
+        executor.projectPluginsDir = new File(project.buildDir, "plugins")
+        executor.testReportsDir = new File(project.buildDir, "test-results")
 
         // Grails 1.2+ only. Previous versions of Grails don't have the
         // 'dependenciesExternallyConfigured' property. Note that this
@@ -124,9 +125,9 @@ class GrailsTask extends DefaultTask {
         // helper because it's the 1.2 version, whereas the project may
         // be using Grails version 1.1. That's why we have to get hold
         // of the actual BuildSettings instance.
-        def buildSettings = grailsHelper.settings
+        def buildSettings = executor.settings
         if (buildSettings.metaClass.hasProperty(buildSettings, "dependenciesExternallyConfigured")) {
-            grailsHelper.dependenciesExternallyConfigured = true
+            executor.dependenciesExternallyConfigured = true
         }
         
         // Using a Groovy trick here, because we either want to call
@@ -137,7 +138,7 @@ class GrailsTask extends DefaultTask {
         def methodArgs = [ cmd, args ]
         if (env) methodArgs << env
 
-        def retval = grailsHelper.execute(*methodArgs)
+        def retval = executor.execute(*methodArgs)
         if (retval != 0) {
             throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + retval);
         }

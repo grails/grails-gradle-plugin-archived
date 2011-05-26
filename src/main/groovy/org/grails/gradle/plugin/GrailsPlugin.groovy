@@ -1,8 +1,9 @@
 package org.grails.gradle.plugin
 
-import grails.util.GrailsNameUtils
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+
+import org.grails.exec.NameUtils
 
 class GrailsPlugin implements Plugin<Project> {
     static public final GRAILS_TASK_PREFIX = "grails-"
@@ -84,7 +85,7 @@ class GrailsPlugin implements Plugin<Project> {
         
         // Attach a generic “grailsTask” method so the build can run arbitrary tasks
         project.grailsTask = { String cmd, String args = null, String env = null ->
-            GrailsTask.runGrails(GrailsNameUtils.getNameFromScript(cmd), project, args, env)
+            GrailsTask.runGrails(NameUtils.toScriptName(cmd), project, args, env)
         }
 
         // Convert any task executed from the command line 
@@ -95,7 +96,7 @@ class GrailsPlugin implements Plugin<Project> {
                     if (name.startsWith(GRAILS_TASK_PREFIX)) {
                         // Add a task for the given Grails command.
                         project.task(name) << {
-                            GrailsTask.runGrailsWithProps(GrailsNameUtils.getNameFromScript(name - GRAILS_TASK_PREFIX), project)
+                            GrailsTask.runGrailsWithProps(NameUtils.toScriptName(name - GRAILS_TASK_PREFIX), project)
                         }
                         addDependencyToProjectLibTasks(project."$name")
                     }
