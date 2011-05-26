@@ -27,9 +27,13 @@ class GrailsPlugin implements Plugin<Project> {
         // all the dependencies required by the Grails build system. This
         // pretty much means everything used by the scripts too.
         project.dependencies {
-            bootstrap "org.grails:grails-bootstrap:${project.grailsVersion}",
-                      "org.grails:grails-scripts:${project.grailsVersion}",
-                      "org.apache.ivy:ivy:2.1.0"
+            ["bootstrap", "scripts"].each {
+                bootstrap("org.grails:grails-$it:${project.grailsVersion}") {
+                    exclude group: "org.slf4j"
+                }
+            }
+            
+            bootstrap "org.apache.ivy:ivy:2.1.0"
         }
         
         // Provide a task that allows the user to create a fresh Grails
