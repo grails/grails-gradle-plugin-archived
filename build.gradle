@@ -1,35 +1,33 @@
+import org.apache.ivy.util.url.CredentialsStore
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
 group = 'org.grails'
 version = '1.1-SNAPSHOT'
-
-configurations {
-    deploy
-}
+isSnapshot = version.endsWith("SNAPSHOT")
 
 repositories {
     mavenCentral()
-    mavenRepo urls: [ 'http://download.java.net/maven/2/' ]
 }
 
 dependencies {
     compile gradleApi(), 'org.grails:grails-bootstrap:1.2.2'
     groovy  'org.codehaus.groovy:groovy:1.6.8'
-    deploy 'org.apache.maven.wagon:wagon-webdav-jackrabbit:1.0-beta-6'
 }
 
-if (hasProperty('codehausUsername') && hasProperty('codehausPassword')) {
-    uploadArchives {
-        repositories.mavenDeployer {
-            configuration = configurations.deploy
+uploadArchives {
+    repositories {
+        project.deployer = repositories.mavenDeployer {
+            repository(url: "http://repo.grails.org/grails/${isSnapshot ? 'libs-snapshots-local' : 'libs-releases-local'}") {
+                final username = project.properties["grailsRepoUsername"]
+                final password = project.properties["grailsRepoPassword"]
 
-            repository(url: 'dav:https://dav.codehaus.org/repository/grails') {
-                authentication(userName: codehausUsername, password: codehausPassword)
-            }
+                if (username && password) {
+                    CredentialsStore.INSTANCE.addCredentials("Artifactory Realm", "repo.grails.org", username, password)
+                }
 
-            snapshotRepository(url: 'dav:https://dav.codehaus.org/snapshots.repository/grails') {
-                authentication(userName: codehausUsername, password: codehausPassword)
+                authentication(userName: username, password: password)
             }
         }
     }
