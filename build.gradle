@@ -9,11 +9,12 @@ isSnapshot = version.endsWith("SNAPSHOT")
 
 repositories {
     mavenCentral()
+    mavenRepo name: "Grails Repo", urls: "http://repo.grails.org/grails/repo"
 }
 
 dependencies {
-    compile gradleApi(), 'org.grails:grails-bootstrap:1.2.2'
-    groovy  'org.codehaus.groovy:groovy:1.6.8'
+    compile gradleApi(), "org.grails:grails-launcher:1.0.0-SNAPSHOT"
+    groovy 'org.codehaus.groovy:groovy:1.6.8'
 }
 
 uploadArchives {

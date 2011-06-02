@@ -1,9 +1,9 @@
 package org.grails.gradle.plugin
 
-import grails.util.GrailsNameUtils
+import org.grails.launcher.NameUtils
+import org.grails.launcher.RootLoader
+import org.grails.launcher.GrailsLauncher
 
-import org.codehaus.groovy.grails.cli.support.GrailsRootLoader
-import org.codehaus.groovy.grails.cli.support.GrailsBuildHelper
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
@@ -87,9 +87,9 @@ class GrailsTask extends DefaultTask {
     def executeCommand() {
         verifyGrailsDependencies()
         
-        def executeArgs = [GrailsNameUtils.getNameFromScript(effectiveCommand), args ?: ""]
-        if (env) executeArgs << end
-        def result = createBuildHelper().execute(*executeArgs)
+        def launchArgs = [NameUtils.toScriptName(effectiveCommand), args ?: ""]
+        if (env) launchArgs << end
+        def result = createLauncher().launch(*launchArgs)
 
         if (result != 0) {
             throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + retval);
@@ -152,38 +152,38 @@ class GrailsTask extends DefaultTask {
         classpath
     }
     
-    protected GrailsBuildHelper createBuildHelper() {
-        def rootLoader = new GrailsRootLoader(getEffectiveBootstrapClasspath() as URL[], ClassLoader.systemClassLoader)
-        def grailsHelper = new GrailsBuildHelper(rootLoader, null, project.projectDir.absolutePath)
-        applyProjectLayout(grailsHelper)
-        configureGrailsDependencyManagement(grailsHelper)
-        grailsHelper
+    protected GrailsLauncher createLauncher() {
+        def rootLoader = new RootLoader(getEffectiveBootstrapClasspath() as URL[], ClassLoader.systemClassLoader)
+        def grailsLauncher = new GrailsLauncher(rootLoader, null, project.projectDir.absolutePath)
+        applyProjectLayout(grailsLauncher)
+        configureGrailsDependencyManagement(grailsLauncher)
+        grailsLauncher
     }
     
-    protected void applyProjectLayout(GrailsBuildHelper grailsHelper) {
-        grailsHelper.compileDependencies = project.configurations.compile.files as List
-        grailsHelper.testDependencies = project.configurations.test.files as List
-        grailsHelper.runtimeDependencies = project.configurations.runtime.files as List
-        grailsHelper.projectWorkDir = project.buildDir
-        grailsHelper.classesDir = new File(project.buildDir, "classes")
-        grailsHelper.testClassesDir = new File(project.buildDir, "test-classes")
-        grailsHelper.resourcesDir = new File(project.buildDir, "resources")
-        grailsHelper.projectPluginsDir = new File(project.buildDir, "plugins")
-        grailsHelper.testReportsDir = new File(project.buildDir, "test-results")
+    protected void applyProjectLayout(GrailsLauncher grailsLauncher) {
+        grailsLauncher.compileDependencies = project.configurations.compile.files as List
+        grailsLauncher.testDependencies = project.configurations.test.files as List
+        grailsLauncher.runtimeDependencies = project.configurations.runtime.files as List
+        grailsLauncher.projectWorkDir = project.buildDir
+        grailsLauncher.classesDir = new File(project.buildDir, "classes")
+        grailsLauncher.testClassesDir = new File(project.buildDir, "test-classes")
+        grailsLauncher.resourcesDir = new File(project.buildDir, "resources")
+        grailsLauncher.projectPluginsDir = new File(project.buildDir, "plugins")
+        grailsLauncher.testReportsDir = new File(project.buildDir, "test-results")
     }
 
-    protected void configureGrailsDependencyManagement(GrailsBuildHelper grailsHelper) {
+    protected void configureGrailsDependencyManagement(GrailsLauncher grailsLauncher) {
         // Grails 1.2+ only. Previous versions of Grails don't have the
         // 'dependenciesExternallyConfigured' property. Note that this
         // is a HACK because the 'settings' field is private.
         //
         // We can't simply check whether the property exists on the
-        // helper because it's the 1.2 version, whereas the project may
+        // launcher because it's the 1.2 version, whereas the project may
         // be using Grails version 1.1. That's why we have to get hold
         // of the actual BuildSettings instance.
-        def buildSettings = grailsHelper.settings
+        def buildSettings = grailsLauncher.settings
         if (buildSettings.metaClass.hasProperty(buildSettings, "dependenciesExternallyConfigured")) {
-            grailsHelper.dependenciesExternallyConfigured = true
+            grailsLauncher.dependenciesExternallyConfigured = true
         }
     }
     
