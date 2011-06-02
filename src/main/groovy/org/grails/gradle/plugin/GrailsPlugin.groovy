@@ -48,17 +48,16 @@ class GrailsPlugin implements Plugin<Project> {
         }
 
         project.task("clean", type: GrailsTask, overwrite: true)
-        addDependencyToProjectLibTasks(project.clean)
 
         project.task("test", type: GrailsTask, overwrite: true) {
             command "test-app"
+            configurations "compile", "test"
         }
-        addDependencyToProjectLibTasks(project.test)
 
         project.task("assemble", type: GrailsTask, overwrite: true) {
             command pluginProject ? "package-plugin" : "war"
+            configuration "compile"
         }
-        addDependencyToProjectLibTasks(project.assemble)
         
         // Convert any task executed from the command line 
         // with the special prefix into the Grails equivalent command.
@@ -68,22 +67,13 @@ class GrailsPlugin implements Plugin<Project> {
                     if (name.startsWith(GRAILS_TASK_PREFIX)) {
                         project.task(name, type: GrailsTask) {
                             command name - GRAILS_TASK_PREFIX
+                            
+                            // We don't really know what configurations are necessary, but compile is a good default
+                            configuration "compile"
                         }
-                        addDependencyToProjectLibTasks(project."$name")
                     }
                 }
             }
-        }
-    }
-
-    
-    /**
-     * Evaluate any project lib dependencies in any of the configurations
-     * and add the jar task of that project as a dependency of the task we created
-     */
-    private void addDependencyToProjectLibTasks(task) {
-        task.project.configurations.each {
-            task.dependsOn(it.getTaskDependencyFromProjectDependency(true, "jar"))
         }
     }
 }

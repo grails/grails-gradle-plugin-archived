@@ -57,6 +57,24 @@ class GrailsTask extends DefaultTask {
         this.env
     }
     
+    void configuration(Configuration configuration) {
+        configurations(configuration)
+    }
+    
+    void configuration(String configuration) {
+        configurations(configuration)
+    }
+    
+    void configurations(Configuration[] configurations) {
+        configurations.each {
+            dependsOn it.getTaskDependencyFromProjectDependency(true, "jar")
+        }
+    }
+    
+    void configurations(String[] configurations) {
+        this.configurations configurations.collect { project.configurations[it] } as Configuration[]
+    }
+    
     @TaskAction
     def executeCommand() {
         verifyGrailsDependencies()
@@ -174,6 +192,10 @@ class GrailsTask extends DefaultTask {
     
     protected boolean isPluginProject() {
         project.projectDir.listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter)
+    }
+    
+    protected  void addProjectDependenciesFromConfiguration(Configuration configuration) {
+        
     }
     
 }
