@@ -7,6 +7,7 @@ import org.codehaus.groovy.grails.cli.support.GrailsBuildHelper
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.artifacts.Configuration
 
 class GrailsTask extends DefaultTask {
     /**
@@ -16,47 +17,25 @@ class GrailsTask extends DefaultTask {
      */
     static final RUNTIME_CLASSPATH_COMMANDS = [ "RunApp", "TestApp" ] as Set
 
-    String command
-    String args
-    String env
-
+    String command = "RunApp"
+    String args = ""
+    String env = null
+    
     @TaskAction
     def executeCommand() {
-        runGrails(GrailsNameUtils.getNameFromScript(cmd), project, args, env)
+        verifyGrailsDependencies()
+        
+        def executeArgs = [command, args]
+        if (env) executeArgs << end
+        def result = createBuildHelper().execute(*executeArgs)
+
+        if (result != 0) {
+            throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + retval);
+        }
     }
     
-    /**
-     * Launches Grails and executes the given command. Any command
-     * arguments or environment are picked up from the "args" and "env"
-     * project properties.
-     * @param cmd The Grails command to execute. Note that this should
-     * actually be the name of the script, not the command name. So
-     * "RunApp" rather than "run-app".
-     * @param project The Gradle project to run Grails in.
-     */
-    protected static void runGrailsWithProps(String cmd, Project project) {
-        def cmdArgs = project.hasProperty("args") ? project.args : null
-        def cmdEnv = project.hasProperty("env") ? project.env : null
-        runGrails(cmd, project, cmdArgs, cmdEnv)
-    }
 
-    /**
-     * Launches Grails and executes the given command.
-     * @param cmd The Grails command to execute. Note that this should
-     * actually be the name of the script, not the command name. So
-     * "RunApp" rather than "run-app".
-     * @param project The Gradle project to run Grails in.
-     * @param args (Optional) Any arguments (as a single, space-separated
-     * string) that you want to pass to the Grails command. Defaults to
-     * <code>null</code> (no args).
-     * @param env (Optional) The environment to run the Grails command
-     * in. Defaults to <code>null</code>, which means that the command
-     * uses whatever its default environment is.
-     */
-    protected static void runGrails(String cmd, Project project, String args = null, String env = null) {
-        // Start by checking that the project has both Grails and a
-        // logging implementation as dependencies. Otherwise we fail
-        // the build.
+    protected void verifyGrailsDependencies() {
         def runtimeDeps = project.configurations.runtime.resolvedConfiguration.resolvedArtifacts
         def grailsDep = runtimeDeps.find { it.resolvedDependency.moduleGroup == 'org.grails' && it.name.startsWith('grails-') }
         if (!grailsDep) {
@@ -67,7 +46,9 @@ class GrailsTask extends DefaultTask {
         if (!loggingDep) {
             throw new RuntimeException("[GrailsPlugin] Your project does not contain an SLF4J logging implementation dependency.")
         }
+    }
 
+    protected void addToolsJarIfNecessary(Collection<URL> classpath) {
         // Add the "tools.jar" to the classpath so that the Grails
         // scripts can run native2ascii. First assume that "java.home"
         // points to a JRE within a JDK.
@@ -86,26 +67,34 @@ class GrailsTask extends DefaultTask {
             project.logger.warn "[GrailsPlugin] Cannot find tools.jar in JAVA_HOME, so native2ascii may not work."
         }
         
-        def bootsrapConfiguration = cmd in RUNTIME_CLASSPATH_COMMANDS ? project.configurations.bootstrapRuntime : project.configurations.bootstrap
-        
-        // Get the bootstrap configuration as a list of URLs
-        // and add tools.jar to it.
-        def classpath = bootsrapConfiguration.files.collect { it.toURI().toURL() }
-        classpath << toolsJar.toURI().toURL()
-
-        // So we know what files are on what classpaths.
-        project.logger.info "Classpath for Grails root loader:\n  ${classpath.join('\n  ')}"
-        project.logger.info "Compile classpath:\n  ${project.configurations.compile.files.join('\n  ')}"
-        project.logger.info "Test classpath:\n  ${project.configurations.test.files.join('\n  ')}"
-        project.logger.info "Runtime classpath:\n  ${project.configurations.runtime.files.join('\n  ')}"
-
-        // Finally, kick off Grails with the given command. GrailsBuildHelper
-        // allows us to easily configure the Grails build settings and the
-        // various lists of dependencies. It also ensures that the Grails
-        // build system runs in its own class loader so that Gradle's
-        // dependencies don't conflict with it.
-        def rootLoader = new GrailsRootLoader(classpath as URL[], ClassLoader.systemClassLoader)
+        if (toolsJar.exists()) {
+            classpath << toolsJar.toURI().toURL()
+        }
+    }
+    
+    boolean isUseRuntimeClasspathForBootstrap() {
+        command in RUNTIME_CLASSPATH_COMMANDS
+    }
+    
+    Configuration getEffectiveBootstrapConfiguration() {
+         project.configurations."${useRuntimeClasspathForBootstrap ? 'bootstrapRuntime' : 'bootstrap'}"
+    }
+    
+    protected Collection<URL> getEffectiveBootstrapClasspath() {
+        def classpath = effectiveBootstrapConfiguration.files.collect { it.toURI().toURL() }
+        addToolsJarIfNecessary(classpath)
+        classpath
+    }
+    
+    protected GrailsBuildHelper createBuildHelper() {
+        def rootLoader = new GrailsRootLoader(getEffectiveBootstrapClasspath() as URL[], ClassLoader.systemClassLoader)
         def grailsHelper = new GrailsBuildHelper(rootLoader, null, project.projectDir.absolutePath)
+        applyProjectLayout(grailsHelper)
+        configureGrailsDependencyManagement(grailsHelper)
+        grailsHelper
+    }
+    
+    protected void applyProjectLayout(GrailsBuildHelper grailsHelper) {
         grailsHelper.compileDependencies = project.configurations.compile.files as List
         grailsHelper.testDependencies = project.configurations.test.files as List
         grailsHelper.runtimeDependencies = project.configurations.runtime.files as List
@@ -115,7 +104,9 @@ class GrailsTask extends DefaultTask {
         grailsHelper.resourcesDir = new File(project.buildDir, "resources")
         grailsHelper.projectPluginsDir = new File(project.buildDir, "plugins")
         grailsHelper.testReportsDir = new File(project.buildDir, "test-results")
+    }
 
+    protected void configureGrailsDependencyManagement(GrailsBuildHelper grailsHelper) {
         // Grails 1.2+ only. Previous versions of Grails don't have the
         // 'dependenciesExternallyConfigured' property. Note that this
         // is a HACK because the 'settings' field is private.
@@ -128,18 +119,21 @@ class GrailsTask extends DefaultTask {
         if (buildSettings.metaClass.hasProperty(buildSettings, "dependenciesExternallyConfigured")) {
             grailsHelper.dependenciesExternallyConfigured = true
         }
-        
-        // Using a Groovy trick here, because we either want to call
-        // the execute() method that takes two arguments, or the one
-        // that takes three. So rather than calling those methods
-        // explicitly within a condition, we create an argument list
-        // and then use the spread operator.
-        def methodArgs = [ cmd, args ]
-        if (env) methodArgs << env
-
-        def retval = grailsHelper.execute(*methodArgs)
-        if (retval != 0) {
-            throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + retval);
+    }
+    
+    protected void logClasspaths() {
+        project.logger.with {
+            if (infoEnabled) {
+                info "Classpath for Grails root loader:\n  ${classpath.join('\n  ')}"
+                info "Compile classpath:\n  ${project.configurations.compile.files.join('\n  ')}"
+                info "Test classpath:\n  ${project.configurations.test.files.join('\n  ')}"
+                info "Runtime classpath:\n  ${project.configurations.runtime.files.join('\n  ')}"
+            }
         }
     }
+    
+    protected boolean isPluginProject() {
+        project.projectDir.listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter)
+    }
+    
 }

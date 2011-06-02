@@ -36,57 +36,45 @@ class GrailsPlugin implements Plugin<Project> {
             bootstrap "org.apache.ivy:ivy:2.1.0"
         }
         
-        // Provide a task that allows the user to create a fresh Grails
-        // project from a basic Gradle build file.
-        project.task("init") << {
-            // First make sure that a project version has been configured.
-            if (project.version == "unspecified") {
-                throw new RuntimeException("[GrailsPlugin] Build file must specify a 'version' property.")
+        project.task("init", type: GrailsTask) {
+            onlyIf {
+                !project.file("application.properties").exists() && !project.file("grails-app").exists()
+            }
+            
+            doFirst {
+                // First make sure that a project version has been configured.
+                if (project.version == "unspecified") {
+                    throw new RuntimeException("[GrailsPlugin] Build file must specify a 'version' property.")
+                }
             }
 
-            // Don't create a new project if one already exists.
-            if (project.file("application.properties").exists() && project.file("grails-app").exists()) {
-                logger.warn "Grails project already exists - SKIPPING"
-                return
-            }
-
-            // The project name comes from the name of the project
-            // directory, but this can be overridden by an argument.
             def projName = project.hasProperty("args") ? project.args : project.projectDir.name
-            GrailsTask.runGrails("CreateApp", project, "--inplace --appVersion=" + project.version + " " + projName)
+            
+            command = "CreateApp"
+            args = "--inplace --appVersion=$project.version $projName"
         }
 
         // Make the Grails 'clean' command available as a 'clean' task.
-        project.task("clean", overwrite: true) << {
-            GrailsTask.runGrailsWithProps("Clean", project)
+        project.task("clean", type: GrailsTask, overwrite: true) {
+            command = "Clean"
         }
         addDependencyToProjectLibTasks(project.clean)
 
         // Most people are used to a "test" target or task, but Grails
         // has "test-app". So we hard-code a "test" task.
-        project.task(overwrite: true, "test") << {
-            GrailsTask.runGrailsWithProps("TestApp", project)
+        project.task("test", type: GrailsTask, overwrite: true) {
+            command = "TestApp"
         }
         addDependencyToProjectLibTasks(project.test)
 
         // Gradle's Java plugin provides an "assemble" task. We map that
         // to the War command here for applications and PackagePlugin for
         // Grails plugins.
-        project.task(overwrite: true, "assemble") << {
-            if (project.projectDir.listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter)) {
-                GrailsTask.runGrailsWithProps("PackagePlugin", project)
-            }
-            else {
-                GrailsTask.runGrailsWithProps("War", project)
-            }
+        project.task("assemble", type: GrailsTask, overwrite: true) {
+            command = pluginProject ? "PackagePlugin" : "War"
         }
         addDependencyToProjectLibTasks(project.assemble)
         
-        // Attach a generic “grailsTask” method so the build can run arbitrary tasks
-        project.grailsTask = { String cmd, String args = null, String env = null ->
-            GrailsTask.runGrails(GrailsNameUtils.getNameFromScript(cmd), project, args, env)
-        }
-
         // Convert any task executed from the command line 
         // with the special prefix into the Grails equivalent command.
         project.gradle.afterProject { p, ex ->
@@ -94,8 +82,8 @@ class GrailsPlugin implements Plugin<Project> {
                 project.tasks.addRule("Grails command") { String name ->
                     if (name.startsWith(GRAILS_TASK_PREFIX)) {
                         // Add a task for the given Grails command.
-                        project.task(name) << {
-                            GrailsTask.runGrailsWithProps(GrailsNameUtils.getNameFromScript(name - GRAILS_TASK_PREFIX), project)
+                        project.task(name, type: GrailsTask) {
+                            command = GrailsNameUtils.getNameFromScript(name - GRAILS_TASK_PREFIX)
                         }
                         addDependencyToProjectLibTasks(project."$name")
                     }
@@ -104,6 +92,7 @@ class GrailsPlugin implements Plugin<Project> {
         }
     }
 
+    
     /**
      * Evaluate any project lib dependencies in any of the configurations
      * and add the jar task of that project as a dependency of the task we created
