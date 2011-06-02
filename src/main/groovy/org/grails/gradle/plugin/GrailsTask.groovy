@@ -10,16 +10,12 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.artifacts.Configuration
 
 class GrailsTask extends DefaultTask {
-    /**
-     * These Grails commands require the project's runtime dependencies
-     * in the Grails root loader because they are not using the runtime
-     * classpath (as they are supposed to).
-     */
-    static final RUNTIME_CLASSPATH_COMMANDS = ["run-app", "test-app"] as Set
 
     private String command = null
     private String args = null
     private String env = null
+    
+    private boolean useRuntimeClasspathForBoostrap = false
     
     void command(String command) {
         setCommand(command)
@@ -73,6 +69,18 @@ class GrailsTask extends DefaultTask {
     
     void configurations(String[] configurations) {
         this.configurations configurations.collect { project.configurations[it] } as Configuration[]
+    }
+    
+    void useRuntimeClasspathForBoostrap(boolean flag) {
+        setUseRuntimeClasspathForBoostrap(flag)
+    }
+    
+    void setUseRuntimeClasspathForBoostrap(boolean flag) {
+        this.useRuntimeClasspathForBoostrap = flag
+    }
+    
+    boolean isUseRuntimeClasspathForBootstrap(boolean flag) {
+        this.useRuntimeClasspathForBoostrap
     }
     
     @TaskAction
@@ -131,7 +139,7 @@ class GrailsTask extends DefaultTask {
     }
     
     boolean isUseRuntimeClasspathForBootstrap() {
-        effectiveCommand in RUNTIME_CLASSPATH_COMMANDS
+        effectiveCommand in ["run-app", "test-app"] || useRuntimeClasspathForBootstrap
     }
     
     Configuration getEffectiveBootstrapConfiguration() {
