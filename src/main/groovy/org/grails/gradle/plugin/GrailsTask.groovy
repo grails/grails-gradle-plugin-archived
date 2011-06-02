@@ -61,7 +61,7 @@ class GrailsTask extends DefaultTask {
     def executeCommand() {
         verifyGrailsDependencies()
         
-        def executeArgs = [command, args]
+        def executeArgs = [effectiveCommand, args]
         if (env) executeArgs << end
         def result = createBuildHelper().execute(*executeArgs)
 
@@ -70,7 +70,11 @@ class GrailsTask extends DefaultTask {
         }
     }
     
-
+    // TODO - use a convention for this
+    String getEffectiveCommand() {
+        command ?: name
+    }
+    
     protected void verifyGrailsDependencies() {
         def runtimeDeps = project.configurations.runtime.resolvedConfiguration.resolvedArtifacts
         def grailsDep = runtimeDeps.find { it.resolvedDependency.moduleGroup == 'org.grails' && it.name.startsWith('grails-') }
@@ -109,7 +113,7 @@ class GrailsTask extends DefaultTask {
     }
     
     boolean isUseRuntimeClasspathForBootstrap() {
-        command in RUNTIME_CLASSPATH_COMMANDS
+        effectiveCommand in RUNTIME_CLASSPATH_COMMANDS
     }
     
     Configuration getEffectiveBootstrapConfiguration() {
