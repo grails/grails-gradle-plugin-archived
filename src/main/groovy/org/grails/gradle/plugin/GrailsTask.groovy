@@ -201,9 +201,5 @@ class GrailsTask extends DefaultTask {
     protected boolean isPluginProject() {
         project.projectDir.listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter)
     }
-    
-    protected  void addProjectDependenciesFromConfiguration(Configuration configuration) {
-        
-    }
-    
+
 }
