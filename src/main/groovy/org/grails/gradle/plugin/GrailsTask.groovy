@@ -15,7 +15,7 @@ class GrailsTask extends DefaultTask {
     private String args = null
     private String env = null
     
-    private boolean useRuntimeClasspathForBoostrap = false
+    private boolean useRuntimeClasspathForBootstrap = false
     
     void command(String command) {
         setCommand(command)
@@ -71,16 +71,16 @@ class GrailsTask extends DefaultTask {
         this.configurations configurations.collect { project.configurations[it] } as Configuration[]
     }
     
-    void useRuntimeClasspathForBoostrap(boolean flag) {
-        setUseRuntimeClasspathForBoostrap(flag)
+    void useRuntimeClasspathForBootstrap(boolean flag) {
+        setUseRuntimeClasspathForBootstrap(flag)
     }
     
-    void setUseRuntimeClasspathForBoostrap(boolean flag) {
-        this.useRuntimeClasspathForBoostrap = flag
+    void setUseRuntimeClasspathForBootstrap(boolean flag) {
+        this.useRuntimeClasspathForBootstrap = flag
     }
     
-    boolean isUseRuntimeClasspathForBootstrap(boolean flag) {
-        this.useRuntimeClasspathForBoostrap
+    boolean isUseRuntimeClasspathForBootstrap() {
+        this.useRuntimeClasspathForBootstrap
     }
     
     @TaskAction
@@ -138,12 +138,12 @@ class GrailsTask extends DefaultTask {
         }
     }
     
-    boolean isUseRuntimeClasspathForBootstrap() {
+    boolean isEffectiveUseRuntimeClasspathForBootstrap() {
         effectiveCommand in ["run-app", "test-app"] || useRuntimeClasspathForBootstrap
     }
     
     Configuration getEffectiveBootstrapConfiguration() {
-         project.configurations."${useRuntimeClasspathForBootstrap ? 'bootstrapRuntime' : 'bootstrap'}"
+         project.configurations."${effectiveUseRuntimeClasspathForBootstrap ? 'bootstrapRuntime' : 'bootstrap'}"
     }
     
     protected Collection<URL> getEffectiveBootstrapClasspath() {
