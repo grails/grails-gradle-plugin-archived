@@ -139,7 +139,7 @@ class GrailsTask extends DefaultTask {
     }
     
     boolean isEffectiveUseRuntimeClasspathForBootstrap() {
-        effectiveCommand in ["run-app", "test-app"] || useRuntimeClasspathForBootstrap
+        effectiveCommand in ["run-app", "test-app", "release-plugin"] || useRuntimeClasspathForBootstrap
     }
     
     Configuration getEffectiveBootstrapConfiguration() {
