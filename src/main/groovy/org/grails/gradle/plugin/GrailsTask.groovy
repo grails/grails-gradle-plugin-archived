@@ -17,9 +17,45 @@ class GrailsTask extends DefaultTask {
      */
     static final RUNTIME_CLASSPATH_COMMANDS = [ "RunApp", "TestApp" ] as Set
 
-    String command = "RunApp"
-    String args = ""
-    String env = null
+    private String command = "RunApp"
+    private String args = ""
+    private String env = null
+    
+    void command(String command) {
+        setCommand(command)
+    }
+    
+    void setCommand(String command) {
+        this.command = command
+    }
+    
+    String getCommand() {
+        this.command
+    }
+
+    void args(String args) {
+        setArgs(args)
+    }
+    
+    void setArgs(String args) {
+        this.args = args
+    }
+    
+    String getArgs() {
+        this.args
+    }
+    
+    void env(String env) {
+        setEnv(env)
+    }
+    
+    void setEnv(String env) {
+        this.env = env
+    }
+    
+    String getEnv() {
+        this.env
+    }
     
     @TaskAction
     def executeCommand() {

@@ -50,20 +50,20 @@ class GrailsPlugin implements Plugin<Project> {
 
             def projName = project.hasProperty("args") ? project.args : project.projectDir.name
             
-            command = "CreateApp"
-            args = "--inplace --appVersion=$project.version $projName"
+            command "CreateApp"
+            args "--inplace --appVersion=$project.version $projName"
         }
 
         // Make the Grails 'clean' command available as a 'clean' task.
         project.task("clean", type: GrailsTask, overwrite: true) {
-            command = "Clean"
+            command "Clean"
         }
         addDependencyToProjectLibTasks(project.clean)
 
         // Most people are used to a "test" target or task, but Grails
         // has "test-app". So we hard-code a "test" task.
         project.task("test", type: GrailsTask, overwrite: true) {
-            command = "TestApp"
+            command "TestApp"
         }
         addDependencyToProjectLibTasks(project.test)
 
@@ -71,7 +71,7 @@ class GrailsPlugin implements Plugin<Project> {
         // to the War command here for applications and PackagePlugin for
         // Grails plugins.
         project.task("assemble", type: GrailsTask, overwrite: true) {
-            command = pluginProject ? "PackagePlugin" : "War"
+            command pluginProject ? "PackagePlugin" : "War"
         }
         addDependencyToProjectLibTasks(project.assemble)
         
@@ -83,7 +83,7 @@ class GrailsPlugin implements Plugin<Project> {
                     if (name.startsWith(GRAILS_TASK_PREFIX)) {
                         // Add a task for the given Grails command.
                         project.task(name, type: GrailsTask) {
-                            command = GrailsNameUtils.getNameFromScript(name - GRAILS_TASK_PREFIX)
+                            command GrailsNameUtils.getNameFromScript(name - GRAILS_TASK_PREFIX)
                         }
                         addDependencyToProjectLibTasks(project."$name")
                     }
