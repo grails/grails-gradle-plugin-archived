@@ -20,9 +20,6 @@ class GrailsPlugin implements Plugin<Project> {
             bootstrapRuntime.extendsFrom bootstrap, runtime
         }
 
-        // Set up the 'bootstrap' configuration so that it contains
-        // all the dependencies required by the Grails build system. This
-        // pretty much means everything used by the scripts too.
         project.dependencies {
             ["bootstrap", "scripts"].each {
                 bootstrap("org.grails:grails-$it:${project.grailsVersion}") {
@@ -39,7 +36,6 @@ class GrailsPlugin implements Plugin<Project> {
             }
             
             doFirst {
-                // First make sure that a project version has been configured.
                 if (project.version == "unspecified") {
                     throw new RuntimeException("[GrailsPlugin] Build file must specify a 'version' property.")
                 }
@@ -51,20 +47,14 @@ class GrailsPlugin implements Plugin<Project> {
             args "--inplace --appVersion=$project.version $projName"
         }
 
-        // Make the Grails 'clean' command available as a 'clean' task.
         project.task("clean", type: GrailsTask, overwrite: true)
         addDependencyToProjectLibTasks(project.clean)
 
-        // Most people are used to a "test" target or task, but Grails
-        // has "test-app". So we hard-code a "test" task.
         project.task("test", type: GrailsTask, overwrite: true) {
             command "test-app"
         }
         addDependencyToProjectLibTasks(project.test)
 
-        // Gradle's Java plugin provides an "assemble" task. We map that
-        // to the War command here for applications and PackagePlugin for
-        // Grails plugins.
         project.task("assemble", type: GrailsTask, overwrite: true) {
             command pluginProject ? "package-plugin" : "war"
         }
@@ -73,10 +63,9 @@ class GrailsPlugin implements Plugin<Project> {
         // Convert any task executed from the command line 
         // with the special prefix into the Grails equivalent command.
         project.gradle.afterProject { p, ex ->
-            if (p == project) { // Only add the task to the project that applied the plugin
+            if (p == project) {
                 project.tasks.addRule("Grails command") { String name ->
                     if (name.startsWith(GRAILS_TASK_PREFIX)) {
-                        // Add a task for the given Grails command.
                         project.task(name, type: GrailsTask) {
                             command name - GRAILS_TASK_PREFIX
                         }
