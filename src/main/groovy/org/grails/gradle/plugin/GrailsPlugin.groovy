@@ -12,9 +12,7 @@ class GrailsPlugin implements Plugin<Project> {
         }
         
         project.configurations {
-            logging
-            
-            compile.extendsFrom logging
+            compile
             runtime.extendsFrom compile
             test.extendsFrom compile
             
