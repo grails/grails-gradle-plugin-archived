@@ -15,10 +15,10 @@ class GrailsTask extends DefaultTask {
      * in the Grails root loader because they are not using the runtime
      * classpath (as they are supposed to).
      */
-    static final RUNTIME_CLASSPATH_COMMANDS = [ "RunApp", "TestApp" ] as Set
+    static final RUNTIME_CLASSPATH_COMMANDS = ["run-app", "test-app"] as Set
 
-    private String command = "RunApp"
-    private String args = ""
+    private String command = null
+    private String args = null
     private String env = null
     
     void command(String command) {
@@ -61,7 +61,7 @@ class GrailsTask extends DefaultTask {
     def executeCommand() {
         verifyGrailsDependencies()
         
-        def executeArgs = [effectiveCommand, args]
+        def executeArgs = [GrailsNameUtils.getNameFromScript(effectiveCommand), args ?: ""]
         if (env) executeArgs << end
         def result = createBuildHelper().execute(*executeArgs)
 
