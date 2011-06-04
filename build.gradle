@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     compile gradleApi(), "org.grails:grails-launcher:1.0.0-SNAPSHOT"
-    groovy 'org.codehaus.groovy:groovy:1.6.8'
+    groovy fileTree(dir: new File(gradle.gradleHomeDir, 'lib'), includes: ['**/groovy-all-*.jar'])
 }
 
 uploadArchives {
