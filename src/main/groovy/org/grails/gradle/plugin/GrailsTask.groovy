@@ -17,6 +17,8 @@ class GrailsTask extends DefaultTask {
     
     private boolean useRuntimeClasspathForBootstrap = false
     
+    String grailsHome = null
+    
     void command(String command) {
         setCommand(command)
     }
@@ -101,6 +103,10 @@ class GrailsTask extends DefaultTask {
         command ?: name
     }
     
+    String getEffectiveGrailsHome() {
+        grailsHome ?: (project.hasProperty('grailsHome') ? project.grailsHome : null)
+    }
+    
     protected void verifyGrailsDependencies() {
         def runtimeDeps = project.configurations.runtime.resolvedConfiguration.resolvedArtifacts
         def grailsDep = runtimeDeps.find { it.resolvedDependency.moduleGroup == 'org.grails' && it.name.startsWith('grails-') }
@@ -154,7 +160,7 @@ class GrailsTask extends DefaultTask {
     
     protected GrailsLauncher createLauncher() {
         def rootLoader = new RootLoader(getEffectiveBootstrapClasspath() as URL[], ClassLoader.systemClassLoader)
-        def grailsLauncher = new GrailsLauncher(rootLoader, null, project.projectDir.absolutePath)
+        def grailsLauncher = new GrailsLauncher(rootLoader, effectiveGrailsHome, project.projectDir.absolutePath)
         applyProjectLayout(grailsLauncher)
         configureGrailsDependencyManagement(grailsLauncher)
         grailsLauncher
