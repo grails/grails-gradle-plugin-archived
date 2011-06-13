@@ -94,7 +94,7 @@ class GrailsTask extends DefaultTask {
         def result = createLauncher().launch(*launchArgs)
 
         if (result != 0) {
-            throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + retval);
+            throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + result);
         }
     }
     
