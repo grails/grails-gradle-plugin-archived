@@ -13,16 +13,16 @@ repositories {
 }
 
 dependencies {
-    compile gradleApi(), "org.grails:grails-launcher:1.0.0-SNAPSHOT"
-    groovy fileTree(dir: new File(gradle.gradleHomeDir, 'lib'), includes: ['**/groovy-all-*.jar'])
+    compile gradleApi(), "org.grails:grails-launcher:1.0.0"
+    groovy localGroovy()
 }
 
 uploadArchives {
     repositories {
         project.deployer = repositories.mavenDeployer {
             repository(url: "http://repo.grails.org/grails/${isSnapshot ? 'libs-snapshots-local' : 'libs-releases-local'}") {
-                final username = project.properties["grailsRepoUsername"]
-                final password = project.properties["grailsRepoPassword"]
+                def username = project.hasProperty("grailsRepoUsername") ? project.grailsRepoUsername : null
+                def password = project.hasProperty("grailsRepoPassword") ? project.grailsRepoPassword : null
 
                 if (username && password) {
                     CredentialsStore.INSTANCE.addCredentials("Artifactory Realm", "repo.grails.org", username, password)
