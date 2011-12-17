@@ -9,7 +9,7 @@ isSnapshot = version.endsWith("SNAPSHOT")
 
 repositories {
     mavenCentral()
-    mavenRepo name: "Grails Repo", urls: "http://repo.grails.org/grails/repo"
+    maven { url "http://repo.grails.org/grails/repo" }
 }
 
 dependencies {
