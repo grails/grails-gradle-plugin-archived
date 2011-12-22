@@ -14,19 +14,19 @@ class GrailsTask extends DefaultTask {
     private String command = null
     private String args = null
     private String env = null
-    
+
     private boolean useRuntimeClasspathForBootstrap = false
-    
+
     String grailsHome = null
-    
+
     void command(String command) {
         setCommand(command)
     }
-    
+
     void setCommand(String command) {
         this.command = command
     }
-    
+
     String getCommand() {
         this.command
     }
@@ -34,61 +34,61 @@ class GrailsTask extends DefaultTask {
     void args(String args) {
         setArgs(args)
     }
-    
+
     void setArgs(String args) {
         this.args = args
     }
-    
+
     String getArgs() {
         this.args
     }
-    
+
     void env(String env) {
         setEnv(env)
     }
-    
+
     void setEnv(String env) {
         this.env = env
     }
-    
+
     String getEnv() {
         this.env
     }
-    
+
     void configuration(Configuration configuration) {
         configurations(configuration)
     }
-    
+
     void configuration(String configuration) {
         configurations(configuration)
     }
-    
+
     void configurations(Configuration[] configurations) {
         configurations.each {
             dependsOn it.getTaskDependencyFromProjectDependency(true, "jar")
         }
     }
-    
+
     void configurations(String[] configurations) {
         this.configurations configurations.collect { project.configurations[it] } as Configuration[]
     }
-    
+
     void useRuntimeClasspathForBootstrap(boolean flag) {
         setUseRuntimeClasspathForBootstrap(flag)
     }
-    
+
     void setUseRuntimeClasspathForBootstrap(boolean flag) {
         this.useRuntimeClasspathForBootstrap = flag
     }
-    
+
     boolean isUseRuntimeClasspathForBootstrap() {
         this.useRuntimeClasspathForBootstrap
     }
-    
+
     @TaskAction
     def executeCommand() {
         verifyGrailsDependencies()
-        
+
         def launchArgs = [NameUtils.toScriptName(effectiveCommand), args ?: ""]
         if (env) launchArgs << end
         def result = createLauncher().launch(*launchArgs)
@@ -97,16 +97,16 @@ class GrailsTask extends DefaultTask {
             throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + result);
         }
     }
-    
+
     // TODO - use a convention for this
     String getEffectiveCommand() {
         command ?: name
     }
-    
+
     String getEffectiveGrailsHome() {
         grailsHome ?: (project.hasProperty('grailsHome') ? project.grailsHome : null)
     }
-    
+
     protected void verifyGrailsDependencies() {
         def runtimeDeps = project.configurations.runtime.resolvedConfiguration.resolvedArtifacts
         def grailsDep = runtimeDeps.find { it.resolvedDependency.moduleGroup == 'org.grails' && it.name.startsWith('grails-') }
@@ -138,26 +138,26 @@ class GrailsTask extends DefaultTask {
         if (!toolsJar.exists() && !System.getProperty('os.name') == 'Mac OS X') {
             project.logger.warn "[GrailsPlugin] Cannot find tools.jar in JAVA_HOME, so native2ascii may not work."
         }
-        
+
         if (toolsJar.exists()) {
             classpath << toolsJar.toURI().toURL()
         }
     }
-    
+
     boolean isEffectiveUseRuntimeClasspathForBootstrap() {
         effectiveCommand in ["run-app", "test-app", "release-plugin"] || useRuntimeClasspathForBootstrap
     }
-    
+
     Configuration getEffectiveBootstrapConfiguration() {
          project.configurations."${effectiveUseRuntimeClasspathForBootstrap ? 'bootstrapRuntime' : 'bootstrap'}"
     }
-    
+
     protected Collection<URL> getEffectiveBootstrapClasspath() {
         def classpath = effectiveBootstrapConfiguration.files.collect { it.toURI().toURL() }
         addToolsJarIfNecessary(classpath)
         classpath
     }
-    
+
     protected GrailsLauncher createLauncher() {
         def rootLoader = new RootLoader(getEffectiveBootstrapClasspath() as URL[], ClassLoader.systemClassLoader)
         def grailsLauncher = new GrailsLauncher(rootLoader, effectiveGrailsHome, project.projectDir.absolutePath)
@@ -165,7 +165,7 @@ class GrailsTask extends DefaultTask {
         configureGrailsDependencyManagement(grailsLauncher)
         grailsLauncher
     }
-    
+
     protected void applyProjectLayout(GrailsLauncher grailsLauncher) {
         grailsLauncher.compileDependencies = project.configurations.compile.files as List
         grailsLauncher.testDependencies = project.configurations.test.files as List
@@ -192,7 +192,7 @@ class GrailsTask extends DefaultTask {
             grailsLauncher.dependenciesExternallyConfigured = true
         }
     }
-    
+
     protected void logClasspaths() {
         project.logger.with {
             if (infoEnabled) {
@@ -203,9 +203,8 @@ class GrailsTask extends DefaultTask {
             }
         }
     }
-    
+
     protected boolean isPluginProject() {
         project.projectDir.listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter)
     }
-
 }

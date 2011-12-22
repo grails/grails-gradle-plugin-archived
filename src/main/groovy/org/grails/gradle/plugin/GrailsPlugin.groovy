@@ -10,12 +10,12 @@ class GrailsPlugin implements Plugin<Project> {
         if (!project.hasProperty("grailsVersion")) {
             throw new RuntimeException("[GrailsPlugin] the 'grailsVersion' project property is not set - you need to set this before applying the plugin")
         }
-        
+
         project.configurations {
             compile
             runtime.extendsFrom compile
             test.extendsFrom compile
-            
+
             bootstrap.extendsFrom logging
             bootstrapRuntime.extendsFrom bootstrap, runtime
         }
@@ -26,15 +26,15 @@ class GrailsPlugin implements Plugin<Project> {
                     exclude group: "org.slf4j"
                 }
             }
-            
+
             bootstrap "org.apache.ivy:ivy:2.1.0"
         }
-        
+
         project.task("init", type: GrailsTask) {
             onlyIf {
                 !project.file("application.properties").exists() && !project.file("grails-app").exists()
             }
-            
+
             doFirst {
                 if (project.version == "unspecified") {
                     throw new RuntimeException("[GrailsPlugin] Build file must specify a 'version' property.")
@@ -42,7 +42,7 @@ class GrailsPlugin implements Plugin<Project> {
             }
 
             def projName = project.hasProperty("args") ? project.args : project.projectDir.name
-            
+
             command "create-app"
             args "--inplace --appVersion=$project.version $projName"
         }
@@ -58,8 +58,8 @@ class GrailsPlugin implements Plugin<Project> {
             command pluginProject ? "package-plugin" : "war"
             configuration "compile"
         }
-        
-        // Convert any task executed from the command line 
+
+        // Convert any task executed from the command line
         // with the special prefix into the Grails equivalent command.
         project.gradle.afterProject { p, ex ->
             if (p == project) {
@@ -67,7 +67,7 @@ class GrailsPlugin implements Plugin<Project> {
                     if (name.startsWith(GRAILS_TASK_PREFIX)) {
                         project.task(name, type: GrailsTask) {
                             command name - GRAILS_TASK_PREFIX
-                            
+
                             // We don't really know what configurations are necessary, but compile is a good default
                             configuration "compile"
                         }
