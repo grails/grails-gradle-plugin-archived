@@ -152,14 +152,12 @@ class GrailsTask extends DefaultTask {
         }
     }
 
-    protected void logClasspaths() {
+    void logClasspaths() {
         project.logger.with {
-            if (infoEnabled) {
-                info "Classpath for Grails root loader:\n  ${classpath.join('\n  ')}"
-                info "Compile classpath:\n  ${project.configurations.compile.files.join('\n  ')}"
-                info "Test classpath:\n  ${project.configurations.test.files.join('\n  ')}"
-                info "Runtime classpath:\n  ${project.configurations.runtime.files.join('\n  ')}"
-            }
+            quiet "Classpath for Grails root loader:\n  ${effectiveBootstrapClasspath.join('\n  ')}"
+            quiet "Compile classpath:\n  ${compileClasspath.files.join('\n  ')}"
+            quiet "Test classpath:\n  ${testClasspath.files.join('\n  ')}"
+            quiet "Runtime classpath:\n  ${runtimeClasspath.files.join('\n  ')}"
         }
     }
 
