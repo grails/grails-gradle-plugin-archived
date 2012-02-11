@@ -1,17 +1,13 @@
 package org.grails.gradle.plugin
 
+import org.gradle.api.DefaultTask
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.TaskAction
+import org.grails.launcher.GrailsLauncher
 import org.grails.launcher.NameUtils
 import org.grails.launcher.RootLoader
-import org.grails.launcher.GrailsLauncher
-
-import org.gradle.api.DefaultTask
-import org.gradle.api.Project
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.InvalidUserDataException
-import org.gradle.api.tasks.Input
-import org.gradle.api.file.FileCollection
-import org.gradle.api.tasks.InputFiles
 
 class GrailsTask extends DefaultTask {
 
@@ -168,7 +164,7 @@ class GrailsTask extends DefaultTask {
     }
 
     protected boolean isPluginProject() {
-        getProjectDir().listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter)
+        getProjectDir().listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter) as boolean
     }
 
     protected File projectFile(String path) {
