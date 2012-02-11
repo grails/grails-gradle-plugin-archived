@@ -2,6 +2,7 @@ import org.apache.ivy.util.url.CredentialsStore
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'idea'
 
 group = 'org.grails'
 version = '1.1.0'
@@ -29,6 +30,19 @@ uploadArchives {
                 }
 
                 authentication(userName: username, password: password)
+            }
+        }
+    }
+}
+
+idea {
+    project {
+        jdkName "1.6"
+        ipr {
+            withXml { provider ->
+                def node = provider.asNode()
+                node.component.find { it.'@name' == 'VcsDirectoryMappings' }?.mapping[0].'@vcs' = 'Git'
+                node.append(new XmlParser().parse(file("ideaCodeStyle.xml")))
             }
         }
     }

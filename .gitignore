@@ -2,3 +2,6 @@
 build/
 bin/
 .settings/
+*.iml
+*.ipr
+*.iws
