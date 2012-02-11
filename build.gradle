@@ -11,11 +11,13 @@ isSnapshot = version.endsWith("SNAPSHOT")
 repositories {
     mavenCentral()
     maven { url "http://repo.grails.org/grails/repo" }
+    maven { url "http://m2repo.spockframework.org/snapshots" }
 }
 
 dependencies {
     compile gradleApi(), "org.grails:grails-launcher:1.0.0"
     groovy localGroovy()
+    testCompile "org.spockframework:spock-core:0.6-groovy-1.8-SNAPSHOT"
 }
 
 uploadArchives {

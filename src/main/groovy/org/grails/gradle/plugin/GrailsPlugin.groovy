@@ -11,6 +11,8 @@ class GrailsPlugin implements Plugin<Project> {
             throw new RuntimeException("[GrailsPlugin] the 'grailsVersion' project property is not set - you need to set this before applying the plugin")
         }
 
+        String grailsVersion = project.grailsVersion
+
         project.configurations {
             compile
             runtime.extendsFrom compile
@@ -21,13 +23,19 @@ class GrailsPlugin implements Plugin<Project> {
         }
 
         project.dependencies {
-            ["bootstrap", "scripts"].each {
+            ["bootstrap", "scripts", "resources"].each {
                 bootstrap("org.grails:grails-$it:${project.grailsVersion}") {
                     exclude group: "org.slf4j"
                 }
             }
 
-            bootstrap "org.apache.ivy:ivy:2.1.0"
+            if (grailsVersion.startsWith("1.3")) {
+                bootstrap "org.apache.ant:ant:1.8.2"
+            }
+
+            if (!grailsVersion.startsWith("2")) {
+                bootstrap "org.apache.ivy:ivy:2.1.0"
+            }
         }
 
         project.task("init", type: GrailsTask) {
