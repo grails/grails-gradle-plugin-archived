@@ -5,7 +5,7 @@ apply plugin: 'maven'
 apply plugin: 'idea'
 
 group = 'org.grails'
-version = '1.1.0'
+version = '1.1.1-SNAPSHOT'
 isSnapshot = version.endsWith("SNAPSHOT")
 
 repositories {
@@ -18,6 +18,20 @@ dependencies {
     compile gradleApi(), "org.grails:grails-launcher:1.0.0"
     groovy localGroovy()
     testCompile "org.spockframework:spock-core:0.6-groovy-1.8-SNAPSHOT"
+}
+
+task sourcesJar(type: Jar) {
+    classifier "sources"
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+    classifier "javadoc"
+    from javadoc
+}
+
+artifacts {
+    archives sourcesJar, javadocJar
 }
 
 uploadArchives {
