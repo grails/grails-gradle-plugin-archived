@@ -38,6 +38,11 @@ class GrailsPlugin implements Plugin<Project> {
             }
         }
 
+        project.tasks.withType(GrailsTask) {
+            projectDir = project.projectDir
+            targetDir = project.buildDir
+        }
+
         project.task("init", type: GrailsTask) {
             onlyIf {
                 !project.file("application.properties").exists() && !project.file("grails-app").exists()

@@ -8,6 +8,8 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.InvalidUserDataException
+import org.gradle.api.tasks.Input
 
 class GrailsTask extends DefaultTask {
 
@@ -17,8 +19,29 @@ class GrailsTask extends DefaultTask {
     String env
     boolean useRuntimeClasspathForBootstrap
 
+    private projectDir
+    private targetDir
+    
     GrailsTask() {
-        command = name // default the command to the name of this task
+        command = name 
+    }
+
+    @Input
+    File getProjectDir() {
+        project.file(projectDir)
+    }
+
+    void setProjectDir(projectDir) {
+        this.projectDir = projectDir            
+    }
+
+    @Input
+    File getTargetDir() {
+        project.file(targetDir)
+    }
+
+    void setTargetDir(targetDir) {
+        this.targetDir = targetDir
     }
 
 
@@ -94,7 +117,7 @@ class GrailsTask extends DefaultTask {
 
     protected GrailsLauncher createLauncher() {
         def rootLoader = new RootLoader(getEffectiveBootstrapClasspath() as URL[], ClassLoader.systemClassLoader)
-        def grailsLauncher = new GrailsLauncher(rootLoader, effectiveGrailsHome, project.projectDir.absolutePath)
+        def grailsLauncher = new GrailsLauncher(rootLoader, effectiveGrailsHome, getProjectDir().absolutePath)
         applyProjectLayout(grailsLauncher)
         configureGrailsDependencyManagement(grailsLauncher)
         grailsLauncher
@@ -105,11 +128,11 @@ class GrailsTask extends DefaultTask {
         grailsLauncher.testDependencies = project.configurations.test.files as List
         grailsLauncher.runtimeDependencies = project.configurations.runtime.files as List
         grailsLauncher.projectWorkDir = project.buildDir
-        grailsLauncher.classesDir = new File(project.buildDir, "classes")
-        grailsLauncher.testClassesDir = new File(project.buildDir, "test-classes")
-        grailsLauncher.resourcesDir = new File(project.buildDir, "resources")
-        grailsLauncher.projectPluginsDir = new File(project.buildDir, "plugins")
-        grailsLauncher.testReportsDir = new File(project.buildDir, "test-results")
+        grailsLauncher.classesDir = targetFile("classes")
+        grailsLauncher.testClassesDir = targetFile("test-classes")
+        grailsLauncher.resourcesDir = targetFile("resources")
+        grailsLauncher.projectPluginsDir = targetFile("plugins")
+        grailsLauncher.testReportsDir = targetFile("test-results")
     }
 
     protected void configureGrailsDependencyManagement(GrailsLauncher grailsLauncher) {
@@ -139,6 +162,14 @@ class GrailsTask extends DefaultTask {
     }
 
     protected boolean isPluginProject() {
-        project.projectDir.listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter)
+        getProjectDir().listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter)
+    }
+
+    protected File projectFile(String path) {
+        new File(getProjectDir(), path)
+    }
+
+    protected File targetFile(String path) {
+        new File(getTargetDir(), path)
     }
 }
