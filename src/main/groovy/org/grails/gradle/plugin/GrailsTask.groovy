@@ -11,85 +11,22 @@ import org.gradle.api.artifacts.Configuration
 
 class GrailsTask extends DefaultTask {
 
-    private String command = null
-    private String args = null
-    private String env = null
+    String grailsHome
+    String command 
+    String args
+    String env
+    boolean useRuntimeClasspathForBootstrap
 
-    private boolean useRuntimeClasspathForBootstrap = false
-
-    String grailsHome = null
-
-    void command(String command) {
-        setCommand(command)
+    GrailsTask() {
+        command = name // default the command to the name of this task
     }
 
-    void setCommand(String command) {
-        this.command = command
-    }
-
-    String getCommand() {
-        this.command
-    }
-
-    void args(String args) {
-        setArgs(args)
-    }
-
-    void setArgs(String args) {
-        this.args = args
-    }
-
-    String getArgs() {
-        this.args
-    }
-
-    void env(String env) {
-        setEnv(env)
-    }
-
-    void setEnv(String env) {
-        this.env = env
-    }
-
-    String getEnv() {
-        this.env
-    }
-
-    void configuration(Configuration configuration) {
-        configurations(configuration)
-    }
-
-    void configuration(String configuration) {
-        configurations(configuration)
-    }
-
-    void configurations(Configuration[] configurations) {
-        configurations.each {
-            dependsOn it.getTaskDependencyFromProjectDependency(true, "jar")
-        }
-    }
-
-    void configurations(String[] configurations) {
-        this.configurations configurations.collect { project.configurations[it] } as Configuration[]
-    }
-
-    void useRuntimeClasspathForBootstrap(boolean flag) {
-        setUseRuntimeClasspathForBootstrap(flag)
-    }
-
-    void setUseRuntimeClasspathForBootstrap(boolean flag) {
-        this.useRuntimeClasspathForBootstrap = flag
-    }
-
-    boolean isUseRuntimeClasspathForBootstrap() {
-        this.useRuntimeClasspathForBootstrap
-    }
 
     @TaskAction
     def executeCommand() {
         verifyGrailsDependencies()
 
-        def launchArgs = [NameUtils.toScriptName(effectiveCommand), args ?: ""]
+        def launchArgs = [NameUtils.toScriptName(command), args ?: ""]
         if (env) launchArgs << end
         def result = createLauncher().launch(*launchArgs)
 
@@ -98,16 +35,13 @@ class GrailsTask extends DefaultTask {
         }
     }
 
-    // TODO - use a convention for this
-    String getEffectiveCommand() {
-        command ?: name
-    }
-
     String getEffectiveGrailsHome() {
         grailsHome ?: (project.hasProperty('grailsHome') ? project.grailsHome : null)
     }
 
     protected void verifyGrailsDependencies() {
+        if (command == "create-app") return
+
         def runtimeDeps = project.configurations.runtime.resolvedConfiguration.resolvedArtifacts
         def grailsDep = runtimeDeps.find { it.resolvedDependency.moduleGroup == 'org.grails' && it.name.startsWith('grails-') }
         if (!grailsDep) {
@@ -145,7 +79,7 @@ class GrailsTask extends DefaultTask {
     }
 
     boolean isEffectiveUseRuntimeClasspathForBootstrap() {
-        effectiveCommand in ["run-app", "test-app", "release-plugin"] || useRuntimeClasspathForBootstrap
+        command in ["run-app", "test-app", "release-plugin"] || useRuntimeClasspathForBootstrap
     }
 
     Configuration getEffectiveBootstrapConfiguration() {
