@@ -10,6 +10,8 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Input
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.InputFiles
 
 class GrailsTask extends DefaultTask {
 
@@ -17,6 +19,13 @@ class GrailsTask extends DefaultTask {
     String command 
     String args
     String env
+    
+    @InputFiles FileCollection compileClasspath
+    @InputFiles FileCollection runtimeClasspath
+    @InputFiles FileCollection testClasspath
+    @InputFiles FileCollection bootstrapClasspath
+    @InputFiles FileCollection bootstrapRuntimeClasspath
+
     boolean useRuntimeClasspathForBootstrap
 
     private projectDir
@@ -44,11 +53,8 @@ class GrailsTask extends DefaultTask {
         this.targetDir = targetDir
     }
 
-
     @TaskAction
     def executeCommand() {
-        verifyGrailsDependencies()
-
         def launchArgs = [NameUtils.toScriptName(command), args ?: ""]
         if (env) launchArgs << end
         def result = createLauncher().launch(*launchArgs)
@@ -105,8 +111,8 @@ class GrailsTask extends DefaultTask {
         command in ["run-app", "test-app", "release-plugin"] || useRuntimeClasspathForBootstrap
     }
 
-    Configuration getEffectiveBootstrapConfiguration() {
-         project.configurations."${effectiveUseRuntimeClasspathForBootstrap ? 'bootstrapRuntime' : 'bootstrap'}"
+    FileCollection getEffectiveBootstrapConfiguration() {
+         effectiveUseRuntimeClasspathForBootstrap ? bootstrapRuntimeClasspath : bootstrapClasspath
     }
 
     protected Collection<URL> getEffectiveBootstrapClasspath() {
@@ -124,9 +130,9 @@ class GrailsTask extends DefaultTask {
     }
 
     protected void applyProjectLayout(GrailsLauncher grailsLauncher) {
-        grailsLauncher.compileDependencies = project.configurations.compile.files as List
-        grailsLauncher.testDependencies = project.configurations.test.files as List
-        grailsLauncher.runtimeDependencies = project.configurations.runtime.files as List
+        grailsLauncher.compileDependencies = compileClasspath.files as List
+        grailsLauncher.testDependencies = testClasspath.files as List
+        grailsLauncher.runtimeDependencies = runtimeClasspath.files as List
         grailsLauncher.projectWorkDir = project.buildDir
         grailsLauncher.classesDir = targetFile("classes")
         grailsLauncher.testClassesDir = targetFile("test-classes")

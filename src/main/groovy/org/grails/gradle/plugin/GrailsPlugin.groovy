@@ -39,9 +39,15 @@ class GrailsPlugin implements Plugin<Project> {
             }
         }
 
-        project.tasks.withType(GrailsTask) {
-            projectDir = project.projectDir
-            targetDir = project.buildDir
+        project.tasks.withType(GrailsTask) { GrailsTask task ->
+            task.projectDir project.projectDir
+            task.targetDir project.buildDir
+
+            task.compileClasspath = project.configurations.compile
+            task.runtimeClasspath = project.configurations.runtime
+            task.testClasspath = project.configurations.test
+            task.bootstrapClasspath = project.configurations.bootstrap
+            task.bootstrapRuntimeClasspath = project.configurations.bootstrapRuntime
         }
 
         project.task("init", type: GrailsTask) {
@@ -65,12 +71,10 @@ class GrailsPlugin implements Plugin<Project> {
 
         project.task("test", type: GrailsTask, overwrite: true) {
             command "test-app"
-            configurations "compile", "test"
         }
 
         project.task("assemble", type: GrailsTask, overwrite: true) {
             command pluginProject ? "package-plugin" : "war"
-            configuration "compile"
         }
 
         // Convert any task executed from the command line
