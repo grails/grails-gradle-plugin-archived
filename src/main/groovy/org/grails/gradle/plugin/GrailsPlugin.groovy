@@ -1,5 +1,6 @@
 package org.grails.gradle.plugin
 
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -8,7 +9,7 @@ class GrailsPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         if (!project.hasProperty("grailsVersion")) {
-            throw new RuntimeException("[GrailsPlugin] the 'grailsVersion' project property is not set - you need to set this before applying the plugin")
+            throw new InvalidUserDataException("[GrailsPlugin] the 'grailsVersion' project property is not set - you need to set this before applying the plugin")
         }
 
         String grailsVersion = project.grailsVersion
@@ -50,7 +51,7 @@ class GrailsPlugin implements Plugin<Project> {
 
             doFirst {
                 if (project.version == "unspecified") {
-                    throw new RuntimeException("[GrailsPlugin] Build file must specify a 'version' property.")
+                    throw new InvalidUserDataException("[GrailsPlugin] Build file must specify a 'version' property.")
                 }
             }
 
