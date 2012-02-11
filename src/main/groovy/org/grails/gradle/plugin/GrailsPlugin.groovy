@@ -23,21 +23,7 @@ class GrailsPlugin implements Plugin<Project> {
             bootstrapRuntime.extendsFrom bootstrap, runtime
         }
 
-        project.dependencies {
-            ["bootstrap", "scripts", "resources"].each {
-                bootstrap("org.grails:grails-$it:${project.grailsVersion}") {
-                    exclude group: "org.slf4j"
-                }
-            }
-
-            if (grailsVersion.startsWith("1.3")) {
-                bootstrap "org.apache.ant:ant:1.8.2"
-            }
-
-            if (!grailsVersion.startsWith("2")) {
-                bootstrap "org.apache.ivy:ivy:2.1.0"
-            }
-        }
+        GrailsDependenciesUtil.configureBootstrapClasspath(project, grailsVersion, project.configurations.bootstrap)
 
         project.tasks.withType(GrailsTask) { GrailsTask task ->
             task.projectDir project.projectDir
@@ -85,9 +71,6 @@ class GrailsPlugin implements Plugin<Project> {
                     if (name.startsWith(GRAILS_TASK_PREFIX)) {
                         project.task(name, type: GrailsTask) {
                             command name - GRAILS_TASK_PREFIX
-
-                            // We don't really know what configurations are necessary, but compile is a good default
-                            configuration "compile"
                         }
                     }
                 }
