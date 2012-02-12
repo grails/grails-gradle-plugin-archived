@@ -52,7 +52,7 @@ class GrailsTask extends DefaultTask {
     @TaskAction
     def executeCommand() {
         def launchArgs = [NameUtils.toScriptName(command), args ?: ""]
-        if (env) launchArgs << end
+        if (env) launchArgs << env
         def result = createLauncher().launch(*launchArgs)
 
         if (result != 0) {
@@ -62,21 +62,6 @@ class GrailsTask extends DefaultTask {
 
     String getEffectiveGrailsHome() {
         grailsHome ?: (project.hasProperty('grailsHome') ? project.grailsHome : null)
-    }
-
-    protected void verifyGrailsDependencies() {
-        if (command == "create-app") return
-
-        def runtimeDeps = project.configurations.runtime.resolvedConfiguration.resolvedArtifacts
-        def grailsDep = runtimeDeps.find { it.resolvedDependency.moduleGroup == 'org.grails' && it.name.startsWith('grails-') }
-        if (!grailsDep) {
-            throw new RuntimeException("[GrailsPlugin] Your project does not contain any 'grails-*' dependencies in 'compile' or 'runtime'.")
-        }
-
-        def loggingDep = runtimeDeps.find { it.resolvedDependency.moduleGroup == 'org.slf4j' && it.name.startsWith('slf4j-') }
-        if (!loggingDep) {
-            throw new RuntimeException("[GrailsPlugin] Your project does not contain an SLF4J logging implementation dependency.")
-        }
     }
 
     protected void addToolsJarIfNecessary(Collection<URL> classpath) {
@@ -129,7 +114,7 @@ class GrailsTask extends DefaultTask {
         grailsLauncher.compileDependencies = compileClasspath.files as List
         grailsLauncher.testDependencies = testClasspath.files as List
         grailsLauncher.runtimeDependencies = runtimeClasspath.files as List
-        grailsLauncher.projectWorkDir = project.buildDir
+        grailsLauncher.projectWorkDir = targetDir
         grailsLauncher.classesDir = targetFile("classes")
         grailsLauncher.testClassesDir = targetFile("test-classes")
         grailsLauncher.resourcesDir = targetFile("resources")
