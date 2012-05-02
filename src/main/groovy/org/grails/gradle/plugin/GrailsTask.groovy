@@ -10,6 +10,7 @@ import org.grails.launcher.NameUtils
 import org.grails.launcher.RootLoader
 import java.lang.reflect.InvocationTargetException
 import org.grails.launcher.BootstrapUtils
+import org.grails.launcher.ForkedGrailsLauncher
 
 class GrailsTask extends DefaultTask {
 
@@ -26,6 +27,9 @@ class GrailsTask extends DefaultTask {
     @InputFiles FileCollection bootstrapRuntimeClasspath
 
     boolean useRuntimeClasspathForBootstrap
+    
+    @Input
+    boolean fork
 
     private projectDir
     private targetDir
@@ -56,20 +60,48 @@ class GrailsTask extends DefaultTask {
 
     @TaskAction
     def executeCommand() {
-        def launchArgs = [NameUtils.toScriptName(command), args ?: ""]
-        if (env) launchArgs << env
         def result = 0
-        try {
-            result = createLauncher().launch(*launchArgs)
-        } catch (e) {
-            while(e.cause != null && e.cause != e) {
-                e = e.cause
+        if (fork) {
+            ForkedGrailsLauncher.ExecutionContext ec = new ForkedGrailsLauncher.ExecutionContext();
+
+            ec.setBuildDependencies(bootstrapClasspath.files.toList());
+            ec.setProvidedDependencies(providedClasspath.files as List);
+            ec.setCompileDependencies(compileClasspath.files as List);
+            ec.setTestDependencies(testClasspath.files as List);
+            ec.setRuntimeDependencies(runtimeClasspath.files as List);
+            ec.setGrailsWorkDir(new File(targetDir, "grails-work"));
+            ec.setProjectWorkDir(targetDir);
+            ec.setClassesDir(new File(targetDir, "classes"));
+            ec.setTestClassesDir(new File(targetDir, "test-classes"));
+            ec.setResourcesDir(new File(targetDir, "resources"));
+            ec.setProjectPluginsDir(new File(targetDir, "plugins"));
+            ec.setArgs(args);
+            ec.setScriptName(command);
+            ec.setBaseDir(project.projectDir);
+            ec.setEnv(env);
+            ForkedGrailsLauncher fgr = new ForkedGrailsLauncher(ec);
+            try {
+                fgr.fork();
+            } catch (Exception e) {
+                throw new RuntimeException(e.getMessage(), e);
             }
-            if(e.class.name.contains("ScriptNotFound")) {
-                throw new RuntimeException("[GrailsPlugin] Grails command $launchArgs not found");
-            }
-            else {
-                throw e
+        }
+        else {
+
+            def launchArgs = [NameUtils.toScriptName(command), args ?: ""]
+            if (env) launchArgs << env
+            try {
+                result = createLauncher().launch(*launchArgs)
+            } catch (e) {
+                while(e.cause != null && e.cause != e) {
+                    e = e.cause
+                }
+                if(e.class.name.contains("ScriptNotFound")) {
+                    throw new RuntimeException("[GrailsPlugin] Grails command $launchArgs not found");
+                }
+                else {
+                    throw e
+                }
             }
         }
 
