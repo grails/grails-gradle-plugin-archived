@@ -16,6 +16,7 @@ class GrailsPlugin implements Plugin<Project> {
 
         project.configurations {
             compile
+            provided
             runtime.extendsFrom compile
             test.extendsFrom compile
 
@@ -29,6 +30,7 @@ class GrailsPlugin implements Plugin<Project> {
             task.projectDir project.projectDir
             task.targetDir project.buildDir
 
+            task.providedClasspath = project.configurations.provided
             task.compileClasspath = project.configurations.compile
             task.runtimeClasspath = project.configurations.runtime
             task.testClasspath = project.configurations.test
