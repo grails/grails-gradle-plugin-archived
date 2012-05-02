@@ -8,6 +8,8 @@ import org.gradle.api.tasks.TaskAction
 import org.grails.launcher.GrailsLauncher
 import org.grails.launcher.NameUtils
 import org.grails.launcher.RootLoader
+import java.lang.reflect.InvocationTargetException
+import org.grails.launcher.BootstrapUtils
 
 class GrailsTask extends DefaultTask {
 
@@ -15,7 +17,8 @@ class GrailsTask extends DefaultTask {
     String command 
     String args
     String env
-    
+
+    @InputFiles FileCollection providedClasspath
     @InputFiles FileCollection compileClasspath
     @InputFiles FileCollection runtimeClasspath
     @InputFiles FileCollection testClasspath
@@ -28,6 +31,8 @@ class GrailsTask extends DefaultTask {
     private targetDir
     
     GrailsTask() {
+        System.setProperty("grails.console.enable.terminal", "false");
+        System.setProperty("grails.console.enable.interactive", "false");
         command = name 
     }
 
@@ -53,7 +58,20 @@ class GrailsTask extends DefaultTask {
     def executeCommand() {
         def launchArgs = [NameUtils.toScriptName(command), args ?: ""]
         if (env) launchArgs << env
-        def result = createLauncher().launch(*launchArgs)
+        def result = 0
+        try {
+            result = createLauncher().launch(*launchArgs)
+        } catch (e) {
+            while(e.cause != null && e.cause != e) {
+                e = e.cause
+            }
+            if(e.class.name.contains("ScriptNotFound")) {
+                throw new RuntimeException("[GrailsPlugin] Grails command $launchArgs not found");
+            }
+            else {
+                throw e
+            }
+        }
 
         if (result != 0) {
             throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + result);
@@ -107,10 +125,12 @@ class GrailsTask extends DefaultTask {
         def grailsLauncher = new GrailsLauncher(rootLoader, effectiveGrailsHome, getProjectDir().absolutePath)
         applyProjectLayout(grailsLauncher)
         configureGrailsDependencyManagement(grailsLauncher)
+        BootstrapUtils.addLoggingJarsToRootLoaderAndInit(rootLoader,compileClasspath.files as List)
         grailsLauncher
     }
 
     protected void applyProjectLayout(GrailsLauncher grailsLauncher) {
+        grailsLauncher.providedDependencies = providedClasspath.files as List
         grailsLauncher.compileDependencies = compileClasspath.files as List
         grailsLauncher.testDependencies = testClasspath.files as List
         grailsLauncher.runtimeDependencies = runtimeClasspath.files as List
