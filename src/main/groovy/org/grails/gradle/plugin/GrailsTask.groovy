@@ -1,13 +1,12 @@
 package org.grails.gradle.plugin
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
 import org.grails.launcher.*
-import org.gradle.api.tasks.TaskExecutionException
-import org.gradle.api.InvalidUserDataException
 
 class GrailsTask extends DefaultTask {
 
