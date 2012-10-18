@@ -5,17 +5,12 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
-import org.grails.launcher.GrailsLauncher
-import org.grails.launcher.NameUtils
-import org.grails.launcher.RootLoader
-import java.lang.reflect.InvocationTargetException
-import org.grails.launcher.BootstrapUtils
-import org.grails.launcher.ForkedGrailsLauncher
+import org.grails.launcher.*
 
 class GrailsTask extends DefaultTask {
 
     String grailsHome
-    String command 
+    String command
     String args
     String env
 
@@ -27,17 +22,17 @@ class GrailsTask extends DefaultTask {
     @InputFiles FileCollection bootstrapRuntimeClasspath
 
     boolean useRuntimeClasspathForBootstrap
-    
+
     @Input
     boolean fork
 
     private projectDir
     private targetDir
-    
+
     GrailsTask() {
         System.setProperty("grails.console.enable.terminal", "false");
         System.setProperty("grails.console.enable.interactive", "false");
-        command = name 
+        command = name
     }
 
     @Input
@@ -46,7 +41,7 @@ class GrailsTask extends DefaultTask {
     }
 
     void setProjectDir(projectDir) {
-        this.projectDir = projectDir            
+        this.projectDir = projectDir
     }
 
     @Input
@@ -64,21 +59,21 @@ class GrailsTask extends DefaultTask {
         if (fork) {
             ForkedGrailsLauncher.ExecutionContext ec = new ForkedGrailsLauncher.ExecutionContext();
 
-            ec.setBuildDependencies(bootstrapClasspath.files.toList());
-            ec.setProvidedDependencies(providedClasspath.files as List);
-            ec.setCompileDependencies(compileClasspath.files as List);
-            ec.setTestDependencies(testClasspath.files as List);
-            ec.setRuntimeDependencies(runtimeClasspath.files as List);
-            ec.setGrailsWorkDir(new File(targetDir, "grails-work"));
-            ec.setProjectWorkDir(targetDir);
-            ec.setClassesDir(new File(targetDir, "classes"));
-            ec.setTestClassesDir(new File(targetDir, "test-classes"));
-            ec.setResourcesDir(new File(targetDir, "resources"));
-            ec.setProjectPluginsDir(new File(targetDir, "plugins"));
-            ec.setArgs(args);
-            ec.setScriptName(command);
-            ec.setBaseDir(project.projectDir);
-            ec.setEnv(env);
+            ec.setBuildDependencies(getBootstrapClasspath().files.toList());
+            ec.setProvidedDependencies(getProvidedClasspath().files as List);
+            ec.setCompileDependencies(getCompileClasspath().files as List);
+            ec.setTestDependencies(getTestClasspath().files as List);
+            ec.setRuntimeDependencies(getRuntimeClasspath().files as List);
+            ec.setGrailsWorkDir(new File(getTargetDir(), "grails-work"));
+            ec.setProjectWorkDir(getTargetDir());
+            ec.setClassesDir(new File(getTargetDir(), "classes"));
+            ec.setTestClassesDir(new File(getTargetDir(), "test-classes"));
+            ec.setResourcesDir(new File(getTargetDir(), "resources"));
+            ec.setProjectPluginsDir(new File(getTargetDir(), "plugins"));
+            ec.setArgs(getArgs());
+            ec.setScriptName(getCommand());
+            ec.setBaseDir(getProjectDir());
+            ec.setEnv(getEnv());
             ForkedGrailsLauncher fgr = new ForkedGrailsLauncher(ec);
             try {
                 fgr.fork();
@@ -88,15 +83,15 @@ class GrailsTask extends DefaultTask {
         }
         else {
 
-            def launchArgs = [NameUtils.toScriptName(command), args ?: ""]
-            if (env) launchArgs << env
+            def launchArgs = [NameUtils.toScriptName(getCommand()), getArgs() ?: ""]
+            if (getEnv()) launchArgs << getEnv()
             try {
-                result = createLauncher().launch(*launchArgs)
+                result = createLauncher().launch(* launchArgs)
             } catch (e) {
-                while(e.cause != null && e.cause != e) {
+                while (e.cause != null && e.cause != e) {
                     e = e.cause
                 }
-                if(e.class.name.contains("ScriptNotFound")) {
+                if (e.class.name.contains("ScriptNotFound")) {
                     throw new RuntimeException("[GrailsPlugin] Grails command $launchArgs not found");
                 }
                 else {
@@ -139,34 +134,34 @@ class GrailsTask extends DefaultTask {
     }
 
     boolean isEffectiveUseRuntimeClasspathForBootstrap() {
-        command in ["run-app", "test-app", "release-plugin"] || useRuntimeClasspathForBootstrap
+        getCommand() in ["run-app", "test-app", "release-plugin"] || isUseRuntimeClasspathForBootstrap()
     }
 
     FileCollection getEffectiveBootstrapConfiguration() {
-         effectiveUseRuntimeClasspathForBootstrap ? bootstrapRuntimeClasspath : bootstrapClasspath
+        effectiveUseRuntimeClasspathForBootstrap ? getBootstrapRuntimeClasspath() : getBootstrapClasspath()
     }
 
     protected Collection<URL> getEffectiveBootstrapClasspath() {
-        def classpath = effectiveBootstrapConfiguration.files.collect { it.toURI().toURL() }
+        def classpath = getEffectiveBootstrapConfiguration().files.collect { it.toURI().toURL() }
         addToolsJarIfNecessary(classpath)
         classpath
     }
 
     protected GrailsLauncher createLauncher() {
         def rootLoader = new RootLoader(getEffectiveBootstrapClasspath() as URL[], ClassLoader.systemClassLoader)
-        def grailsLauncher = new GrailsLauncher(rootLoader, effectiveGrailsHome, getProjectDir().absolutePath)
+        def grailsLauncher = new GrailsLauncher(rootLoader, getEffectiveGrailsHome(), getProjectDir().absolutePath)
         applyProjectLayout(grailsLauncher)
         configureGrailsDependencyManagement(grailsLauncher)
-        BootstrapUtils.addLoggingJarsToRootLoaderAndInit(rootLoader,compileClasspath.files as List)
+        BootstrapUtils.addLoggingJarsToRootLoaderAndInit(rootLoader, getCompileClasspath().files as List)
         grailsLauncher
     }
 
     protected void applyProjectLayout(GrailsLauncher grailsLauncher) {
-        grailsLauncher.providedDependencies = providedClasspath.files as List
-        grailsLauncher.compileDependencies = compileClasspath.files as List
-        grailsLauncher.testDependencies = testClasspath.files as List
-        grailsLauncher.runtimeDependencies = runtimeClasspath.files as List
-        grailsLauncher.projectWorkDir = targetDir
+        grailsLauncher.providedDependencies = getProvidedClasspath().files as List
+        grailsLauncher.compileDependencies = getCompileClasspath().files as List
+        grailsLauncher.testDependencies = getTestClasspath().files as List
+        grailsLauncher.runtimeDependencies = getRuntimeClasspath().files as List
+        grailsLauncher.projectWorkDir = getTargetDir()
         grailsLauncher.classesDir = targetFile("classes")
         grailsLauncher.testClassesDir = targetFile("test-classes")
         grailsLauncher.resourcesDir = targetFile("resources")
@@ -191,10 +186,10 @@ class GrailsTask extends DefaultTask {
 
     void logClasspaths() {
         project.logger.with {
-            quiet "Classpath for Grails root loader:\n  ${effectiveBootstrapClasspath.join('\n  ')}"
-            quiet "Compile classpath:\n  ${compileClasspath.files.join('\n  ')}"
-            quiet "Test classpath:\n  ${testClasspath.files.join('\n  ')}"
-            quiet "Runtime classpath:\n  ${runtimeClasspath.files.join('\n  ')}"
+            quiet "Classpath for Grails root loader:\n  ${getEffectiveBootstrapClasspath().join('\n  ')}"
+            quiet "Compile classpath:\n  ${getCompileClasspath().files.join('\n  ')}"
+            quiet "Test classpath:\n  ${getTestClasspath().files.join('\n  ')}"
+            quiet "Runtime classpath:\n  ${getRuntimeClasspath().files.join('\n  ')}"
         }
     }
 
