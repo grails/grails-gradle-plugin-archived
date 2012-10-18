@@ -8,6 +8,7 @@ import org.gradle.api.tasks.TaskState
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import org.grails.gradle.plugin.GrailsPlugin
 
 abstract class IntegSpec extends Specification {
     @Rule final TemporaryFolder dir = new TemporaryFolder()
@@ -55,8 +56,10 @@ abstract class IntegSpec extends Specification {
 
     def setup() {
         buildFile << """
-            GrailsPlugin = project.class.classLoader.loadClass("org.grails.gradle.plugin.GrailsPlugin")
-            GrailsTask = project.class.classLoader.loadClass("org.grails.gradle.plugin.GrailsTask")
+            ext {
+                GrailsPlugin = project.class.classLoader.loadClass("org.grails.gradle.plugin.GrailsPlugin")
+                GrailsTask = project.class.classLoader.loadClass("org.grails.gradle.plugin.GrailsTask")
+            }
             version = "1.0"
 
             repositories {
@@ -67,7 +70,7 @@ abstract class IntegSpec extends Specification {
 
     def applyPlugin(String grailsVersion = "2.0.0") {
         buildFile << """
-            grailsVersion = "$grailsVersion"
+            ext.grailsVersion = "$grailsVersion"
             apply plugin: GrailsPlugin
         """
     }
