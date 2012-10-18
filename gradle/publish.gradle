@@ -5,7 +5,7 @@ uploadArchives { task ->
         beforeDeployment { MavenDeployment deployment ->
             signing.signPom(deployment)
         }
-        
+
         gradle.taskGraph.whenReady { taskGraph ->
             if (taskGraph.hasTask(task)) {
                 repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2") {
@@ -15,7 +15,7 @@ uploadArchives { task ->
                     authentication(userName: grailsRepoUsername, password: grailsRepoPassword)
                 }
             }
-        }   
+        }
     }.pom
 }
 

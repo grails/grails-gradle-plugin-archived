@@ -6,7 +6,7 @@ idea {
                 def node = provider.asNode()
                 node.component.find { it.'@name' == 'VcsDirectoryMappings' }?.mapping[0].'@vcs' = 'Git'
                 node.append(new XmlParser().parse(file("ideaCodeStyle.xml")))
-                
+
                 def copyrightManager = node.component.find { it.'@name' == 'CopyrightManager' }
                 copyrightManager.@default = "ASL2"
                 def aslCopyright = copyrightManager.copyright.find { it.option.find { it.@name == "myName" }?.@value == "ASL2" }
@@ -21,7 +21,6 @@ idea {
                         </copyright>
                     '''))
                 }
-                
             }
         }
     }
