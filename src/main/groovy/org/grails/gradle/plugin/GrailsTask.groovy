@@ -6,6 +6,8 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
 import org.grails.launcher.*
+import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.api.InvalidUserDataException
 
 class GrailsTask extends DefaultTask {
 
@@ -157,7 +159,17 @@ class GrailsTask extends DefaultTask {
     }
 
     protected void applyProjectLayout(GrailsLauncher grailsLauncher) {
-        grailsLauncher.providedDependencies = getProvidedClasspath().files as List
+
+        // Provided deps are 2.0 only
+        def providedClasspath = getProvidedClasspath().files as List
+        if (providedClasspath) {
+            try {
+                grailsLauncher.providedDependencies = providedClasspath
+            } catch (NoSuchMethodException e) {
+                throw new InvalidUserDataException("Cannot set provided classpath for task ${this} as this version of Grails does not support provided dependencies")
+            }
+        }
+
         grailsLauncher.compileDependencies = getCompileClasspath().files as List
         grailsLauncher.testDependencies = getTestClasspath().files as List
         grailsLauncher.runtimeDependencies = getRuntimeClasspath().files as List
