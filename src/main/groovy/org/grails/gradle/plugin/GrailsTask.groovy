@@ -16,18 +16,27 @@
 
 package org.grails.gradle.plugin
 
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
-import org.grails.launcher.*
+import org.gradle.internal.Factory
+import org.gradle.process.JavaForkOptions
+import org.gradle.process.internal.WorkerProcessBuilder
+import org.grails.gradle.plugin.internal.worker.ForkingGrailsLauncher
 import org.grails.launcher.context.GrailsLaunchContext
 import org.grails.launcher.context.SerializableGrailsLaunchContext
+import org.grails.launcher.util.NameUtils
 import org.grails.launcher.version.GrailsVersion
 import org.grails.launcher.version.GrailsVersionParser
-import org.grails.launcher.util.NameUtils
+
+import javax.inject.Inject
+import org.gradle.process.internal.DefaultJavaForkOptions
+import org.gradle.api.internal.file.FileResolver
+import org.gradle.api.logging.LogLevel
 
 class GrailsTask extends DefaultTask {
 
@@ -47,14 +56,16 @@ class GrailsTask extends DefaultTask {
     boolean useRuntimeClasspathForBootstrap
 
     @Input
-    boolean fork
+    JavaForkOptions jvmOptions
 
     private projectDir
     private projectWorkDir
 
-    GrailsTask() {
-        System.setProperty("grails.console.enable.terminal", "false");
-        System.setProperty("grails.console.enable.interactive", "false");
+    private final Factory<WorkerProcessBuilder> workerProcessBuilderFactory
+
+    @Inject GrailsTask(Factory<WorkerProcessBuilder> workerProcessBuilderFactory, FileResolver fileResolver) {
+        this.workerProcessBuilderFactory = workerProcessBuilderFactory
+        this.jvmOptions = new DefaultJavaForkOptions(fileResolver)
         command = name
     }
 
@@ -80,10 +91,26 @@ class GrailsTask extends DefaultTask {
         grailsHome == null ? null : project.file(grailsHome)
     }
 
+    public JavaForkOptions getJvmOptions() {
+        return jvmOptions
+    }
+
+    public void jvmOptions(Action<JavaForkOptions> configure) {
+        project.configure(jvmOptions, { configure.execute(it) })
+    }
+
     @TaskAction
     def executeCommand() {
-        GrailsLauncher launcher = isFork() ? new ForkedGrailsLauncher() : new InProcessGrailsLauncher()
-        int result = launcher.launch(createLaunchContext())
+        def launchContext = createLaunchContext()
+        def launcher = new ForkingGrailsLauncher(workerProcessBuilderFactory)
+        def logLevel = getProject().getGradle().getStartParameter().getLogLevel();
+        int result = launcher.launch(launchContext, logLevel, new Action<JavaForkOptions>() {
+            @Override
+            void execute(JavaForkOptions workerForkOptions) {
+                getJvmOptions().copyTo(workerForkOptions)
+            }
+        })
+
         if (result != 0) {
             throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + result);
         }

@@ -46,6 +46,11 @@ class GrailsDependenciesConfigurer {
         if (grailsVersionQuirks.isRequiresExplicitIvyDependency()) {
             addDependency("org.apache.ivy:ivy:2.1.0", configuration)
         }
+
+        if (grailsVersionQuirks.isRequiresExplicitLoggingBootstrapDependencies()) {
+            addDependency("org.slf4j:jcl-over-slf4j:1.6.2", configuration);
+            addDependency("log4j:log4j:1.2.17", configuration);
+        }
     }
 
     void configureCompileClasspath(Configuration configuration) {

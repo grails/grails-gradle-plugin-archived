@@ -17,6 +17,7 @@
 package org.grails.gradle.plugin.integ
 
 import spock.lang.Unroll
+import org.grails.launcher.version.GrailsVersion
 
 @Unroll
 class InitSpec extends IntegSpec {
@@ -28,6 +29,25 @@ class InitSpec extends IntegSpec {
             grails.grailsVersion '$grailsVersion'
         """
 
+        if (grailsVersion.is(2, 1)) {
+            buildFile << """
+                dependencies {
+                    compile "org.codehaus.groovy:groovy-all:${grailsVersion.is(2,1,0) ? "1.8.6" : "1.8.8"}"
+                    bootstrap "org.codehaus.groovy:groovy-all:${grailsVersion.is(2,1,0) ? "1.8.6" : "1.8.8"}"
+                }
+            """
+        }
+
+        if (grailsVersion.is(2, 2)) {
+            buildFile << """
+                dependencies {
+                    compile "org.codehaus.groovy:groovy-all:2.0.5"
+                    bootstrap "org.codehaus.groovy:groovy-all:2.0.5"
+                    test "org.grails:grails-test:$grailsVersion"
+                }
+            """
+        }
+
         when:
         launcher("init", "-s").run().rethrowFailure()
 
@@ -37,8 +57,23 @@ class InitSpec extends IntegSpec {
         and:
         file("grails-app").exists()
 
+        when:
+        file("test/integration/SomeTest.groovy") << """
+            class SomeTest extends GroovyTestCase {
+                void testSomething() {
+                    assert true
+                }
+            }
+        """
+
+        and:
+        launcher("test", "-s").run().rethrowFailure()
+
+        then:
+        task("test").state.didWork
+
         where:
-        grailsVersion << ["1.3.7", "2.0.0"]
+        grailsVersion << ["2.0.0", "2.1.0", "2.2.0.RC1"].collect { GrailsVersion.parse(it) }
     }
 
 }
