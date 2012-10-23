@@ -19,39 +19,57 @@ package org.grails.gradle.plugin
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.internal.ConventionMapping
+import org.grails.gradle.plugin.internal.DefaultGrailsProject
 
 class GrailsPlugin implements Plugin<Project> {
     static public final GRAILS_TASK_PREFIX = "grails-"
 
     void apply(Project project) {
-        if (!project.hasProperty("grailsVersion")) {
-            throw new InvalidUserDataException("[GrailsPlugin] the 'grailsVersion' project property is not set - you need to set this before applying the plugin")
+        DefaultGrailsProject grailsProject = project.extensions.create("grails", DefaultGrailsProject, project)
+        grailsProject.conventionMapping.with {
+            map("projectDir") { project.projectDir }
+            map("projectWorkDir") { project.buildDir }
         }
 
-        String grailsVersion = project.grailsVersion
+        Configuration bootstrapConfiguration = getOrCreateConfiguration(project, "bootstrap")
 
-        project.configurations {
-            compile
-            provided
-            runtime.extendsFrom compile
-            test.extendsFrom compile
+        Configuration compileConfiguration = getOrCreateConfiguration(project, "compile")
+        Configuration providedConfiguration = getOrCreateConfiguration(project, "provided")
+        Configuration runtimeConfiguration = getOrCreateConfiguration(project, "runtime")
+        Configuration testConfiguration = getOrCreateConfiguration(project, "test")
 
-            bootstrap.extendsFrom logging
-            bootstrapRuntime.extendsFrom bootstrap, runtime
+        runtimeConfiguration.extendsFrom(compileConfiguration)
+        testConfiguration.extendsFrom(runtimeConfiguration)
+
+        grailsProject.onSetGrailsVersion { String grailsVersion ->
+            def dependenciesUtil = new GrailsDependenciesConfigurer(project, grailsProject.grailsVersion)
+            dependenciesUtil.configureBootstrapClasspath(bootstrapConfiguration)
+            dependenciesUtil.configureCompileClasspath(compileConfiguration)
         }
-
-        GrailsDependenciesUtil.configureBootstrapClasspath(project, grailsVersion, project.configurations.bootstrap)
 
         project.tasks.withType(GrailsTask) { GrailsTask task ->
-            task.projectDir project.projectDir
-            task.targetDir project.buildDir
+            ConventionMapping conventionMapping = task.conventionMapping
+            conventionMapping.with {
+                map("projectDir") { grailsProject.projectDir }
+                map("projectWorkDir") { grailsProject.projectWorkDir }
+                map("grailsVersion") { grailsProject.grailsVersion }
 
-            task.providedClasspath = project.configurations.provided
-            task.compileClasspath = project.configurations.compile
-            task.runtimeClasspath = project.configurations.runtime
-            task.testClasspath = project.configurations.test
-            task.bootstrapClasspath = project.configurations.bootstrap
-            task.bootstrapRuntimeClasspath = project.configurations.bootstrapRuntime
+                map("bootstrapClasspath") { bootstrapConfiguration }
+
+                map("providedClasspath") { providedConfiguration }
+                map("compileClasspath") { compileConfiguration }
+                map("runtimeClasspath") { runtimeConfiguration }
+                map("testClasspath") { testConfiguration }
+            }
+
+            doFirst {
+                if (grailsProject.grailsVersion == null) {
+                    throw new InvalidUserDataException("You must set 'grails.grailsVersion' property before Grails tasks can be run")
+                }
+            }
         }
 
         project.task("init", type: GrailsTask) {
@@ -94,5 +112,10 @@ class GrailsPlugin implements Plugin<Project> {
                 }
             }
         }
+    }
+
+    Configuration getOrCreateConfiguration(Project project, String name) {
+        ConfigurationContainer container = project.configurations
+        container.findByName(name) ?: container.create(name)
     }
 }

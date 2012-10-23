@@ -83,9 +83,8 @@ abstract class IntegSpec extends Specification {
         """
     }
 
-    def applyPlugin(String grailsVersion = "2.0.0") {
+    def applyPlugin() {
         buildFile << """
-            ext.grailsVersion = "$grailsVersion"
             apply plugin: GrailsPlugin
         """
     }

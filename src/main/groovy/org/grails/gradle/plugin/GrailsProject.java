@@ -14,31 +14,12 @@
  * limitations under the License.
  */
 
-package org.grails.gradle.plugin.integ
+package org.grails.gradle.plugin;
 
-import spock.lang.Unroll
+public interface GrailsProject {
 
-@Unroll
-class InitSpec extends IntegSpec {
+    void setGrailsVersion(String grailsVersion);
 
-    def "can create grails #grailsVersion project"() {
-        given:
-        applyPlugin()
-        buildFile << """
-            grails.grailsVersion '$grailsVersion'
-        """
-
-        when:
-        launcher("init", "-s").run().rethrowFailure()
-
-        then:
-        task("init").state.didWork
-
-        and:
-        file("grails-app").exists()
-
-        where:
-        grailsVersion << ["1.3.7", "2.0.0"]
-    }
+    String getGrailsVersion();
 
 }

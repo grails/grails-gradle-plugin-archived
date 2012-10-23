@@ -23,8 +23,15 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
 import org.grails.launcher.*
+import org.grails.launcher.context.GrailsLaunchContext
+import org.grails.launcher.context.SerializableGrailsLaunchContext
+import org.grails.launcher.version.GrailsVersion
+import org.grails.launcher.version.GrailsVersionParser
+import org.grails.launcher.util.NameUtils
 
 class GrailsTask extends DefaultTask {
+
+    String grailsVersion
 
     String grailsHome
     String command
@@ -36,7 +43,6 @@ class GrailsTask extends DefaultTask {
     @InputFiles FileCollection runtimeClasspath
     @InputFiles FileCollection testClasspath
     @InputFiles FileCollection bootstrapClasspath
-    @InputFiles FileCollection bootstrapRuntimeClasspath
 
     boolean useRuntimeClasspathForBootstrap
 
@@ -44,7 +50,7 @@ class GrailsTask extends DefaultTask {
     boolean fork
 
     private projectDir
-    private targetDir
+    private projectWorkDir
 
     GrailsTask() {
         System.setProperty("grails.console.enable.terminal", "false");
@@ -54,7 +60,7 @@ class GrailsTask extends DefaultTask {
 
     @Input
     File getProjectDir() {
-        project.file(projectDir)
+        projectDir == null ? null : project.file(projectDir)
     }
 
     void setProjectDir(projectDir) {
@@ -62,71 +68,40 @@ class GrailsTask extends DefaultTask {
     }
 
     @Input
-    File getTargetDir() {
-        project.file(targetDir)
+    File getProjectWorkDir() {
+        projectWorkDir == null ? null : project.file(projectWorkDir)
     }
 
-    void setTargetDir(targetDir) {
-        this.targetDir = targetDir
+    void setProjectWorkDir(projectWorkDir) {
+        this.projectWorkDir = projectWorkDir
+    }
+
+    File getGrailsHome() {
+        grailsHome == null ? null : project.file(grailsHome)
     }
 
     @TaskAction
     def executeCommand() {
-        def result = 0
-        if (fork) {
-            ForkedGrailsLauncher.ExecutionContext ec = new ForkedGrailsLauncher.ExecutionContext();
-
-            ec.setBuildDependencies(getBootstrapClasspath().files.toList());
-            ec.setProvidedDependencies(getProvidedClasspath().files as List);
-            ec.setCompileDependencies(getCompileClasspath().files as List);
-            ec.setTestDependencies(getTestClasspath().files as List);
-            ec.setRuntimeDependencies(getRuntimeClasspath().files as List);
-            ec.setGrailsWorkDir(new File(getTargetDir(), "grails-work"));
-            ec.setProjectWorkDir(getTargetDir());
-            ec.setClassesDir(new File(getTargetDir(), "classes"));
-            ec.setTestClassesDir(new File(getTargetDir(), "test-classes"));
-            ec.setResourcesDir(new File(getTargetDir(), "resources"));
-            ec.setProjectPluginsDir(new File(getTargetDir(), "plugins"));
-            ec.setArgs(getArgs());
-            ec.setScriptName(getCommand());
-            ec.setBaseDir(getProjectDir());
-            ec.setEnv(getEnv());
-            ForkedGrailsLauncher fgr = new ForkedGrailsLauncher(ec);
-            try {
-                fgr.fork();
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage(), e);
-            }
-        }
-        else {
-
-            def launchArgs = [NameUtils.toScriptName(getCommand()), getArgs() ?: ""]
-            if (getEnv()) launchArgs << getEnv()
-            try {
-                result = createLauncher().launch(* launchArgs)
-            } catch (e) {
-                while (e.cause != null && e.cause != e) {
-                    e = e.cause
-                }
-                if (e.class.name.contains("ScriptNotFound")) {
-                    throw new RuntimeException("[GrailsPlugin] Grails command $launchArgs not found");
-                }
-                else {
-                    throw e
-                }
-            }
-        }
-
+        GrailsLauncher launcher = isFork() ? new ForkedGrailsLauncher() : new InProcessGrailsLauncher()
+        int result = launcher.launch(createLaunchContext())
         if (result != 0) {
             throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + result);
         }
     }
 
-    String getEffectiveGrailsHome() {
-        grailsHome ?: (project.hasProperty('grailsHome') ? project.grailsHome : null)
+    File getEffectiveGrailsHome() {
+        getGrailsHome() ?: (project.hasProperty('grailsHome') ? project.file(project.grailsHome) : null)
     }
 
-    protected void addToolsJarIfNecessary(Collection<URL> classpath) {
+    protected GrailsVersion getParsedGrailsVersion() {
+        new GrailsVersionParser().parse(getGrailsVersion() ?: project.grailsVersion)
+    }
+
+    boolean isEffectiveUseRuntimeClasspathForBootstrap() {
+        getCommand() in ["run-app", "test-app", "release-plugin"] || isUseRuntimeClasspathForBootstrap()
+    }
+
+    protected void addToolsJarIfNecessary(Collection<File> classpath) {
         // Add the "tools.jar" to the classpath so that the Grails
         // scripts can run native2ascii. First assume that "java.home"
         // points to a JRE within a JDK.
@@ -146,69 +121,55 @@ class GrailsTask extends DefaultTask {
         }
 
         if (toolsJar.exists()) {
-            classpath << toolsJar.toURI().toURL()
+            classpath << toolsJar
         }
     }
 
-    boolean isEffectiveUseRuntimeClasspathForBootstrap() {
-        getCommand() in ["run-app", "test-app", "release-plugin"] || isUseRuntimeClasspathForBootstrap()
-    }
-
-    FileCollection getEffectiveBootstrapConfiguration() {
-        effectiveUseRuntimeClasspathForBootstrap ? getBootstrapRuntimeClasspath() : getBootstrapClasspath()
-    }
-
-    protected Collection<URL> getEffectiveBootstrapClasspath() {
-        def classpath = getEffectiveBootstrapConfiguration().files.collect { it.toURI().toURL() }
+    protected Collection<File> getEffectiveBootstrapClasspath() {
+        def classpath = getBootstrapClasspath().files
+        if (isEffectiveUseRuntimeClasspathForBootstrap()) {
+            classpath.addAll(getRuntimeClasspath().files)
+        }
         addToolsJarIfNecessary(classpath)
         classpath
     }
 
-    protected GrailsLauncher createLauncher() {
-        def rootLoader = new RootLoader(getEffectiveBootstrapClasspath() as URL[], ClassLoader.systemClassLoader)
-        def grailsLauncher = new GrailsLauncher(rootLoader, getEffectiveGrailsHome(), getProjectDir().absolutePath)
-        applyProjectLayout(grailsLauncher)
-        configureGrailsDependencyManagement(grailsLauncher)
-        BootstrapUtils.addLoggingJarsToRootLoaderAndInit(rootLoader, getCompileClasspath().files as List)
-        grailsLauncher
-    }
+    protected GrailsLaunchContext createLaunchContext() {
+        GrailsLaunchContext launchContext = new SerializableGrailsLaunchContext(getParsedGrailsVersion())
 
-    protected void applyProjectLayout(GrailsLauncher grailsLauncher) {
+        launchContext.dependenciesExternallyConfigured = true
+        launchContext.plainOutput = true
+
+        launchContext.grailsHome = getEffectiveGrailsHome()
+        launchContext.baseDir = getProjectDir()
+        launchContext.env = getEnv()
+
+        launchContext.scriptName = NameUtils.toScriptName(getCommand())
+        launchContext.args = getArgs()
+
+        launchContext.buildDependencies = getEffectiveBootstrapClasspath() as List
+        launchContext.compileDependencies = getCompileClasspath().files as List
+        launchContext.testDependencies = getTestClasspath().files as List
+        launchContext.runtimeDependencies = getRuntimeClasspath().files as List
 
         // Provided deps are 2.0 only
         def providedClasspath = getProvidedClasspath().files as List
         if (providedClasspath) {
             try {
-                grailsLauncher.providedDependencies = providedClasspath
+                launchContext.providedDependencies = providedClasspath
             } catch (NoSuchMethodException e) {
                 throw new InvalidUserDataException("Cannot set provided classpath for task ${this} as this version of Grails does not support provided dependencies")
             }
         }
 
-        grailsLauncher.compileDependencies = getCompileClasspath().files as List
-        grailsLauncher.testDependencies = getTestClasspath().files as List
-        grailsLauncher.runtimeDependencies = getRuntimeClasspath().files as List
-        grailsLauncher.projectWorkDir = getTargetDir()
-        grailsLauncher.classesDir = targetFile("classes")
-        grailsLauncher.testClassesDir = targetFile("test-classes")
-        grailsLauncher.resourcesDir = targetFile("resources")
-        grailsLauncher.projectPluginsDir = targetFile("plugins")
-        grailsLauncher.testReportsDir = targetFile("test-results")
-    }
+        launchContext.projectWorkDir = getProjectWorkDir()
+        launchContext.classesDir = projectWorkDirFile("classes")
+        launchContext.testClassesDir = projectWorkDirFile("test-classes")
+        launchContext.resourcesDir = projectWorkDirFile("resources")
+        launchContext.projectPluginsDir = projectWorkDirFile("plugins")
+        launchContext.testReportsDir = projectWorkDirFile("test-results")
 
-    protected void configureGrailsDependencyManagement(GrailsLauncher grailsLauncher) {
-        // Grails 1.2+ only. Previous versions of Grails don't have the
-        // 'dependenciesExternallyConfigured' property. Note that this
-        // is a HACK because the 'settings' field is private.
-        //
-        // We can't simply check whether the property exists on the
-        // launcher because it's the 1.2 version, whereas the project may
-        // be using Grails version 1.1. That's why we have to get hold
-        // of the actual BuildSettings instance.
-        def buildSettings = grailsLauncher.settings
-        if (buildSettings.metaClass.hasProperty(buildSettings, "dependenciesExternallyConfigured")) {
-            grailsLauncher.dependenciesExternallyConfigured = true
-        }
+        launchContext
     }
 
     void logClasspaths() {
@@ -224,11 +185,11 @@ class GrailsTask extends DefaultTask {
         getProjectDir().listFiles({ dir, name -> name ==~ /.*GrailsPlugin.groovy/} as FilenameFilter) as boolean
     }
 
-    protected File projectFile(String path) {
+    protected File projectDirFile(String path) {
         new File(getProjectDir(), path)
     }
 
-    protected File targetFile(String path) {
-        new File(getTargetDir(), path)
+    protected File projectWorkDirFile(String path) {
+        new File(getProjectWorkDir(), path)
     }
 }
