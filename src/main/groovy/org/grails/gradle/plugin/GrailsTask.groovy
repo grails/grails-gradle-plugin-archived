@@ -37,6 +37,7 @@ import javax.inject.Inject
 import org.gradle.process.internal.DefaultJavaForkOptions
 import org.gradle.api.internal.file.FileResolver
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.Optional
 
 class GrailsTask extends DefaultTask {
 
@@ -47,10 +48,10 @@ class GrailsTask extends DefaultTask {
     String args
     String env
 
-    @InputFiles FileCollection providedClasspath
-    @InputFiles FileCollection compileClasspath
-    @InputFiles FileCollection runtimeClasspath
-    @InputFiles FileCollection testClasspath
+    @Optional @InputFiles FileCollection providedClasspath
+    @Optional @InputFiles FileCollection compileClasspath
+    @Optional @InputFiles FileCollection runtimeClasspath
+    @Optional @InputFiles FileCollection testClasspath
     @InputFiles FileCollection bootstrapClasspath
 
     boolean useRuntimeClasspathForBootstrap
@@ -174,16 +175,31 @@ class GrailsTask extends DefaultTask {
         launchContext.scriptName = NameUtils.toScriptName(getCommand())
         launchContext.args = getArgs()
 
-        launchContext.buildDependencies = getEffectiveBootstrapClasspath() as List
-        launchContext.compileDependencies = getCompileClasspath().files as List
-        launchContext.testDependencies = getTestClasspath().files as List
-        launchContext.runtimeDependencies = getRuntimeClasspath().files as List
+        Iterable<File> files = getEffectiveBootstrapClasspath()
+        if (files) {
+            launchContext.buildDependencies = files as List
+        }
+
+        files = getCompileClasspath()
+        if (files) {
+            launchContext.compileDependencies = files as List
+        }
+
+        files = getTestClasspath()
+        if (files) {
+            launchContext.testDependencies = files as List
+        }
+
+        files = getRuntimeClasspath()
+        if (files) {
+            launchContext.runtimeDependencies = files as List
+        }
 
         // Provided deps are 2.0 only
-        def providedClasspath = getProvidedClasspath().files as List
+        files = getProvidedClasspath()
         if (providedClasspath) {
             try {
-                launchContext.providedDependencies = providedClasspath
+                launchContext.providedDependencies = files as List
             } catch (NoSuchMethodException e) {
                 throw new InvalidUserDataException("Cannot set provided classpath for task ${this} as this version of Grails does not support provided dependencies")
             }
