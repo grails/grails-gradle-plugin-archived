@@ -16,36 +16,25 @@
 
 package org.grails.gradle.plugin.internal.worker;
 
-import java.util.concurrent.CountDownLatch;
-
-public class LatchBackedGrailsForkHandle implements GrailsForkHandle {
-
-    private final CountDownLatch latch;
+public class DefaultGrailsForkHandle implements GrailsForkHandle {
 
     int exitCode;
     Throwable executionException;
     Throwable initialisationException;
 
-    public LatchBackedGrailsForkHandle(CountDownLatch latch) {
-        this.latch = latch;
-    }
-
     @Override
     public void onExit(int exitCode) {
         this.exitCode = exitCode;
-        latch.countDown();
     }
 
     @Override
     public void onExecutionException(Throwable executionException) {
         this.executionException = executionException;
-        latch.countDown();
     }
 
     @Override
     public void onInitialisationException(Throwable initialisationException) {
         this.initialisationException = initialisationException;
-        latch.countDown();
     }
 
     public int getExitCode() {

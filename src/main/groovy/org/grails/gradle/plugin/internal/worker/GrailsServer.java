@@ -28,15 +28,15 @@ import org.grails.launcher.rootloader.RootLoaderFactory;
 
 import java.io.Serializable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GrailsServer implements Action<WorkerProcessContext>, Serializable {
 
     @Override
     public void execute(WorkerProcessContext context) {
         final GrailsForkHandle forkHandle = context.getServerConnection().addOutgoing(GrailsForkHandle.class);
+
         final CountDownLatch latch = new CountDownLatch(1);
-
-
         GrailsWorkerHandle workerHandle = new GrailsWorkerHandle() {
             @Override
             public void launch(final GrailsLaunchContext launchContext) {
@@ -46,11 +46,13 @@ public class GrailsServer implements Action<WorkerProcessContext>, Serializable 
                     GrailsLauncher grailsLauncher = new ReflectiveGrailsLauncher(rootLoader);
 
                     try {
-                        forkHandle.onExit(grailsLauncher.launch(launchContext));
+                        int exitCode = grailsLauncher.launch(launchContext);
+                        forkHandle.onExit(exitCode);
                     } catch (Throwable e) {
                         forkHandle.onExecutionException(e);
                     }
                 } catch (Throwable e) {
+                    e.printStackTrace();
                     forkHandle.onInitialisationException(e);
                 } finally {
                     latch.countDown();

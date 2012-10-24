@@ -21,7 +21,9 @@ import org.gradle.api.logging.LogLevel;
 import org.gradle.internal.Factory;
 import org.gradle.internal.UncheckedException;
 import org.gradle.messaging.remote.ObjectConnection;
+import org.gradle.process.ExecResult;
 import org.gradle.process.JavaForkOptions;
+import org.gradle.process.internal.ExecException;
 import org.gradle.process.internal.JavaExecHandleBuilder;
 import org.gradle.process.internal.WorkerProcess;
 import org.gradle.process.internal.WorkerProcessBuilder;
@@ -51,8 +53,7 @@ public class ForkingGrailsLauncher {
 
         WorkerProcess workerProcess = builder.build();
 
-        CountDownLatch latch = new CountDownLatch(1);
-        LatchBackedGrailsForkHandle forkHandle = new LatchBackedGrailsForkHandle(latch);
+        DefaultGrailsForkHandle forkHandle = new DefaultGrailsForkHandle();
 
         workerProcess.start();
         ObjectConnection connection = workerProcess.getConnection();
@@ -63,12 +64,20 @@ public class ForkingGrailsLauncher {
         workerHandle.launch(launchContext);
 
         try {
-            latch.await();
-        } catch (InterruptedException e) {
-            throw UncheckedException.throwAsUncheckedException(e);
+            ExecResult result = workerProcess.waitForStop();
+            if (result.getExitValue() != 0) { // forcibly exited
+                return result.getExitValue();
+            }
+        } catch (ExecException e) {
+            return 1;
         }
 
-        Throwable exception = forkHandle.getExecutionException();
+        Throwable exception = forkHandle.getInitialisationException();
+        if (exception != null) {
+            throw UncheckedException.throwAsUncheckedException(exception);
+        }
+
+        exception = forkHandle.getExecutionException();
         if (exception != null) {
             throw UncheckedException.throwAsUncheckedException(exception);
         }
