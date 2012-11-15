@@ -29,7 +29,9 @@ import org.gradle.process.internal.WorkerProcess;
 import org.gradle.process.internal.WorkerProcessBuilder;
 import org.grails.launcher.context.GrailsLaunchContext;
 
+import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ForkingGrailsLauncher {
 
@@ -51,38 +53,63 @@ public class ForkingGrailsLauncher {
             javaForkOptionsAction.execute(javaCommand);
         }
 
-        WorkerProcess workerProcess = builder.build();
+        final WorkerProcess workerProcess = builder.build();
+        final CountDownLatch latch = new CountDownLatch(1);
 
-        DefaultGrailsForkHandle forkHandle = new DefaultGrailsForkHandle();
+        final GrailsExecutionResultHolder resultHolder = new GrailsExecutionResultHolder(latch);
 
         workerProcess.start();
         ObjectConnection connection = workerProcess.getConnection();
 
-        connection.addIncoming(GrailsForkHandle.class, forkHandle);
         GrailsWorkerHandle workerHandle = connection.addOutgoing(GrailsWorkerHandle.class);
+        connection.addIncoming(Action.class, resultHolder);
+
+        final AtomicBoolean alreadyStopped = new AtomicBoolean(false);
+
+        Thread watchForStopThread = new Thread("Gradle Process Stop Watcher") {
+            @Override
+            public void run() {
+                try {
+                    ExecResult result = workerProcess.waitForStop();
+                    alreadyStopped.set(true);
+                    if (resultHolder.getExitCode() == null) {
+                        resultHolder.execute(Collections.singletonMap("exitCode", result.getExitValue()));
+                    }
+                } catch (ExecException e) {
+                    if (resultHolder.getExitCode() == null) { // forcibly exited
+                        resultHolder.execute(Collections.singletonMap("exitCode", 1));
+                    }
+                    alreadyStopped.set(true);
+                }
+            }
+        };
+        watchForStopThread.setDaemon(true);
+        watchForStopThread.start();
 
         workerHandle.launch(launchContext);
 
         try {
-            ExecResult result = workerProcess.waitForStop();
-            if (result.getExitValue() != 0) { // forcibly exited
-                return result.getExitValue();
+            latch.await();
+        } catch (InterruptedException e) {
+            throw UncheckedException.throwAsUncheckedException(e);
+        }
+
+        Throwable exception = resultHolder.getInitialisationException();
+        if (exception == null) {
+            exception = resultHolder.getExecutionException();
+        }
+
+        try {
+            if (exception == null) {
+                return resultHolder.getExitCode();
+            } else {
+                throw UncheckedException.throwAsUncheckedException(exception);
             }
-        } catch (ExecException e) {
-            return 1;
+        } finally {
+            if (!alreadyStopped.get()) {
+                workerHandle.stop();
+            }
         }
-
-        Throwable exception = forkHandle.getInitialisationException();
-        if (exception != null) {
-            throw UncheckedException.throwAsUncheckedException(exception);
-        }
-
-        exception = forkHandle.getExecutionException();
-        if (exception != null) {
-            throw UncheckedException.throwAsUncheckedException(exception);
-        }
-
-        return forkHandle.getExitCode();
     }
 
 }

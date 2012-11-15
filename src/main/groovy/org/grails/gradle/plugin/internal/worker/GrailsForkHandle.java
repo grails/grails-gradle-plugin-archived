@@ -18,7 +18,7 @@ package org.grails.gradle.plugin.internal.worker;
 
 public interface GrailsForkHandle {
 
-    void onExit(int returnCode);
+    boolean onExit(int returnCode);
 
     void onExecutionException(Throwable e);
 

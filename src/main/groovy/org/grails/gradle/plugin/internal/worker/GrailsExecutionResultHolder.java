@@ -16,36 +16,37 @@
 
 package org.grails.gradle.plugin.internal.worker;
 
-public class DefaultGrailsForkHandle implements GrailsForkHandle {
+import org.gradle.api.Action;
 
-    int exitCode;
-    Throwable executionException;
-    Throwable initialisationException;
+import java.util.Collections;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
-    @Override
-    public void onExit(int exitCode) {
-        this.exitCode = exitCode;
+public class GrailsExecutionResultHolder implements Action<Object> {
+
+    private final CountDownLatch latch;
+    private Map<String, Object> result = Collections.emptyMap();
+
+    public GrailsExecutionResultHolder(CountDownLatch latch) {
+        this.latch = latch;
     }
 
     @Override
-    public void onExecutionException(Throwable executionException) {
-        this.executionException = executionException;
+    public void execute(Object result) {
+        //noinspection unchecked
+        this.result = (Map<String, Object>) result;
+        latch.countDown();
     }
 
-    @Override
-    public void onInitialisationException(Throwable initialisationException) {
-        this.initialisationException = initialisationException;
-    }
-
-    public int getExitCode() {
-        return exitCode;
+    public Integer getExitCode() {
+        return (Integer) result.get("exitCode");
     }
 
     public Throwable getExecutionException() {
-        return executionException;
+        return (Throwable) result.get("executionException");
     }
 
     public Throwable getInitialisationException() {
-        return initialisationException;
+        return (Throwable) result.get("initialisationException");
     }
 }

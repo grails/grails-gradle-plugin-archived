@@ -22,4 +22,6 @@ public interface GrailsWorkerHandle {
 
     void launch(GrailsLaunchContext launchContext);
 
+    void stop();
+
 }

@@ -7,6 +7,8 @@ group = 'org.grails'
 version = '2.0.0-SNAPSHOT'
 archivesBaseName = "grails-gradle-plugin"
 
+sourceCompatibility = "1.6"
+
 repositories {
     maven { url "http://repo.grails.org/grails/libs-snapshots-local" }
     maven { url "http://repo.grails.org/grails/repo" }
