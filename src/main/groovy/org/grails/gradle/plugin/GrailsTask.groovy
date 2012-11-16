@@ -105,7 +105,7 @@ class GrailsTask extends DefaultTask {
     def executeCommand() {
         def launchContext = createLaunchContext()
         def file = new File(getTemporaryDir(), "launch.context")
-        def launcher = new GrailsLaunchConfigureAction(launchContext, file)
+        def launcher = new GrailsLaunchConfigureAction(launchContext, file, logger)
 
         ExecResult result = project.javaexec {
             JavaExecAction action = delegate

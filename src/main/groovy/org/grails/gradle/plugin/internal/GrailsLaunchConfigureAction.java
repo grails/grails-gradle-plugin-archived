@@ -20,6 +20,7 @@ import org.gradle.api.Action;
 import org.gradle.api.logging.Logger;
 import org.gradle.process.JavaExecSpec;
 import org.grails.launcher.ForkedGrailsLauncher;
+import org.grails.launcher.Main;
 import org.grails.launcher.context.GrailsLaunchContext;
 
 import java.io.*;
@@ -46,6 +47,8 @@ public class GrailsLaunchConfigureAction implements Action<JavaExecSpec> {
 
     @Override
     public void execute(JavaExecSpec javaExec) {
+        configureReloadAgent(javaExec); // mutates the launch context
+
         OutputStream fileOut = null;
         ObjectOutputStream oos = null;
         try {
@@ -54,12 +57,11 @@ public class GrailsLaunchConfigureAction implements Action<JavaExecSpec> {
             oos.writeObject(launchContext);
 
             javaExec.setWorkingDir(launchContext.getBaseDir());
-            configureReloadAgent(javaExec, launchContext.getBuildDependencies());
 
             File launcherJar = findJarFile(ForkedGrailsLauncher.class);
             javaExec.classpath(launcherJar);
-            javaExec.setMain(ForkedGrailsLauncher.class.getName());
-            javaExec.systemProperty(ForkedGrailsLauncher.EXECUTION_CONTEXT_SYSTEM_PROPERTY, contextDestination.getAbsolutePath());
+            javaExec.setMain(Main.class.getName());
+            javaExec.args(contextDestination.getAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
@@ -76,9 +78,10 @@ public class GrailsLaunchConfigureAction implements Action<JavaExecSpec> {
         }
     }
 
-    public void configureReloadAgent(JavaExecSpec exec, Collection<File> classpath) {
-        List<URL> urls = new ArrayList<URL>(classpath.size());
-        for (File file : classpath) {
+    public void configureReloadAgent(JavaExecSpec exec) {
+        List<File> buildDependencies = launchContext.getBuildDependencies();
+        List<URL> urls = new ArrayList<URL>(buildDependencies.size());
+        for (File file : buildDependencies) {
             try {
                 urls.add(file.toURI().toURL());
             } catch (MalformedURLException ignore) {
@@ -98,6 +101,10 @@ public class GrailsLaunchConfigureAction implements Action<JavaExecSpec> {
         }
 
         File agentJarFile = findJarFile(agentClass);
+        List<File> minusAgent = new ArrayList<File>(launchContext.getBuildDependencies());
+        minusAgent.remove(agentJarFile);
+        launchContext.setBuildDependencies(minusAgent);
+
         String agentJarFilePath;
         agentJarFilePath = agentJarFile.getAbsolutePath();
 
