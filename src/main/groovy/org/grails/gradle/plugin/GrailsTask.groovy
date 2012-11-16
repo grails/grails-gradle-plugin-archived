@@ -20,13 +20,18 @@ import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.FileCollection
+import org.gradle.api.internal.file.FileResolver
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.Factory
+import org.gradle.process.ExecResult
 import org.gradle.process.JavaForkOptions
+import org.gradle.process.internal.DefaultJavaForkOptions
+import org.gradle.process.internal.JavaExecAction
 import org.gradle.process.internal.WorkerProcessBuilder
-import org.grails.gradle.plugin.internal.worker.ForkingGrailsLauncher
+import org.grails.gradle.plugin.internal.GrailsLaunchConfigureAction
 import org.grails.launcher.context.GrailsLaunchContext
 import org.grails.launcher.context.SerializableGrailsLaunchContext
 import org.grails.launcher.util.NameUtils
@@ -34,10 +39,6 @@ import org.grails.launcher.version.GrailsVersion
 import org.grails.launcher.version.GrailsVersionParser
 
 import javax.inject.Inject
-import org.gradle.process.internal.DefaultJavaForkOptions
-import org.gradle.api.internal.file.FileResolver
-import org.gradle.api.logging.LogLevel
-import org.gradle.api.tasks.Optional
 
 class GrailsTask extends DefaultTask {
 
@@ -103,18 +104,19 @@ class GrailsTask extends DefaultTask {
     @TaskAction
     def executeCommand() {
         def launchContext = createLaunchContext()
-        def launcher = new ForkingGrailsLauncher(workerProcessBuilderFactory)
-        def logLevel = getProject().getGradle().getStartParameter().getLogLevel();
-        int result = launcher.launch(launchContext, logLevel, new Action<JavaForkOptions>() {
-            @Override
-            void execute(JavaForkOptions workerForkOptions) {
-                getJvmOptions().copyTo(workerForkOptions)
-            }
-        })
+        def file = new File(getTemporaryDir(), "launch.context")
+        def launcher = new GrailsLaunchConfigureAction(launchContext, file)
 
-        if (result != 0) {
-            throw new RuntimeException("[GrailsPlugin] Grails returned non-zero value: " + result);
+        ExecResult result = project.javaexec {
+            JavaExecAction action = delegate
+            getJvmOptions().copyTo(action)
+            action.standardInput = System.in
+            action.standardOutput = System.out
+            action.errorOutput = System.err
+            launcher.execute(action)
         }
+
+        result.rethrowFailure()
     }
 
     File getEffectiveGrailsHome() {
