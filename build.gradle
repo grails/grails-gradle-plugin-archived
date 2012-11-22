@@ -18,7 +18,7 @@ dependencies {
     compile gradleApi()
     groovy localGroovy()
     
-    compile "org.grails:grails-launcher:1.0.6-SNAPSHOT"
+    compile "org.grails:grails-launcher:1.1-SNAPSHOT"
     testCompile "org.spockframework:spock-core:0.7-groovy-1.8", {
         exclude module: "groovy-all"
     }
