@@ -108,7 +108,12 @@ public class GrailsLaunchConfigureAction implements Action<JavaExecSpec> {
         String agentJarFilePath;
         agentJarFilePath = agentJarFile.getAbsolutePath();
 
-        exec.jvmArgs(String.format("-javaagent:%s", agentJarFilePath), "-noverify");
+        if(exec.getJvmArgs() != null){
+            exec.getJvmArgs().add(String.format("-javaagent:%s", agentJarFilePath));
+            exec.getJvmArgs().add("-noverify");
+        } else {
+            exec.jvmArgs(String.format("-javaagent:%s", agentJarFilePath), "-noverify"); //this may still override other args
+        }
         exec.systemProperty("springloaded", "profile=grails");
     }
 
