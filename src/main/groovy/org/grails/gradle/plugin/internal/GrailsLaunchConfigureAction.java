@@ -28,7 +28,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class GrailsLaunchConfigureAction implements Action<JavaExecSpec> {
@@ -108,7 +107,12 @@ public class GrailsLaunchConfigureAction implements Action<JavaExecSpec> {
         String agentJarFilePath;
         agentJarFilePath = agentJarFile.getAbsolutePath();
 
+        // Workaround http://issues.gradle.org/browse/GRADLE-2485
+        Boolean isDebug = exec.getDebug();
         exec.jvmArgs(String.format("-javaagent:%s", agentJarFilePath), "-noverify");
+        if (isDebug) {
+            exec.setDebug(true);
+        }
         exec.systemProperty("springloaded", "profile=grails");
     }
 
