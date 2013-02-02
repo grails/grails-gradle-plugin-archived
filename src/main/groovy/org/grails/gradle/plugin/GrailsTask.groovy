@@ -63,11 +63,8 @@ class GrailsTask extends DefaultTask {
     private projectDir
     private projectWorkDir
 
-    private final Factory<WorkerProcessBuilder> workerProcessBuilderFactory
-
-    @Inject GrailsTask(Factory<WorkerProcessBuilder> workerProcessBuilderFactory, FileResolver fileResolver) {
-        this.workerProcessBuilderFactory = workerProcessBuilderFactory
-        this.jvmOptions = new DefaultJavaForkOptions(fileResolver)
+    GrailsTask() {
+        this.jvmOptions = new DefaultJavaForkOptions(getServices().get(FileResolver))
         command = name
     }
 
