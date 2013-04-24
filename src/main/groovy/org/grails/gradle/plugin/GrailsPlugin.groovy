@@ -108,6 +108,12 @@ class GrailsPlugin implements Plugin<Project> {
                     if (name.startsWith(GRAILS_TASK_PREFIX)) {
                         project.task(name, type: GrailsTask) {
                             command name - GRAILS_TASK_PREFIX
+                            if (project.hasProperty('args')) {
+                              args project.args
+                            }
+                            if (project.hasProperty('env')) {
+                              env project.env
+                            }
                         }
                     }
                 }
