@@ -48,13 +48,13 @@ You can also access any Grails command by prefixing it with 'grails-'. For examp
 
     gradle grails-run-app
 
-If you want to pass in some arguments, you can do so via the `args` project property:
+If you want to pass in some arguments, you can do so via the `grailsArgs` project property:
 
-    gradle -Pargs='--inplace solr' grails-create-plugin
+    gradle -PgrailsArgs='--inplace solr' grails-create-plugin
 
 You can also change the environment via the `env` project property:
 
-    gradle -Penv=prod grails-run-app
+    gradle -PgrailsEnv=prod grails-run-app
 
 *Warning* Version 1.0 of the plugin does not allow you to execute multiple tasks in one command line. So `gradle clean test` will fail even if `clean` and `test` individually succeed.
 

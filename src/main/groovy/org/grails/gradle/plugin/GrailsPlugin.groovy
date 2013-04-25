@@ -26,6 +26,8 @@ import org.grails.gradle.plugin.internal.DefaultGrailsProject
 
 class GrailsPlugin implements Plugin<Project> {
     static public final GRAILS_TASK_PREFIX = "grails-"
+    static public final GRAILS_ARGS_PROPERTY = 'grailsArgs'
+    static public final GRAILS_ENV_PROPERTY = 'grailsEnv'
 
     void apply(Project project) {
         DefaultGrailsProject grailsProject = project.extensions.create("grails", DefaultGrailsProject, project)
@@ -83,7 +85,7 @@ class GrailsPlugin implements Plugin<Project> {
                 }
             }
 
-            def projName = project.hasProperty("args") ? project.args : project.projectDir.name
+            def projName = project.hasProperty(GRAILS_ARGS_PROPERTY) ? project.property(GRAILS_ARGS_PROPERTY) : project.projectDir.name
 
             command "create-app"
             args "--inplace --appVersion=$project.version $projName"
@@ -107,6 +109,12 @@ class GrailsPlugin implements Plugin<Project> {
                     if (name.startsWith(GRAILS_TASK_PREFIX)) {
                         project.task(name, type: GrailsTask) {
                             command name - GRAILS_TASK_PREFIX
+                            if (project.hasProperty(GRAILS_ARGS_PROPERTY)) {
+                              args project.property(GRAILS_ARGS_PROPERTY)
+                            }
+                            if (project.hasProperty(GRAILS_ENV_PROPERTY)) {
+                              env project.property(GRAILS_ENV_PROPERTY)
+                            }
                         }
                     }
                 }
