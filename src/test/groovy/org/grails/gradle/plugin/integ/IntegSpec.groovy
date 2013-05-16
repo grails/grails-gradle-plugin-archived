@@ -58,11 +58,12 @@ abstract class IntegSpec extends Specification {
     }
 
     File file(String path) {
-        def parts = path.split("/")
-        if (parts.size() > 1) {
-            dir.newFolder(* parts[0..-2])
+        def file = new File(dir.root, path)
+        if (!file.exists()) {
+            file.parentFile.mkdirs()
+            file.createNewFile()
         }
-        dir.newFile(path)
+        file
     }
 
     ExecutedTask task(String name) {

@@ -23,6 +23,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.internal.ConventionMapping
 import org.grails.gradle.plugin.internal.DefaultGrailsProject
+import org.gradle.plugins.ide.idea.IdeaPlugin
 
 class GrailsPlugin implements Plugin<Project> {
     static public final GRAILS_TASK_PREFIX = "grails-"
@@ -110,6 +111,22 @@ class GrailsPlugin implements Plugin<Project> {
                         }
                     }
                 }
+            }
+        }
+
+        configureIdea(project)
+    }
+
+    void configureIdea(Project project) {
+        project.plugins.withType(IdeaPlugin) {
+            project.idea {
+                def configurations = project.configurations
+                module.scopes = [
+                        PROVIDED: [plus: [configurations.provided], minus: []],
+                        COMPILE: [plus: [configurations.compile], minus: []],
+                        RUNTIME: [plus: [configurations.runtime], minus: [configurations.compile]],
+                        TEST: [plus: [configurations.test], minus: [configurations.runtime]]
+                ]
             }
         }
     }
