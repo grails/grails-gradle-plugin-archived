@@ -56,6 +56,9 @@ public class GrailsLaunchConfigureAction implements Action<JavaExecSpec> {
             oos.writeObject(launchContext);
 
             javaExec.setWorkingDir(launchContext.getBaseDir());
+            if (launchContext.getGrailsHome() != null) {
+                javaExec.systemProperty("grails.home", launchContext.getGrailsHome().getAbsolutePath());
+            }
 
             File launcherJar = findJarFile(ForkedGrailsLauncher.class);
             javaExec.classpath(launcherJar);
