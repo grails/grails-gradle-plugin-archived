@@ -199,7 +199,7 @@ class GrailsTask extends DefaultTask {
         if (providedClasspath) {
             try {
                 launchContext.providedDependencies = files as List
-            } catch (NoSuchMethodException e) {
+            } catch (NoSuchMethodException ignore) {
                 throw new InvalidUserDataException("Cannot set provided classpath for task ${this} as this version of Grails does not support provided dependencies")
             }
         }
