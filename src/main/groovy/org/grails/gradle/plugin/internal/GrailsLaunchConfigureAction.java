@@ -32,16 +32,14 @@ import java.util.List;
 
 public class GrailsLaunchConfigureAction implements Action<JavaExecSpec> {
 
-    private static final String RELOADED_CLASS = "com.springsource.loaded.ReloadEventProcessorPlugin";
-
     private final GrailsLaunchContext launchContext;
+    private final File springloadedJar;
     private final File contextDestination;
-    private final Logger logger;
 
-    public GrailsLaunchConfigureAction(GrailsLaunchContext launchContext, File contextDestination, Logger logger) {
+    public GrailsLaunchConfigureAction(GrailsLaunchContext launchContext, File springloadedJar, File contextDestination) {
         this.launchContext = launchContext;
+        this.springloadedJar = springloadedJar;
         this.contextDestination = contextDestination;
-        this.logger = logger;
     }
 
     @Override
@@ -81,34 +79,11 @@ public class GrailsLaunchConfigureAction implements Action<JavaExecSpec> {
     }
 
     public void configureReloadAgent(JavaExecSpec exec) {
-        List<File> buildDependencies = launchContext.getBuildDependencies();
-        List<URL> urls = new ArrayList<URL>(buildDependencies.size());
-        for (File file : buildDependencies) {
-            try {
-                urls.add(file.toURI().toURL());
-            } catch (MalformedURLException ignore) {
-
-            }
-        }
-
-        URL[] urlsArray = new URL[urls.size()];
-        urls.toArray(urlsArray);
-        ClassLoader classLoader = new URLClassLoader(urlsArray);
-        Class<?> agentClass;
-        try {
-            agentClass = classLoader.loadClass(RELOADED_CLASS);
-        } catch (ClassNotFoundException e) {
-            logger.info(String.format("Did not find reload agent class '%s' on bootstrap classpath, reloading is disabled", RELOADED_CLASS));
+        if (springloadedJar == null) {
             return;
         }
 
-        File agentJarFile = findJarFile(agentClass);
-        List<File> minusAgent = new ArrayList<File>(launchContext.getBuildDependencies());
-        minusAgent.remove(agentJarFile);
-        launchContext.setBuildDependencies(minusAgent);
-
-        String agentJarFilePath;
-        agentJarFilePath = agentJarFile.getAbsolutePath();
+        String agentJarFilePath = springloadedJar.getAbsolutePath();
 
         // Workaround http://issues.gradle.org/browse/GRADLE-2485
         Boolean isDebug = exec.getDebug();

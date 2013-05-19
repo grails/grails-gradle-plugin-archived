@@ -23,6 +23,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.internal.ConventionMapping
 import org.gradle.api.tasks.Sync
+import org.gradle.api.specs.Specs
 import org.grails.gradle.plugin.internal.DefaultGrailsProject
 import org.gradle.plugins.ide.idea.IdeaPlugin
 
@@ -45,6 +46,7 @@ class GrailsPlugin implements Plugin<Project> {
         Configuration runtimeConfiguration = getOrCreateConfiguration(project, "runtime")
         Configuration testConfiguration = getOrCreateConfiguration(project, "test")
         Configuration resourcesConfiguration = getOrCreateConfiguration(project, "resources")
+        Configuration springloadedConfiguration = getOrCreateConfiguration(project, "springloaded")
 
         runtimeConfiguration.extendsFrom(compileConfiguration)
         testConfiguration.extendsFrom(runtimeConfiguration)
@@ -87,6 +89,22 @@ class GrailsPlugin implements Plugin<Project> {
                 map("compileClasspath") { compileConfiguration }
                 map("runtimeClasspath") { runtimeConfiguration }
                 map("testClasspath") { testConfiguration }
+
+                map("springloaded") {
+                    if (springloadedConfiguration.dependencies.empty) {
+                        def defaultSpringloaded = project.dependencies.create("org.springsource.springloaded:springloaded-core:$grailsProject.springLoadedVersion")
+                        springloadedConfiguration.dependencies.add(defaultSpringloaded)
+                    }
+
+                    def lenient = springloadedConfiguration.resolvedConfiguration.lenientConfiguration
+                    if (lenient.unresolvedModuleDependencies) {
+                        def springloadedDependency = springloadedConfiguration.dependencies.toList().first()
+                        project.logger.warn("Failed to resolve springloaded dependency: $springloadedDependency (reloading will be disabled)")
+                        null
+                    } else {
+                        springloadedConfiguration
+                    }
+                }
             }
 
             doFirst {

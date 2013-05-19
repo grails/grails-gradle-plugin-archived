@@ -26,12 +26,16 @@ import java.io.File;
 
 public class DefaultGrailsProject implements GrailsProject {
 
+    public static final String DEFAULT_SPRINGLOADED = "1.1.1";
+
     private final Project project;
 
     private Object projectDir;
     private Object projectWorkDir;
 
     private String grailsVersion;
+    private String springLoadedVersion = DEFAULT_SPRINGLOADED;
+
     private ActionBroadcast<String> onSetGrailsVersion = new ActionBroadcast<String>();
 
     public DefaultGrailsProject(Project project) {
@@ -63,12 +67,22 @@ public class DefaultGrailsProject implements GrailsProject {
         onSetGrailsVersion.execute(grailsVersion);
     }
 
+    public void onSetGrailsVersion(Action<String> action) {
+        onSetGrailsVersion.add(action);
+    }
+
     @Override
     public String getGrailsVersion() {
         return this.grailsVersion;
     }
 
-    public void onSetGrailsVersion(Action<String> action) {
-        onSetGrailsVersion.add(action);
+    @Override
+    public String getSpringLoadedVersion() {
+        return springLoadedVersion;
+    }
+
+    @Override
+    public void setSpringLoadedVersion(String springLoadedVersion) {
+        this.springLoadedVersion = springLoadedVersion;
     }
 }

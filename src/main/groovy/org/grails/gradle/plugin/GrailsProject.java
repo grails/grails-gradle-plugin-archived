@@ -22,4 +22,8 @@ public interface GrailsProject {
 
     String getGrailsVersion();
 
+    String getSpringLoadedVersion();
+
+    void setSpringLoadedVersion(String springLoadedVersion);
+
 }
