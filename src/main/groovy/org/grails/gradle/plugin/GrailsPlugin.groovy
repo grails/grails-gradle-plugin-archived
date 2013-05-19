@@ -22,6 +22,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.internal.ConventionMapping
+import org.gradle.api.tasks.Sync
 import org.grails.gradle.plugin.internal.DefaultGrailsProject
 import org.gradle.plugins.ide.idea.IdeaPlugin
 
@@ -43,6 +44,7 @@ class GrailsPlugin implements Plugin<Project> {
         Configuration providedConfiguration = getOrCreateConfiguration(project, "provided")
         Configuration runtimeConfiguration = getOrCreateConfiguration(project, "runtime")
         Configuration testConfiguration = getOrCreateConfiguration(project, "test")
+        Configuration resourcesConfiguration = getOrCreateConfiguration(project, "resources")
 
         runtimeConfiguration.extendsFrom(compileConfiguration)
         testConfiguration.extendsFrom(runtimeConfiguration)
@@ -51,11 +53,30 @@ class GrailsPlugin implements Plugin<Project> {
             def dependenciesUtil = new GrailsDependenciesConfigurer(project, grailsProject.grailsVersion)
             dependenciesUtil.configureBootstrapClasspath(bootstrapConfiguration)
             dependenciesUtil.configureCompileClasspath(compileConfiguration)
+            dependenciesUtil.configureResources(resourcesConfiguration)
+        }
+
+        Sync unpackResources = project.task("unpackGrailsResources", type: Sync)
+        unpackResources.with {
+            dependsOn resourcesConfiguration
+            from { project.zipTree(resourcesConfiguration.singleFile) }
+            into { "$project.buildDir/grails/resources" }
+            doLast {
+                def file = new File(destinationDir, "scripts/log4j.properties")
+                file.parentFile.mkdirs()
+                file.withOutputStream { out ->
+                    getClass().getResourceAsStream("/grails-maven/log4j.properties").withStream {
+                        out << it
+                    }
+                }
+            }
         }
 
         project.tasks.withType(GrailsTask) { GrailsTask task ->
+            dependsOn unpackResources
             ConventionMapping conventionMapping = task.conventionMapping
             conventionMapping.with {
+                map("grailsHome") { unpackResources.destinationDir }
                 map("projectDir") { grailsProject.projectDir }
                 map("projectWorkDir") { grailsProject.projectWorkDir }
                 map("grailsVersion") { grailsProject.grailsVersion }

@@ -59,6 +59,10 @@ class GrailsDependenciesConfigurer {
         }
     }
 
+    void configureResources(Configuration configuration) {
+        addDependency("org.grails:grails-resources:$grailsVersion", configuration).transitive = false
+    }
+
     private ModuleDependency addDependency(String notation, Configuration configuration) {
         ModuleDependency dependency = project.dependencies.create(notation) as ModuleDependency
         configuration.dependencies.add(dependency)
