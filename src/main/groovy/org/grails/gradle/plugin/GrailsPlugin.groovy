@@ -23,9 +23,8 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.internal.ConventionMapping
 import org.gradle.api.tasks.Sync
-import org.gradle.api.specs.Specs
-import org.grails.gradle.plugin.internal.DefaultGrailsProject
 import org.gradle.plugins.ide.idea.IdeaPlugin
+import org.grails.gradle.plugin.internal.DefaultGrailsProject
 
 class GrailsPlugin implements Plugin<Project> {
     static public final GRAILS_TASK_PREFIX = "grails-"
