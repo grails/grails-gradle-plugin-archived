@@ -61,27 +61,9 @@ class GrailsPlugin implements Plugin<Project> {
             dependenciesUtil.configureResources(resourcesConfiguration)
         }
 
-        Sync unpackResources = project.task("unpackGrailsResources", type: Sync)
-        unpackResources.with {
-            dependsOn resourcesConfiguration
-            from { project.zipTree(resourcesConfiguration.singleFile) }
-            into { "$project.buildDir/grails/resources" }
-            doLast {
-                def file = new File(destinationDir, "scripts/log4j.properties")
-                file.parentFile.mkdirs()
-                file.withOutputStream { out ->
-                    getClass().getResourceAsStream("/grails-maven/log4j.properties").withStream {
-                        out << it
-                    }
-                }
-            }
-        }
-
         project.tasks.withType(GrailsTask) { GrailsTask task ->
-            dependsOn unpackResources
             ConventionMapping conventionMapping = task.conventionMapping
             conventionMapping.with {
-                map("grailsHome") { unpackResources.destinationDir }
                 map("projectDir") { grailsProject.projectDir }
                 map("projectWorkDir") { grailsProject.projectWorkDir }
                 map("grailsVersion") { grailsProject.grailsVersion }
@@ -165,8 +147,8 @@ class GrailsPlugin implements Plugin<Project> {
                 module.scopes = [
                     PROVIDED: [plus: [configurations.provided], minus: []],
                     COMPILE: [plus: [configurations.compile], minus: []],
-                    RUNTIME: [plus: [configurations.runtime], minus: []],
-                    TEST: [plus: [configurations.test], minus: []]
+                    RUNTIME: [plus: [configurations.runtime], minus: [configurations.compile]],
+                    TEST: [plus: [configurations.test], minus: [configurations.runtime]]
                 ]
             }
         }
