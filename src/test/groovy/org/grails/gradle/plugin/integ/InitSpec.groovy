@@ -67,10 +67,10 @@ class InitSpec extends IntegSpec {
         """
 
         and:
-        launcher("test", "-s").run().rethrowFailure()
+        launcher("grails-test-app", "-s").run().rethrowFailure()
 
         then:
-        task("test").state.didWork
+        task("grails-test-app").state.didWork
 
         where:
         grailsVersion << ["2.0.0", "2.1.0", "2.2.0.RC1"].collect { GrailsVersion.parse(it) }

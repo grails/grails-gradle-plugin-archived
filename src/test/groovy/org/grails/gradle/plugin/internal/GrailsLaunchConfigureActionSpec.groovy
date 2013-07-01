@@ -33,11 +33,13 @@ class GrailsLaunchConfigureActionSpec extends Specification {
     Logger logger = Mock()
     JavaExecSpec javaExecSpec = Mock()
     GrailsLaunchConfigureAction launchConfigureAction
+    private File springLoaded
 
     def setup() {
         grailsHome = dir.newFolder()
         contextDestination = dir.newFile()
-        launchConfigureAction = new GrailsLaunchConfigureAction(launchContext, contextDestination, logger)
+        springLoaded = dir.newFile()
+        launchConfigureAction = new GrailsLaunchConfigureAction(launchContext, springLoaded, contextDestination)
     }
 
     def "grails home is passed as a system property to launcher when set"() {
