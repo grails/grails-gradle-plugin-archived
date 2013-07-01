@@ -22,6 +22,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.internal.ConventionMapping
+import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.tasks.Sync
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.grails.gradle.plugin.internal.DefaultGrailsProject
@@ -32,6 +33,8 @@ class GrailsPlugin implements Plugin<Project> {
     static public final GRAILS_ENV_PROPERTY = 'grailsEnv'
 
     void apply(Project project) {
+        project.plugins.apply(BasePlugin)
+
         DefaultGrailsProject grailsProject = project.extensions.create("grails", DefaultGrailsProject, project)
         grailsProject.conventionMapping.with {
             map("projectDir") { project.projectDir }
@@ -54,6 +57,7 @@ class GrailsPlugin implements Plugin<Project> {
             def dependenciesUtil = new GrailsDependenciesConfigurer(project, grailsProject.grailsVersion)
             dependenciesUtil.configureBootstrapClasspath(bootstrapConfiguration)
             dependenciesUtil.configureCompileClasspath(compileConfiguration)
+            dependenciesUtil.configureTestClasspath(testConfiguration)
             dependenciesUtil.configureResources(resourcesConfiguration)
         }
 
@@ -130,31 +134,22 @@ class GrailsPlugin implements Plugin<Project> {
             args "--inplace --appVersion=$project.version $projName"
         }
 
-        project.task("clean", type: GrailsTask, overwrite: true)
+        GrailsTask grailsClean = project.task("grails-clean", type: GrailsTask)
+        grailsClean.command = "clean"
 
-        project.task("test", type: GrailsTask, overwrite: true) {
-            command "test-app"
-        }
+        project.clean.dependsOn grailsClean
 
-        project.task("assemble", type: GrailsTask, overwrite: true) {
-            command pluginProject ? "package-plugin" : "war"
-        }
+        project.assemble.dependsOn { grailsProject.pluginProject ? "grails-package-plugin" : "grails-war" }
 
-        // Convert any task executed from the command line
-        // with the special prefix into the Grails equivalent command.
-        project.gradle.afterProject { p, ex ->
-            if (p == project) {
-                project.tasks.addRule("Grails command") { String name ->
-                    if (name.startsWith(GRAILS_TASK_PREFIX)) {
-                        project.task(name, type: GrailsTask) {
-                            command name - GRAILS_TASK_PREFIX
-                            if (project.hasProperty(GRAILS_ARGS_PROPERTY)) {
-                              args project.property(GRAILS_ARGS_PROPERTY)
-                            }
-                            if (project.hasProperty(GRAILS_ENV_PROPERTY)) {
-                              env project.property(GRAILS_ENV_PROPERTY)
-                            }
-                        }
+        project.tasks.addRule("Grails command") { String name ->
+            if (name.startsWith(GRAILS_TASK_PREFIX)) {
+                project.task(name, type: GrailsTask) {
+                    command name - GRAILS_TASK_PREFIX
+                    if (project.hasProperty(GRAILS_ARGS_PROPERTY)) {
+                        args project.property(GRAILS_ARGS_PROPERTY)
+                    }
+                    if (project.hasProperty(GRAILS_ENV_PROPERTY)) {
+                        env project.property(GRAILS_ENV_PROPERTY)
                     }
                 }
             }
@@ -168,10 +163,10 @@ class GrailsPlugin implements Plugin<Project> {
             project.idea {
                 def configurations = project.configurations
                 module.scopes = [
-                        PROVIDED: [plus: [configurations.provided], minus: []],
-                        COMPILE: [plus: [configurations.compile], minus: []],
-                        RUNTIME: [plus: [configurations.runtime], minus: [configurations.compile]],
-                        TEST: [plus: [configurations.test], minus: [configurations.runtime]]
+                    PROVIDED: [plus: [configurations.provided], minus: []],
+                    COMPILE: [plus: [configurations.compile], minus: []],
+                    RUNTIME: [plus: [configurations.runtime], minus: []],
+                    TEST: [plus: [configurations.test], minus: []]
                 ]
             }
         }

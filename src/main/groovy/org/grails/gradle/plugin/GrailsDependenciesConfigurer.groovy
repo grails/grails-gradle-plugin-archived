@@ -59,6 +59,11 @@ class GrailsDependenciesConfigurer {
         }
     }
 
+    void configureTestClasspath(Configuration configuration) {
+        addDependency("org.grails:grails-plugin-testing:${grailsVersion}", configuration)
+        addDependency("org.grails:grails-test:${grailsVersion}", configuration)
+    }
+
     void configureResources(Configuration configuration) {
         addDependency("org.grails:grails-resources:$grailsVersion", configuration).transitive = false
     }

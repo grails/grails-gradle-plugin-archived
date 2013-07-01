@@ -23,6 +23,7 @@ import org.gradle.listener.ActionBroadcast;
 import org.grails.gradle.plugin.GrailsProject;
 
 import java.io.File;
+import java.io.FilenameFilter;
 
 public class DefaultGrailsProject implements GrailsProject {
 
@@ -85,4 +86,14 @@ public class DefaultGrailsProject implements GrailsProject {
     public void setSpringLoadedVersion(String springLoadedVersion) {
         this.springLoadedVersion = springLoadedVersion;
     }
+
+    public boolean isPluginProject() {
+        for (File file : getProjectDir().listFiles()) {
+            if (file.getName().endsWith("GrailsPlugin.groovy")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
