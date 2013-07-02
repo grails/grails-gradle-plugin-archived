@@ -59,6 +59,8 @@ class GrailsTask extends DefaultTask {
     private projectDir
     private projectWorkDir
 
+    boolean forwardStdIn
+
     GrailsTask() {
         this.jvmOptions = new DefaultJavaForkOptions(getServices().get(FileResolver))
         command = name
@@ -112,7 +114,9 @@ class GrailsTask extends DefaultTask {
         ExecResult result = project.javaexec {
             JavaExecAction action = delegate
             getJvmOptions().copyTo(action)
-            action.standardInput = System.in
+            if (forwardStdIn) {
+                action.standardInput = System.in
+            }
             action.standardOutput = System.out
             action.errorOutput = System.err
             launcher.execute(action)
