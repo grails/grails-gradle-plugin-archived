@@ -31,6 +31,7 @@ class GrailsPlugin implements Plugin<Project> {
     static public final GRAILS_TASK_PREFIX = "grails-"
     static public final GRAILS_ARGS_PROPERTY = 'grailsArgs'
     static public final GRAILS_ENV_PROPERTY = 'grailsEnv'
+    static public final GRAILS_DEBUG_PROPERTY = 'grailsDebug'
 
     void apply(Project project) {
         project.plugins.apply(BasePlugin)
@@ -132,6 +133,9 @@ class GrailsPlugin implements Plugin<Project> {
                     }
                     if (project.hasProperty(GRAILS_ENV_PROPERTY)) {
                         env project.property(GRAILS_ENV_PROPERTY)
+                    }
+                    if (project.hasProperty(GRAILS_DEBUG_PROPERTY)) {
+                        jvmOptions.debug = Boolean.parseBoolean(project.property(GRAILS_DEBUG_PROPERTY))
                     }
                 }
             }
