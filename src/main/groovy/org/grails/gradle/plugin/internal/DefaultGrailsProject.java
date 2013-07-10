@@ -27,7 +27,7 @@ import java.io.FilenameFilter;
 
 public class DefaultGrailsProject implements GrailsProject {
 
-    public static final String DEFAULT_SPRINGLOADED = "1.1.1";
+    public static final String DEFAULT_SPRINGLOADED = "1.1.3";
 
     private final Project project;
 
