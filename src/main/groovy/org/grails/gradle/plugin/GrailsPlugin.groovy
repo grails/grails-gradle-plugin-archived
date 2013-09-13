@@ -22,26 +22,42 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.internal.ConventionMapping
+import org.gradle.api.internal.file.FileResolver
 import org.gradle.api.plugins.BasePlugin
+import org.gradle.internal.reflect.Instantiator
+import org.gradle.language.base.ProjectSourceSet
 import org.gradle.language.base.plugins.LanguageBasePlugin
-import org.gradle.plugins.ide.idea.IdeaPlugin
+import org.grails.gradle.plugin.idea.GrailsIdeaConfigurator
 import org.grails.gradle.plugin.internal.DefaultGrailsProject
-import org.grails.gradle.plugin.tasks.GrailsCleanTask
-import org.grails.gradle.plugin.tasks.GrailsInitTask
-import org.grails.gradle.plugin.tasks.GrailsPackagePluginTask
 import org.grails.gradle.plugin.tasks.GrailsTask
 import org.grails.gradle.plugin.tasks.GrailsTaskConfigurator
-import org.grails.gradle.plugin.tasks.GrailsWarTask
+
+import javax.inject.Inject
 
 class GrailsPlugin implements Plugin<Project> {
 
-    GrailsTaskConfigurator taskConfigurator = new GrailsTaskConfigurator()
+    GrailsTaskConfigurator taskConfigurator
+    GrailsSourceSetConfigurator sourceSetConfigurator
+    GrailsIdeaConfigurator ideaConfigurator
+
+    private final Instantiator instantiator;
+    private final FileResolver fileResolver
+
+    @Inject
+    GrailsPlugin(Instantiator instantiator, FileResolver fileResolver) {
+        this.instantiator = instantiator;
+        this.fileResolver = fileResolver;
+        this.sourceSetConfigurator = new GrailsSourceSetConfigurator(instantiator, fileResolver)
+        this.taskConfigurator = new GrailsTaskConfigurator()
+        this.ideaConfigurator = new GrailsIdeaConfigurator()
+    }
 
     void apply(Project project) {
         project.plugins.apply(BasePlugin)
         project.plugins.apply(LanguageBasePlugin)
 
-        DefaultGrailsProject grailsProject = project.extensions.create("grails", DefaultGrailsProject, project)
+        DefaultGrailsProject grailsProject = project.extensions.create('grails', DefaultGrailsProject, project, instantiator)
+        project.convention.plugins.put('grails', grailsProject)
         grailsProject.conventionMapping.with {
             map("projectDir") { project.projectDir }
             map("projectWorkDir") { project.buildDir }
@@ -105,26 +121,21 @@ class GrailsPlugin implements Plugin<Project> {
             }
         }
 
-        configureTasks(project)
+        configureSourceSets(project, grailsProject)
+        configureTasks(project, grailsProject)
         configureIdea(project)
     }
 
-    void configureTasks(Project project) {
-        taskConfigurator.configure(project)
+    void configureTasks(Project project, GrailsProject grailsProject) {
+        taskConfigurator.configure(project, grailsProject)
+    }
+
+    void configureSourceSets(Project project, GrailsProject grailsProject) {
+        sourceSetConfigurator.configure(project.extensions.getByType(ProjectSourceSet), grailsProject)
     }
 
     void configureIdea(Project project) {
-        project.plugins.withType(IdeaPlugin) {
-            project.idea {
-                def configurations = project.configurations
-                module.scopes = [
-                    PROVIDED: [plus: [configurations.provided], minus: []],
-                    COMPILE: [plus: [configurations.compile], minus: []],
-                    RUNTIME: [plus: [configurations.runtime], minus: [configurations.compile]],
-                    TEST: [plus: [configurations.test], minus: [configurations.runtime]]
-                ]
-            }
-        }
+        ideaConfigurator.configure(project)
     }
 
     Configuration getOrCreateConfiguration(Project project, String name) {

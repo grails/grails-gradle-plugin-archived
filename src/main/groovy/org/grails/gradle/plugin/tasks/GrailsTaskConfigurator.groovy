@@ -1,10 +1,12 @@
 package org.grails.gradle.plugin.tasks
 
-import org.gradle.plugins.ide.idea.model.Project
+import org.gradle.api.Project
+import org.grails.gradle.plugin.GrailsProject
+
 
 class GrailsTaskConfigurator {
 
-    void configure(Project project) {
+    void configure(Project project, GrailsProject grailsProject) {
         project.tasks.create("init", GrailsInitTask)
 
         def grailsClean = project.tasks.create("grails-clean", GrailsCleanTask)

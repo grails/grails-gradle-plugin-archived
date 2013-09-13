@@ -16,6 +16,11 @@
 
 package org.grails.gradle.plugin;
 
+import groovy.lang.Closure;
+import org.gradle.api.NamedDomainObjectContainer;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
+
 public interface GrailsProject {
 
     void setGrailsVersion(String grailsVersion);
@@ -25,5 +30,11 @@ public interface GrailsProject {
     String getSpringLoadedVersion();
 
     void setSpringLoadedVersion(String springLoadedVersion);
+
+    NamedDomainObjectContainer<SourceSet> sourceSets(Closure configure);
+
+    SourceSetContainer getSourceSets();
+
+    boolean isPluginProject();
 
 }

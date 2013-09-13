@@ -16,9 +16,16 @@
 
 package org.grails.gradle.plugin.internal;
 
+import groovy.lang.Closure;
 import org.gradle.api.Action;
 import org.gradle.api.InvalidUserDataException;
+import org.gradle.api.NamedDomainObjectContainer;
 import org.gradle.api.Project;
+import org.gradle.api.internal.project.ProjectInternal;
+import org.gradle.api.internal.tasks.DefaultSourceSetContainer;
+import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
+import org.gradle.internal.reflect.Instantiator;
 import org.gradle.listener.ActionBroadcast;
 import org.grails.gradle.plugin.GrailsProject;
 
@@ -37,10 +44,14 @@ public class DefaultGrailsProject implements GrailsProject {
     private String grailsVersion;
     private String springLoadedVersion = DEFAULT_SPRINGLOADED;
 
+    private final SourceSetContainer sourceSets;
+
     private ActionBroadcast<String> onSetGrailsVersion = new ActionBroadcast<String>();
 
-    public DefaultGrailsProject(Project project) {
+    public DefaultGrailsProject(ProjectInternal project, Instantiator instantiator) {
         this.project = project;
+        this.sourceSets = instantiator.newInstance(DefaultSourceSetContainer.class,
+                project.getFileResolver(), project.getTasks(), instantiator);
     }
 
     public File getProjectDir() {
@@ -57,6 +68,14 @@ public class DefaultGrailsProject implements GrailsProject {
 
     public void setProjectWorkDir(Object projectWorkDir) {
         this.projectWorkDir = projectWorkDir;
+    }
+
+    public NamedDomainObjectContainer<SourceSet> sourceSets(Closure closure) {
+        return sourceSets.configure(closure);
+    }
+
+    public SourceSetContainer getSourceSets() {
+        return sourceSets;
     }
 
     @Override
