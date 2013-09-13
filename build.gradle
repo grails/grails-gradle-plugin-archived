@@ -44,7 +44,3 @@ signing {
 
 apply from: "gradle/publish.gradle"
 apply from: "gradle/idea.gradle"
-
-task wrapper(type: Wrapper) {
-    gradleVersion "1.6"
-}
