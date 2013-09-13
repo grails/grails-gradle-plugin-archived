@@ -53,7 +53,6 @@ class GrailsTask extends DefaultTask {
 
     boolean useRuntimeClasspathForBootstrap
 
-    @Input
     JavaForkOptions jvmOptions
 
     private projectDir
