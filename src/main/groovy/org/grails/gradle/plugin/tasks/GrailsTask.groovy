@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.grails.gradle.plugin
+package org.grails.gradle.plugin.tasks
 
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
@@ -34,6 +34,11 @@ import org.grails.launcher.version.GrailsVersion
 import org.grails.launcher.version.GrailsVersionParser
 
 class GrailsTask extends DefaultTask {
+
+    static public final GRAILS_TASK_PREFIX = "grails-"
+    static public final GRAILS_ARGS_PROPERTY = 'grailsArgs'
+    static public final GRAILS_ENV_PROPERTY = 'grailsEnv'
+    static public final GRAILS_DEBUG_PROPERTY = 'grailsDebug'
 
     String grailsVersion
 

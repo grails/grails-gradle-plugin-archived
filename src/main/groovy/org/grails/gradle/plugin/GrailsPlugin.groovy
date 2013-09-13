@@ -23,18 +23,23 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.internal.ConventionMapping
 import org.gradle.api.plugins.BasePlugin
-import org.gradle.api.tasks.Sync
+import org.gradle.language.base.plugins.LanguageBasePlugin
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.grails.gradle.plugin.internal.DefaultGrailsProject
+import org.grails.gradle.plugin.tasks.GrailsCleanTask
+import org.grails.gradle.plugin.tasks.GrailsInitTask
+import org.grails.gradle.plugin.tasks.GrailsPackagePluginTask
+import org.grails.gradle.plugin.tasks.GrailsTask
+import org.grails.gradle.plugin.tasks.GrailsTaskConfigurator
+import org.grails.gradle.plugin.tasks.GrailsWarTask
 
 class GrailsPlugin implements Plugin<Project> {
-    static public final GRAILS_TASK_PREFIX = "grails-"
-    static public final GRAILS_ARGS_PROPERTY = 'grailsArgs'
-    static public final GRAILS_ENV_PROPERTY = 'grailsEnv'
-    static public final GRAILS_DEBUG_PROPERTY = 'grailsDebug'
+
+    GrailsTaskConfigurator taskConfigurator = new GrailsTaskConfigurator()
 
     void apply(Project project) {
         project.plugins.apply(BasePlugin)
+        project.plugins.apply(LanguageBasePlugin)
 
         DefaultGrailsProject grailsProject = project.extensions.create("grails", DefaultGrailsProject, project)
         grailsProject.conventionMapping.with {
@@ -100,48 +105,12 @@ class GrailsPlugin implements Plugin<Project> {
             }
         }
 
-        project.task("init", type: GrailsTask) {
-            onlyIf {
-                !project.file("application.properties").exists() && !project.file("grails-app").exists()
-            }
-
-            doFirst {
-                if (project.version == "unspecified") {
-                    throw new InvalidUserDataException("[GrailsPlugin] Build file must specify a 'version' property.")
-                }
-            }
-
-            def projName = project.hasProperty(GRAILS_ARGS_PROPERTY) ? project.property(GRAILS_ARGS_PROPERTY) : project.projectDir.name
-
-            command "create-app"
-            args "--inplace --appVersion=$project.version $projName"
-        }
-
-        GrailsTask grailsClean = project.task("grails-clean", type: GrailsTask)
-        grailsClean.command = "clean"
-
-        project.clean.dependsOn grailsClean
-
-        project.assemble.dependsOn { grailsProject.pluginProject ? "grails-package-plugin" : "grails-war" }
-
-        project.tasks.addRule("Grails command") { String name ->
-            if (name.startsWith(GRAILS_TASK_PREFIX)) {
-                project.task(name, type: GrailsTask) {
-                    command name - GRAILS_TASK_PREFIX
-                    if (project.hasProperty(GRAILS_ARGS_PROPERTY)) {
-                        args project.property(GRAILS_ARGS_PROPERTY)
-                    }
-                    if (project.hasProperty(GRAILS_ENV_PROPERTY)) {
-                        env project.property(GRAILS_ENV_PROPERTY)
-                    }
-                    if (project.hasProperty(GRAILS_DEBUG_PROPERTY)) {
-                        jvmOptions.debug = Boolean.parseBoolean(project.property(GRAILS_DEBUG_PROPERTY))
-                    }
-                }
-            }
-        }
-
+        configureTasks(project)
         configureIdea(project)
+    }
+
+    void configureTasks(Project project) {
+        taskConfigurator.configure(project)
     }
 
     void configureIdea(Project project) {

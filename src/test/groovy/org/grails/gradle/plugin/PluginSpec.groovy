@@ -18,6 +18,7 @@ package org.grails.gradle.plugin
 
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
+import org.grails.gradle.plugin.tasks.GrailsTask
 import spock.lang.Specification
 
 class PluginSpec extends Specification {
