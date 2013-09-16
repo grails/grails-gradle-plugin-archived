@@ -24,7 +24,6 @@ class InitSpec extends IntegSpec {
 
     def "can create grails #grailsVersion project"() {
         given:
-        applyPlugin()
         buildFile << """
             grails.grailsVersion '$grailsVersion'
         """

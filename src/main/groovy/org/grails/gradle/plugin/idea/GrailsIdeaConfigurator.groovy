@@ -2,6 +2,7 @@ package org.grails.gradle.plugin.idea
 
 import org.gradle.api.Project
 import org.gradle.api.XmlProvider
+import org.gradle.api.artifacts.Dependency
 import org.gradle.plugins.ide.idea.IdeaPlugin
 
 class GrailsIdeaConfigurator {
@@ -18,26 +19,42 @@ class GrailsIdeaConfigurator {
                 ]
                 module.conventionMapping.sourceDirs = { sourceDirs(project) }
                 module.conventionMapping.testSourceDirs = { testDirs(project) }
-
+                module.conventionMapping.excludeDirs = { excludedBuildFiles(project) }
                 module.iml.withXml { XmlProvider xmlProvider ->
                     declareGrailsFacets(project, xmlProvider.asNode())
-                    generateAndAppendPluginModule(project, xmlProvider.asNode())
                 }
             }
         }
     }
 
+    private LinkedHashSet excludedBuildFiles(Project project) {
+        return [project.buildDir, project.file('.gradle')] as LinkedHashSet
+    }
+
     private LinkedHashSet sourceDirs(Project project) {
         (project.sourceSets.main.allSource.srcDirs as LinkedHashSet) -
-                (project.sourceSets.main.resources.srcDirs as LinkedHashSet)
+                (project.sourceSets.main.resources.srcDirs as LinkedHashSet) + pluginSourceDirs(project)
+    }
+
+    private LinkedHashSet pluginSourceDirs(Project project) {
+        ['compile', 'test', 'runtime'].collect { scope ->
+            project.configurations.getByName(scope).dependencies.find { dependency ->
+                dependency.group == 'org.grails.plugins'
+            }.collect { dependency ->
+                ['src/groovy', 'grails-app/i18n', 'grails-app/controllers', 'grails-app/domain',
+                        'grails-app/services', 'grails-app/taglib', 'src/java'].collect { root ->
+                    pluginDir(dependency, project, root)
+                }
+            }
+        }.flatten()
     }
 
     private LinkedHashSet testDirs(Project project) {
         project.sourceSets.test.allSource.srcDirs as LinkedHashSet
     }
 
-    private void generateAndAppendPluginModule(Project project, Node iml) {
-
+    private File pluginDir(Dependency dependency, Project project, String root) {
+        return new File(project.projectDir, '/buildPlugins/' + dependency.name + '-' + dependency.version + '/' + root)
     }
 
     private void declareGrailsFacets(Project project, Node iml) {

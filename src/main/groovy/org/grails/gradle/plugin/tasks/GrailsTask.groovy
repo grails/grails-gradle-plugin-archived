@@ -75,17 +75,9 @@ class GrailsTask extends DefaultTask {
         projectDir == null ? null : project.file(projectDir)
     }
 
-    void setProjectDir(projectDir) {
-        this.projectDir = projectDir
-    }
-
     @Input
     File getProjectWorkDir() {
         projectWorkDir == null ? null : project.file(projectWorkDir)
-    }
-
-    void setProjectWorkDir(projectWorkDir) {
-        this.projectWorkDir = projectWorkDir
     }
 
     File getGrailsHome() {
@@ -221,7 +213,7 @@ class GrailsTask extends DefaultTask {
         launchContext.classesDir = projectWorkDirFile("classes")
         launchContext.testClassesDir = projectWorkDirFile("test-classes")
         launchContext.resourcesDir = projectWorkDirFile("resources")
-        launchContext.projectPluginsDir = projectWorkDirFile("plugins")
+        launchContext.projectPluginsDir = projectDirFile("buildPlugins")
         launchContext.testReportsDir = projectWorkDirFile("test-results")
 
         launchContext

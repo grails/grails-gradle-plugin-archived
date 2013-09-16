@@ -58,6 +58,7 @@ class GrailsPlugin implements Plugin<Project> {
 
         DefaultGrailsProject grailsProject = project.extensions.create('grails', DefaultGrailsProject, project, instantiator)
         project.convention.plugins.put('grails', grailsProject)
+
         grailsProject.conventionMapping.with {
             map("projectDir") { project.projectDir }
             map("projectWorkDir") { project.buildDir }

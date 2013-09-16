@@ -20,7 +20,6 @@ class FailureSpec extends IntegSpec {
 
     def "handles failure"() {
         given:
-        applyPlugin()
         buildFile << """
             grails.grailsVersion '2.0.1'
         """
