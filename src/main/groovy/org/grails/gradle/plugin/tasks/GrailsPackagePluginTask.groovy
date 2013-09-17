@@ -4,5 +4,6 @@ class GrailsPackagePluginTask extends GrailsTask {
 
     GrailsPackagePluginTask() {
         command = 'package-plugin'
+        description = 'Packages a grails plugin'
     }
 }

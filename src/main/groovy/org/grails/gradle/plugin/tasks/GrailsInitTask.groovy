@@ -19,5 +19,6 @@ class GrailsInitTask extends GrailsTask {
 
         command = "create-app"
         args = "--inplace --appVersion=$project.version $projName"
+        description = 'Creates a new Grails application in the current directory'
     }
 }

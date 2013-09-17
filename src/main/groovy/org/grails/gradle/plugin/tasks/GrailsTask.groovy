@@ -39,6 +39,7 @@ class GrailsTask extends DefaultTask {
     static public final GRAILS_ARGS_PROPERTY = 'grailsArgs'
     static public final GRAILS_ENV_PROPERTY = 'grailsEnv'
     static public final GRAILS_DEBUG_PROPERTY = 'grailsDebug'
+    static public final GRAILS_GROUP = 'grails'
 
     String grailsVersion
 
@@ -69,8 +70,7 @@ class GrailsTask extends DefaultTask {
     GrailsTask() {
         this.jvmOptions = new DefaultJavaForkOptions(getServices().get(FileResolver))
         command = name
-//        inputs.source(sourceSets.main.allSource)
-//        outputs.dir(sourceSets.main.output.classesDir)
+        group = GRAILS_GROUP
     }
 
     @Input

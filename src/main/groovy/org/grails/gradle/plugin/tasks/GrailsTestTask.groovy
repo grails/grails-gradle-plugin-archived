@@ -13,6 +13,7 @@ class GrailsTestTask extends GrailsTask {
         super()
         command = 'test-app'
         env = 'test'
+        description = 'Executes Grails tests'
     }
 
     @Override
