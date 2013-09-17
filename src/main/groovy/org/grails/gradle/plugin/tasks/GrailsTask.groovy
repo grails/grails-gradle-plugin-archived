@@ -59,6 +59,7 @@ class GrailsTask extends DefaultTask {
     boolean useRuntimeClasspathForBootstrap
 
     JavaForkOptions jvmOptions
+    SourceSetContainer sourceSets
 
     private projectDir
     private projectWorkDir
@@ -68,6 +69,8 @@ class GrailsTask extends DefaultTask {
     GrailsTask() {
         this.jvmOptions = new DefaultJavaForkOptions(getServices().get(FileResolver))
         command = name
+//        inputs.source(sourceSets.main.allSource)
+//        outputs.dir(sourceSets.main.output.classesDir)
     }
 
     @Input

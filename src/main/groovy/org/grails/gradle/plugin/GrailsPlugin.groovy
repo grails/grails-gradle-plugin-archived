@@ -21,12 +21,15 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.internal.ConventionMapping
 import org.gradle.api.internal.file.FileResolver
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.language.base.ProjectSourceSet
 import org.gradle.language.base.plugins.LanguageBasePlugin
+import org.grails.gradle.plugin.dependencies.DependencyConfigurer
+import org.grails.gradle.plugin.dependencies.DependencyConfigurerFactory
 import org.grails.gradle.plugin.idea.GrailsIdeaConfigurator
 import org.grails.gradle.plugin.internal.DefaultGrailsProject
 import org.grails.gradle.plugin.tasks.GrailsTask
@@ -77,11 +80,33 @@ class GrailsPlugin implements Plugin<Project> {
         testConfiguration.extendsFrom(runtimeConfiguration)
 
         grailsProject.onSetGrailsVersion { String grailsVersion ->
-            def dependenciesUtil = new GrailsDependenciesConfigurer(project, grailsProject.grailsVersion)
+            DependencyConfigurer dependenciesUtil = DependencyConfigurerFactory.build(project, grailsProject)
             dependenciesUtil.configureBootstrapClasspath(bootstrapConfiguration)
+            dependenciesUtil.configureProvidedClasspath(providedConfiguration)
             dependenciesUtil.configureCompileClasspath(compileConfiguration)
+            dependenciesUtil.configureRuntimeClasspath(runtimeConfiguration)
             dependenciesUtil.configureTestClasspath(testConfiguration)
             dependenciesUtil.configureResources(resourcesConfiguration)
+        }
+        grailsProject.onSetGroovyVersion { String groovyVersion ->
+            DependencyConfigurer dependenciesUtil = DependencyConfigurerFactory.build(project, grailsProject)
+            dependenciesUtil.configureGroovyBootstrapClasspath(bootstrapConfiguration)
+            dependenciesUtil.configureGroovyCompileClasspath(compileConfiguration)
+
+            project.configurations.all { Configuration config ->
+                config.resolutionStrategy {
+                    eachDependency { DependencyResolveDetails details ->
+                        if (details.requested.group == 'org.codehaus.groovy') {
+                            if (details.requested.name == 'groovy-all') {
+                                details.useVersion groovyVersion
+                            }
+                            if (details.requested.name == 'groovy') {
+                                details.useTarget name: 'groovy-all', version: groovyVersion
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         project.tasks.withType(GrailsTask) { GrailsTask task ->
@@ -97,6 +122,7 @@ class GrailsPlugin implements Plugin<Project> {
                 map("compileClasspath") { compileConfiguration }
                 map("runtimeClasspath") { runtimeConfiguration }
                 map("testClasspath") { testConfiguration }
+                map("sourceSets") { grailsProject.sourceSets }
 
                 map("springloaded") {
                     if (springloadedConfiguration.dependencies.empty) {

@@ -14,25 +14,13 @@
  * limitations under the License.
  */
 
-package org.grails.gradle.plugin
+package org.grails.gradle.plugin.dependencies
 
-import org.gradle.api.Project
+import groovy.transform.InheritConstructors
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ModuleDependency
-import org.grails.launcher.version.GrailsVersion
-import org.grails.launcher.version.GrailsVersionQuirks
 
-class GrailsDependenciesConfigurer {
-
-    private final Project project
-    private final GrailsVersion grailsVersion
-    private final GrailsVersionQuirks grailsVersionQuirks
-
-    GrailsDependenciesConfigurer(Project project, String grailsVersion) {
-        this.project = project
-        this.grailsVersion = GrailsVersion.parse(grailsVersion)
-        this.grailsVersionQuirks = new GrailsVersionQuirks(grailsVersion)
-    }
+@InheritConstructors
+class GrailsDependenciesConfigurer extends DependencyConfigurer {
 
     void configureBootstrapClasspath(Configuration configuration) {
         ["bootstrap", "scripts", "resources"].each {
@@ -53,9 +41,27 @@ class GrailsDependenciesConfigurer {
         }
     }
 
+    void configureGroovyBootstrapClasspath(Configuration configuration) {
+        addGroovyDependency(configuration)
+    }
+
+    void configureProvidedClasspath(Configuration configuration) {
+
+    }
+
     void configureCompileClasspath(Configuration configuration) {
         if (grailsVersionQuirks.isHasGrailsDependenciesPom()) {
             addDependency("org.grails:grails-dependencies:${grailsVersion}", configuration)
+        }
+    }
+
+    void configureGroovyCompileClasspath(Configuration configuration) {
+        addGroovyDependency(configuration)
+    }
+
+    void configureRuntimeClasspath(Configuration configuration) {
+        if (grailsVersion.is(2, 3)) {
+            addDependency('com.h2database:h2:1.3.170', configuration)
         }
     }
 
@@ -68,10 +74,8 @@ class GrailsDependenciesConfigurer {
         addDependency("org.grails:grails-resources:$grailsVersion", configuration).transitive = false
     }
 
-    private ModuleDependency addDependency(String notation, Configuration configuration) {
-        ModuleDependency dependency = project.dependencies.create(notation) as ModuleDependency
-        configuration.dependencies.add(dependency)
-        dependency
+    private addGroovyDependency(Configuration configuration) {
+        addDependency("org.codehaus.groovy:groovy-all:${grailsProject.groovyVersion}", configuration)
     }
 
 }

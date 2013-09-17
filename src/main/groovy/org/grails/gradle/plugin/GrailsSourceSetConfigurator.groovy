@@ -78,8 +78,20 @@ class GrailsSourceSetConfigurator {
                             'src/java'
                     ]
                 }
+                output.with {
+                    classesDir = buildPath(project, 'classes')
+                    ['plugin-build-classes', 'plugin-classes', 'plugin-provided-classes'].each {
+                        dir buildPath(project, it)
+                    }
+                    dir 'buildPlugins'
+                    resourcesDir = buildPath(project, 'resources')
+                }
             }
         }
+    }
+
+    String buildPath(GrailsProject project, String path) {
+        return new File(project.projectWorkDir, path).path
     }
 
     void createTestSourceSet(GrailsProject project) {
@@ -91,6 +103,9 @@ class GrailsSourceSetConfigurator {
                             'test/integration',
                             'test/unit'
                     ]
+                }
+                output.with {
+                    classesDir = buildPath(project, 'test-classes')
                 }
             }
         }

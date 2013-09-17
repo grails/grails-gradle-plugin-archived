@@ -39,11 +39,13 @@ public class DefaultGrailsProject implements GrailsProject {
     private Object projectWorkDir
 
     private String grailsVersion
+    private String groovyVersion
     private String springLoadedVersion = DEFAULT_SPRINGLOADED
 
     private final SourceSetContainer sourceSets
 
     private ActionBroadcast<String> onSetGrailsVersion = new ActionBroadcast<String>()
+    private ActionBroadcast<String> onSetGroovyVersion = new ActionBroadcast<String>()
 
     public DefaultGrailsProject(ProjectInternal project, Instantiator instantiator) {
         this.project = project
@@ -76,13 +78,29 @@ public class DefaultGrailsProject implements GrailsProject {
         onSetGrailsVersion.execute(grailsVersion)
     }
 
+    public void setGroovyVersion(String groovyVersion) {
+        if (this.groovyVersion != null) {
+            throw new InvalidUserDataException("The 'groovyVersion' property can only be set once")
+        }
+        this.groovyVersion = groovyVersion
+        onSetGroovyVersion.execute(groovyVersion)
+    }
+
     public void onSetGrailsVersion(Action<String> action) {
         onSetGrailsVersion.add(action)
+    }
+
+    public void onSetGroovyVersion(Action<String> action) {
+        onSetGroovyVersion.add(action)
     }
 
     @Override
     public String getGrailsVersion() {
         return this.grailsVersion
+    }
+
+    public String getGroovyVersion() {
+        return this.groovyVersion
     }
 
     @Override
