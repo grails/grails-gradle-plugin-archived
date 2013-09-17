@@ -34,7 +34,7 @@ class GrailsTaskConfigurator {
             project.tasks.create(GRAILS_RUN_TASK, GrailsRunAppTask)
         }
 
-        project.tasks.create(GRAILS_TEST_TASK, GrailsTestTask)
+        def grailsTest = project.tasks.create(GRAILS_TEST_TASK, GrailsTestTask)
 
         project.tasks.addRule("Grails command") { String name ->
             if (name.startsWith(GrailsTask.GRAILS_TASK_PREFIX)) {
@@ -54,6 +54,8 @@ class GrailsTaskConfigurator {
         }
 
         configureJavaStyleTasks(project)
+
+        project.tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn grailsTest
     }
 
     private void configureJavaStyleTasks(Project project) {

@@ -109,6 +109,8 @@ class GrailsPlugin implements Plugin<Project> {
             }
         }
 
+        configureSourceSets(project, grailsProject)
+        configureTasks(project, grailsProject)
         project.tasks.withType(GrailsTask) { GrailsTask task ->
             ConventionMapping conventionMapping = task.conventionMapping
             conventionMapping.with {
@@ -147,9 +149,6 @@ class GrailsPlugin implements Plugin<Project> {
                 }
             }
         }
-
-        configureSourceSets(project, grailsProject)
-        configureTasks(project, grailsProject)
         configureIdea(project)
     }
 
