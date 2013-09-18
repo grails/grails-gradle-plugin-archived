@@ -6,12 +6,13 @@ This plugin for Gradle allows you to build Grails projects. To use it, simply in
     buildscript {
         repositories {
             mavenCentral()
-            mavenRepo urls: "http://repository.jboss.org/maven2/"
+            maven {
+                url 'http://repo.grails.org/grails/repo'
+            }
         }
 
         dependencies {
-            classpath "org.grails:grails-gradle-plugin:1.0",
-                      "org.grails:grails-bootstrap:1.3.4"
+            classpath 'org.grail:grails-gradle-plugin:2.0.0-SNAPSHOT'
         }
     }
 
@@ -19,15 +20,22 @@ This plugin for Gradle allows you to build Grails projects. To use it, simply in
 
     repositories {
         mavenCentral()
-        mavenRepo urls: "http://repository.jboss.org/maven2/"
+        grails.central() //creates a maven repo for the Grails Central repository (Core libraries and plugins)
     }
 
     dependencies {
-        compile "org.grails:grails-crud:1.3.4",
-                "org.grails:grails-gorm:1.3.4"
+        bootstrap 'org.grails.plugins:tomcat-7.0.42' //No container is deployed by default, so add this
+        compile 'org.grails.plugins:resources:1.2' //Just an example of adding a Grails plugin
     }
 
-You must include a version of the 'grails-bootstrap' artifact in the 'classpath' configuration. You should also add whichever Grails artifacts you need. 'grails-crud' and 'grails-gorm' will give you everything you need for a standard Grails web application.
+    grails {
+        grailsVersion = '2.3.0'
+        groovyVersion = '2.1.7'
+    }
+
+You must specify the 'grails.grailsVersion' property before executing any Grails commands. The 'grails.groovyVersion' property is a convenience for Grails 2.3.0, it may not work correctly in earlier
+versions, so it's best to not use it with version pre-2.3.0. Declaring 'grails.groovyVersion' will configure a Gradle ResolutionStrategy to modify all requests for 'groovy-all' to be
+for the version specified. Additionally, the ResolutionStrategy will change all requests for 'groovy' to be 'groovy-all'
 
 *Warning* If you're using a pre-1.3.5 or pre-1.2.4 version of Grails, you'll need to add this runtime dependency to your project's build file:
 
@@ -37,12 +45,19 @@ Once you have this build file, you can create a Grails application with the 'ini
 
     gradle init
 
-Other standard tasks include:
+The plugin creates standard tasks that mimic the Java lifecycle:
 
 * clean
-* compile
 * test
+* check
+* build
 * assemble
+
+These tasks are wrapper tasks that declare a dependsOn to Grails specific tasks. This will allow for further build customization.
+
+* clean [grails-clean]
+* test [grails-test]
+* assemble [grails-war or grails-package-plugin]
 
 You can also access any Grails command by prefixing it with 'grails-'. For example, to run the application:
 
