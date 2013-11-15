@@ -33,6 +33,9 @@ import org.grails.launcher.util.NameUtils
 import org.grails.launcher.version.GrailsVersion
 import org.grails.launcher.version.GrailsVersionParser
 
+/**
+ * Base class for all Grails tasks
+ */
 class GrailsTask extends DefaultTask {
 
     static public final GRAILS_TASK_PREFIX = "grails-"

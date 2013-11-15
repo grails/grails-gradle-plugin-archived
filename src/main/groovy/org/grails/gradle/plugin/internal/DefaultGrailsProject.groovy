@@ -29,6 +29,9 @@ import org.gradle.internal.reflect.Instantiator
 import org.gradle.listener.ActionBroadcast
 import org.grails.gradle.plugin.GrailsProject
 
+/**
+ * This is the 'grails' extension object for the Gradle DSL.
+ */
 public class DefaultGrailsProject implements GrailsProject {
 
     public static final String DEFAULT_SPRINGLOADED = "1.1.3"
@@ -70,6 +73,8 @@ public class DefaultGrailsProject implements GrailsProject {
     }
 
     @Override
+    //Set the Grails version and execute the configuration callback that configures the Grails dependencies
+    //on the project
     public void setGrailsVersion(String grailsVersion) {
         if (this.grailsVersion != null) {
             throw new InvalidUserDataException("The 'grailsVersion' property can only be set once")
@@ -78,6 +83,8 @@ public class DefaultGrailsProject implements GrailsProject {
         onSetGrailsVersion.execute(grailsVersion)
     }
 
+    //Set the Groovy version and execute the configuratio callback the configures the Groovy resolution
+    //strategy on the project
     public void setGroovyVersion(String groovyVersion) {
         if (this.groovyVersion != null) {
             throw new InvalidUserDataException("The 'groovyVersion' property can only be set once")
@@ -122,6 +129,13 @@ public class DefaultGrailsProject implements GrailsProject {
         return false
     }
 
+    /**
+     * Configures the Grails central repositories on the project:
+     * repositories {
+     *    grails.central()
+     * }
+     *
+     */
     public MavenArtifactRepository central() {
         project.repositories.maven { MavenArtifactRepository repository ->
             repository.url = 'http://repo.grails.org/grails/repo'

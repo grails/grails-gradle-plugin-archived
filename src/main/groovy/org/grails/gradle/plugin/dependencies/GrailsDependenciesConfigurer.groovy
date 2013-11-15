@@ -19,6 +19,9 @@ package org.grails.gradle.plugin.dependencies
 import groovy.transform.InheritConstructors
 import org.gradle.api.artifacts.Configuration
 
+/**
+ * Default Grails dependency configuration
+ */
 @InheritConstructors
 class GrailsDependenciesConfigurer extends DependencyConfigurer {
 

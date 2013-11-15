@@ -2,6 +2,13 @@ package org.grails.gradle.plugin.tasks
 
 import org.gradle.api.InvalidUserDataException
 
+/**
+ * Creates a new Grails application in the working directory. This requires that the 'project.version' property
+ * be configured in the Gradle build.
+ *
+ * By default this will create the Grails application with a name matching the projectDir name. This can be overridden
+ * on the command line by supplying '-PgrailsArgs=<project name>' when executing the command
+ */
 class GrailsInitTask extends GrailsTask {
 
     GrailsInitTask() {

@@ -8,6 +8,9 @@ import org.grails.gradle.plugin.GrailsProject
 import org.grails.launcher.version.GrailsVersion
 import org.grails.launcher.version.GrailsVersionQuirks
 
+/**
+ * Abstract class for the dependency configuration.
+ */
 @TupleConstructor
 abstract class DependencyConfigurer {
 

@@ -5,18 +5,23 @@ import org.gradle.api.XmlProvider
 import org.gradle.api.artifacts.Dependency
 import org.gradle.plugins.ide.idea.IdeaPlugin
 
+/**
+ * Configure the IDEA integration for the project.
+ */
 class GrailsIdeaConfigurator {
 
     void configure(Project project) {
         project.plugins.withType(IdeaPlugin) {
             project.idea {
                 def configurations = project.configurations
+                //Map IDEA scopes to Gradle configurations
                 module.scopes = [
                         PROVIDED: [plus: [configurations.provided], minus: []],
                         COMPILE: [plus: [configurations.compile], minus: []],
                         RUNTIME: [plus: [configurations.runtime], minus: [configurations.compile]],
                         TEST: [plus: [configurations.test], minus: [configurations.runtime]]
                 ]
+                //Configure additional source and test directories
                 module.conventionMapping.sourceDirs = { sourceDirs(project) }
                 module.conventionMapping.testSourceDirs = { testDirs(project) }
                 module.conventionMapping.excludeDirs = { excludedBuildFiles(project) }
@@ -31,11 +36,21 @@ class GrailsIdeaConfigurator {
         return [project.buildDir, project.file('.gradle')] as LinkedHashSet
     }
 
+    /**
+     * returns source directories from the projects and any installed Grails plugins
+     */
     private LinkedHashSet sourceDirs(Project project) {
         (project.sourceSets.main.allSource.srcDirs as LinkedHashSet) -
                 (project.sourceSets.main.resources.srcDirs as LinkedHashSet) + pluginSourceDirs(project)
     }
 
+    /**
+     * Calculate that plugin source directories. This is required because Gradle treats the plugin zip file
+     * as a jar, assuming that all the directories contained within are packages.
+     *
+     * This is a little hacky in that it assumes that all plugins have the 'org.grails.plugins' group.
+     * This needs to be made more robust (perhaps a 'pluginCompile' and 'pluginRuntime' configuration)
+     */
     private LinkedHashSet pluginSourceDirs(Project project) {
         ['compile', 'test', 'runtime'].collect { scope ->
             project.configurations.getByName(scope).dependencies.find { dependency ->
@@ -57,6 +72,11 @@ class GrailsIdeaConfigurator {
         return new File(project.projectDir, '/buildPlugins/' + dependency.name + '-' + dependency.version + '/' + root)
     }
 
+    /**
+     * Tries to mimic the IML creation that IDEA natively does for Grails projects.
+     * @param project
+     * @param iml
+     */
     private void declareGrailsFacets(Project project, Node iml) {
         Node facetManager = iml.component.find { it.@name == "FacetManager" }
         if (!facetManager) {

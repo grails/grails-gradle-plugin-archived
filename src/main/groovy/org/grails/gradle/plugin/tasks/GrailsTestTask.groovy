@@ -7,6 +7,18 @@ import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.OutputFile
 import org.grails.launcher.context.GrailsLaunchContext
 
+/**
+ * Executes Grails tests. By default this command will execute all the Grails test phases and types. A single test can
+ * be executed by supplying '-Ptest.single=<test name>' when executing this task.
+ *
+ * Additionally, the test phases/types to executes can by configured by configuring the 'phases' property. This list
+ * should contain the phases/types in the standard Grails format: ['unit:', 'integration:'], ['unit:spock']
+ *
+ * This tasks also tracks the Grails source as task inputs/outputs for up-to-date checking. If this behavior is
+ * undesirably, configure the task with 'outputs.upToDateWhen { false }'.
+ *
+ * The plugin configures a task of this type (grails-test-app) as a dependency of the 'test' task.
+ */
 class GrailsTestTask extends GrailsTask {
 
     @OutputFile

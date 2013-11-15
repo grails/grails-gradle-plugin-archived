@@ -14,6 +14,10 @@ import org.gradle.language.base.ProjectSourceSet
 import org.gradle.language.jvm.ResourceSet
 import org.gradle.language.jvm.internal.DefaultResourceSet
 
+/**
+ * Configures the source sets with the Grails source structure. Much of this code is replicated from the Java and
+ * Groovy plugins.
+ */
 class GrailsSourceSetConfigurator {
 
     private final Instantiator instantiator
@@ -26,6 +30,7 @@ class GrailsSourceSetConfigurator {
 
     void configure(ProjectSourceSet projectSourceSet, GrailsProject project) {
 
+        //Add the 'groovy' DSL extension to the source sets
         project.sourceSets.all(new Action<SourceSet>() {
             public void execute(final SourceSet sourceSet) {
                 FunctionalSourceSet functionalSourceSet = projectSourceSet.create(sourceSet.name)
@@ -46,6 +51,9 @@ class GrailsSourceSetConfigurator {
         createTestSourceSet(project)
     }
 
+    /**
+     * Configure the main source sets
+     */
     void createMainSourceSet(GrailsProject project) {
         project.sourceSets {
             main {
@@ -94,6 +102,9 @@ class GrailsSourceSetConfigurator {
         return new File(project.projectWorkDir, path).path
     }
 
+    /**
+     * Configure the test source set
+     */
     void createTestSourceSet(GrailsProject project) {
         project.sourceSets {
             test {
