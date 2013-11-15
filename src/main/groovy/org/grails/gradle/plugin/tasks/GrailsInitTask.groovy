@@ -20,7 +20,7 @@ class GrailsInitTask extends GrailsTask {
         def projName = project.hasProperty(GRAILS_ARGS_PROPERTY) ? project.property(GRAILS_ARGS_PROPERTY) : project.projectDir.name
 
         command = "create-app"
-        args = "--inplace --appVersion=$project.version $projName"
+        args = "--inplace --appVersion=${ -> project.version} $projName"
         description = 'Creates a new Grails application in the current directory'
     }
 

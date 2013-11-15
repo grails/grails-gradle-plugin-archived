@@ -48,7 +48,7 @@ class GrailsTask extends DefaultTask {
 
     String grailsHome
     String command
-    String args
+    CharSequence args
     String env
 
     @Optional @InputFiles FileCollection providedClasspath
