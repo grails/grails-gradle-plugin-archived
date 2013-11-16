@@ -21,22 +21,50 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.internal.ConventionMapping
+import org.gradle.api.internal.file.FileResolver
 import org.gradle.api.plugins.BasePlugin
-import org.gradle.api.tasks.Sync
-import org.gradle.plugins.ide.idea.IdeaPlugin
+import org.gradle.internal.reflect.Instantiator
+import org.gradle.language.base.ProjectSourceSet
+import org.gradle.language.base.plugins.LanguageBasePlugin
+import org.grails.gradle.plugin.dependencies.DependencyConfigurer
+import org.grails.gradle.plugin.dependencies.DependencyConfigurerFactory
+import org.grails.gradle.plugin.idea.GrailsIdeaConfigurator
 import org.grails.gradle.plugin.internal.DefaultGrailsProject
+import org.grails.gradle.plugin.tasks.GrailsTask
+import org.grails.gradle.plugin.tasks.GrailsTaskConfigurator
 
+import javax.inject.Inject
+
+/**
+ * Configures a Gradle project as a Grails project.
+ */
 class GrailsPlugin implements Plugin<Project> {
-    static public final GRAILS_TASK_PREFIX = "grails-"
-    static public final GRAILS_ARGS_PROPERTY = 'grailsArgs'
-    static public final GRAILS_ENV_PROPERTY = 'grailsEnv'
-    static public final GRAILS_DEBUG_PROPERTY = 'grailsDebug'
+
+    GrailsTaskConfigurator taskConfigurator
+    GrailsSourceSetConfigurator sourceSetConfigurator
+    GrailsIdeaConfigurator ideaConfigurator
+
+    private final Instantiator instantiator;
+    private final FileResolver fileResolver
+
+    @Inject
+    GrailsPlugin(Instantiator instantiator, FileResolver fileResolver) {
+        this.instantiator = instantiator;
+        this.fileResolver = fileResolver;
+        this.sourceSetConfigurator = new GrailsSourceSetConfigurator(instantiator, fileResolver)
+        this.taskConfigurator = new GrailsTaskConfigurator()
+        this.ideaConfigurator = new GrailsIdeaConfigurator()
+    }
 
     void apply(Project project) {
         project.plugins.apply(BasePlugin)
+        project.plugins.apply(LanguageBasePlugin)
 
-        DefaultGrailsProject grailsProject = project.extensions.create("grails", DefaultGrailsProject, project)
+        DefaultGrailsProject grailsProject = project.extensions.create('grails', DefaultGrailsProject, project, instantiator)
+        project.convention.plugins.put('grails', grailsProject)
+
         grailsProject.conventionMapping.with {
             map("projectDir") { project.projectDir }
             map("projectWorkDir") { project.buildDir }
@@ -55,13 +83,37 @@ class GrailsPlugin implements Plugin<Project> {
         testConfiguration.extendsFrom(runtimeConfiguration)
 
         grailsProject.onSetGrailsVersion { String grailsVersion ->
-            def dependenciesUtil = new GrailsDependenciesConfigurer(project, grailsProject.grailsVersion)
+            DependencyConfigurer dependenciesUtil = DependencyConfigurerFactory.build(project, grailsProject)
             dependenciesUtil.configureBootstrapClasspath(bootstrapConfiguration)
+            dependenciesUtil.configureProvidedClasspath(providedConfiguration)
             dependenciesUtil.configureCompileClasspath(compileConfiguration)
+            dependenciesUtil.configureRuntimeClasspath(runtimeConfiguration)
             dependenciesUtil.configureTestClasspath(testConfiguration)
             dependenciesUtil.configureResources(resourcesConfiguration)
         }
+        grailsProject.onSetGroovyVersion { String groovyVersion ->
+            DependencyConfigurer dependenciesUtil = DependencyConfigurerFactory.build(project, grailsProject)
+            dependenciesUtil.configureGroovyBootstrapClasspath(bootstrapConfiguration)
+            dependenciesUtil.configureGroovyCompileClasspath(compileConfiguration)
 
+            project.configurations.all { Configuration config ->
+                config.resolutionStrategy {
+                    eachDependency { DependencyResolveDetails details ->
+                        if (details.requested.group == 'org.codehaus.groovy') {
+                            if (details.requested.name == 'groovy-all') {
+                                details.useVersion groovyVersion
+                            }
+                            if (details.requested.name == 'groovy') {
+                                details.useTarget name: 'groovy-all', version: groovyVersion
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        configureSourceSets(project, grailsProject)
+        configureTasks(project, grailsProject)
         project.tasks.withType(GrailsTask) { GrailsTask task ->
             ConventionMapping conventionMapping = task.conventionMapping
             conventionMapping.with {
@@ -75,6 +127,7 @@ class GrailsPlugin implements Plugin<Project> {
                 map("compileClasspath") { compileConfiguration }
                 map("runtimeClasspath") { runtimeConfiguration }
                 map("testClasspath") { testConfiguration }
+                map("sourceSets") { grailsProject.sourceSets }
 
                 map("springloaded") {
                     if (springloadedConfiguration.dependencies.empty) {
@@ -99,63 +152,19 @@ class GrailsPlugin implements Plugin<Project> {
                 }
             }
         }
-
-        project.task("init", type: GrailsTask) {
-            onlyIf {
-                !project.file("application.properties").exists() && !project.file("grails-app").exists()
-            }
-
-            doFirst {
-                if (project.version == "unspecified") {
-                    throw new InvalidUserDataException("[GrailsPlugin] Build file must specify a 'version' property.")
-                }
-            }
-
-            def projName = project.hasProperty(GRAILS_ARGS_PROPERTY) ? project.property(GRAILS_ARGS_PROPERTY) : project.projectDir.name
-
-            command "create-app"
-            args "--inplace --appVersion=$project.version $projName"
-        }
-
-        GrailsTask grailsClean = project.task("grails-clean", type: GrailsTask)
-        grailsClean.command = "clean"
-
-        project.clean.dependsOn grailsClean
-
-        project.assemble.dependsOn { grailsProject.pluginProject ? "grails-package-plugin" : "grails-war" }
-
-        project.tasks.addRule("Grails command") { String name ->
-            if (name.startsWith(GRAILS_TASK_PREFIX)) {
-                project.task(name, type: GrailsTask) {
-                    command name - GRAILS_TASK_PREFIX
-                    if (project.hasProperty(GRAILS_ARGS_PROPERTY)) {
-                        args project.property(GRAILS_ARGS_PROPERTY)
-                    }
-                    if (project.hasProperty(GRAILS_ENV_PROPERTY)) {
-                        env project.property(GRAILS_ENV_PROPERTY)
-                    }
-                    if (project.hasProperty(GRAILS_DEBUG_PROPERTY)) {
-                        jvmOptions.debug = Boolean.parseBoolean(project.property(GRAILS_DEBUG_PROPERTY))
-                    }
-                }
-            }
-        }
-
         configureIdea(project)
     }
 
+    void configureTasks(Project project, GrailsProject grailsProject) {
+        taskConfigurator.configure(project, grailsProject)
+    }
+
+    void configureSourceSets(Project project, GrailsProject grailsProject) {
+        sourceSetConfigurator.configure(project.extensions.getByType(ProjectSourceSet), grailsProject)
+    }
+
     void configureIdea(Project project) {
-        project.plugins.withType(IdeaPlugin) {
-            project.idea {
-                def configurations = project.configurations
-                module.scopes = [
-                    PROVIDED: [plus: [configurations.provided], minus: []],
-                    COMPILE: [plus: [configurations.compile], minus: []],
-                    RUNTIME: [plus: [configurations.runtime], minus: [configurations.compile]],
-                    TEST: [plus: [configurations.test], minus: [configurations.runtime]]
-                ]
-            }
-        }
+        ideaConfigurator.configure(project)
     }
 
     Configuration getOrCreateConfiguration(Project project, String name) {

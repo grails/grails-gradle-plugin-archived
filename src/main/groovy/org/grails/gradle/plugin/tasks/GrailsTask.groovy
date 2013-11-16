@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.grails.gradle.plugin
+package org.grails.gradle.plugin.tasks
 
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
@@ -33,13 +33,22 @@ import org.grails.launcher.util.NameUtils
 import org.grails.launcher.version.GrailsVersion
 import org.grails.launcher.version.GrailsVersionParser
 
+/**
+ * Base class for all Grails tasks
+ */
 class GrailsTask extends DefaultTask {
+
+    static public final GRAILS_TASK_PREFIX = "grails-"
+    static public final GRAILS_ARGS_PROPERTY = 'grailsArgs'
+    static public final GRAILS_ENV_PROPERTY = 'grailsEnv'
+    static public final GRAILS_DEBUG_PROPERTY = 'grailsDebug'
+    static public final GRAILS_GROUP = 'grails'
 
     String grailsVersion
 
     String grailsHome
     String command
-    String args
+    CharSequence args
     String env
 
     @Optional @InputFiles FileCollection providedClasspath
@@ -53,8 +62,8 @@ class GrailsTask extends DefaultTask {
 
     boolean useRuntimeClasspathForBootstrap
 
-    @Input
     JavaForkOptions jvmOptions
+    SourceSetContainer sourceSets
 
     private projectDir
     private projectWorkDir
@@ -64,6 +73,7 @@ class GrailsTask extends DefaultTask {
     GrailsTask() {
         this.jvmOptions = new DefaultJavaForkOptions(getServices().get(FileResolver))
         command = name
+        group = GRAILS_GROUP
     }
 
     @Input
@@ -71,17 +81,9 @@ class GrailsTask extends DefaultTask {
         projectDir == null ? null : project.file(projectDir)
     }
 
-    void setProjectDir(projectDir) {
-        this.projectDir = projectDir
-    }
-
     @Input
     File getProjectWorkDir() {
         projectWorkDir == null ? null : project.file(projectWorkDir)
-    }
-
-    void setProjectWorkDir(projectWorkDir) {
-        this.projectWorkDir = projectWorkDir
     }
 
     File getGrailsHome() {
@@ -217,7 +219,7 @@ class GrailsTask extends DefaultTask {
         launchContext.classesDir = projectWorkDirFile("classes")
         launchContext.testClassesDir = projectWorkDirFile("test-classes")
         launchContext.resourcesDir = projectWorkDirFile("resources")
-        launchContext.projectPluginsDir = projectWorkDirFile("plugins")
+        launchContext.projectPluginsDir = projectDirFile("buildPlugins")
         launchContext.testReportsDir = projectWorkDirFile("test-results")
 
         launchContext

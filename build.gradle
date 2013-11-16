@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     compile gradleApi()
-    groovy localGroovy()
+    compile localGroovy()
     
     compile "org.grails:grails-launcher:1.1-SNAPSHOT"
     testCompile "org.spockframework:spock-core:0.7-groovy-1.8", {
@@ -44,7 +44,3 @@ signing {
 
 apply from: "gradle/publish.gradle"
 apply from: "gradle/idea.gradle"
-
-task wrapper(type: Wrapper) {
-    gradleVersion "1.6"
-}
