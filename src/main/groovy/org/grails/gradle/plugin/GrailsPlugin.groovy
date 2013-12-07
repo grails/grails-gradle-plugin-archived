@@ -42,10 +42,6 @@ import javax.inject.Inject
  */
 class GrailsPlugin implements Plugin<Project> {
 
-    private final GrailsTaskConfigurator taskConfigurator
-    private final GrailsSourceSetConfigurator sourceSetConfigurator
-    private final GrailsIdeaConfigurator ideaConfigurator
-
     private final Instantiator instantiator
     private final FileResolver fileResolver
 
@@ -53,9 +49,6 @@ class GrailsPlugin implements Plugin<Project> {
     GrailsPlugin(Instantiator instantiator, FileResolver fileResolver) {
         this.instantiator = instantiator
         this.fileResolver = fileResolver
-        this.sourceSetConfigurator = new GrailsSourceSetConfigurator(instantiator, fileResolver)
-        this.taskConfigurator = new GrailsTaskConfigurator()
-        this.ideaConfigurator = new GrailsIdeaConfigurator()
     }
 
     void apply(Project project) {
@@ -156,15 +149,15 @@ class GrailsPlugin implements Plugin<Project> {
     }
 
     void configureTasks(Project project, GrailsProject grailsProject) {
-        taskConfigurator.configure(project, grailsProject)
+        new GrailsTaskConfigurator().configure(project, grailsProject)
     }
 
     void configureSourceSets(Project project, GrailsProject grailsProject) {
-        sourceSetConfigurator.configure(project.extensions.getByType(ProjectSourceSet), grailsProject)
+        new GrailsSourceSetConfigurator(instantiator, fileResolver).configure(project.extensions.getByType(ProjectSourceSet), grailsProject)
     }
 
     void configureIdea(Project project) {
-        ideaConfigurator.configure(project)
+        new GrailsIdeaConfigurator().configure(project)
     }
 
     Configuration getOrCreateConfiguration(Project project, String name) {
