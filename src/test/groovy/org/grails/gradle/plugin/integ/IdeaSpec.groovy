@@ -20,7 +20,6 @@ class IdeaSpec extends IntegSpec {
 
     def "dependencies carry over to idea module file"() {
         given:
-        applyPlugin()
         buildFile << """
             apply plugin: 'idea'
 

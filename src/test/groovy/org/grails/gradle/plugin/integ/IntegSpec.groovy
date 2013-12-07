@@ -26,7 +26,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 abstract class IntegSpec extends Specification {
-    @Rule final TemporaryFolder dir = new TemporaryFolder()
+    @Rule final TemporaryFolder dir = new TemporaryFolder(new File('build'))
 
     static class ExecutedTask {
         Task task
@@ -74,19 +74,15 @@ abstract class IntegSpec extends Specification {
         buildFile << """
             ext {
                 GrailsPlugin = project.class.classLoader.loadClass("org.grails.gradle.plugin.GrailsPlugin")
-                GrailsTask = project.class.classLoader.loadClass("org.grails.gradle.plugin.GrailsTask")
+                GrailsTask = project.class.classLoader.loadClass("org.grails.gradle.plugin.tasks.GrailsTask")
             }
             version = "1.0"
 
-            repositories {
-                maven { url "http://repo.grails.org/grails/core" }
-            }
-        """
-    }
-
-    def applyPlugin() {
-        buildFile << """
             apply plugin: GrailsPlugin
+
+            repositories {
+                grails.central()
+            }
         """
     }
 
