@@ -3,7 +3,6 @@ Grails Gradle Plugin
 
 This plugin for Gradle allows you to build Grails projects. To use it, simply include the required JARs via `buildscript {}` and 'apply' the plugin:
 
-<<<<<<< HEAD
 ````````
 buildscript {
   repositories {
@@ -33,44 +32,14 @@ dependencies {
   compile 'org.grails.plugins:resources:1.2' // Just an example of adding a Grails plugin
 }
 ````````
-You must specify the 'grails.grailsVersion' property before executing any Grails commands. The 'grails.groovyVersion' property is a convenience for Grails 2.3.0, it may not work correctly in earlier
+You must specify the 'grails.grailsVersion' property before executing any Grails commands.
+
+The 'grails.groovyVersion' property is a convenience for Grails 2.3.0, it may not work correctly in earlier
 versions, so it's best to not use it with version pre-2.3.0. Declaring 'grails.groovyVersion' will configure a Gradle ResolutionStrategy to modify all requests for 'groovy-all' to be
 for the version specified. Additionally, the ResolutionStrategy will change all requests for 'groovy' to be 'groovy-all'
 
 The grails-gradle-plugin will populate the bootstrap, compile, and test classpaths with a base set of dependencies for Grails.
 You need to provide a container plugin such as 'tomcat' to the bootstrap classpath to enable the run-app command.
-=======
-    buildscript {
-        repositories {
-            mavenCentral()
-            maven {
-                url 'http://repo.grails.org/grails/repo'
-            }
-        }
-
-        dependencies {
-            classpath 'org.grail:grails-gradle-plugin:2.0.0-SNAPSHOT'
-        }
-    }
-
-    apply plugin: "grails"
-
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        bootstrap 'org.grails.plugins:tomcat-7.0.42' //No container is deployed by default, so add this
-        compile 'org.grails.plugins:resources:1.2' //Just an example of adding a Grails plugin
-    }
-
-    grails {
-        grailsVersion = '2.3.0'
-        groovyVersion = '2.1.7'
-    }
-
-
->>>>>>> johnrengelman/add-source-sets
 
 *Warning* If you're using a pre-1.3.5 or pre-1.2.4 version of Grails, you'll need to add this runtime dependency to your project's build file:
 
