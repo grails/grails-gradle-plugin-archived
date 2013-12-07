@@ -26,20 +26,32 @@ class GrailsTaskConfigurator {
         project.tasks.create(GRAILS_INIT_TASK, GrailsInitTask)
 
         //Create the grails-clean task and wire it to the 'clean' task
-        def grailsClean = project.tasks.create(GRAILS_CLEAN_TASK, GrailsCleanTask)
+        def grailsClean = project.tasks.create(GRAILS_CLEAN_TASK, GrailsTask).with {
+            command = "clean"
+            description = 'Executes Grails clean'
+        }
         project.tasks.getByName(BasePlugin.CLEAN_TASK_NAME).dependsOn grailsClean
 
         //Depending on the project type, configure either the package-plugin or war tasks
         //as the assemble task
         def grailsAssemble = grailsProject.pluginProject ?
-                project.tasks.create(GRAILS_PACKAGE_PLUGIN_TASK, GrailsPackagePluginTask) :
-                project.tasks.create(GRAILS_WAR_TASK, GrailsWarTask)
+                project.tasks.create(GRAILS_PACKAGE_PLUGIN_TASK, GrailsTask).with {
+                    command = 'package-plugin'
+                    description = 'Packages a grails plugin'
+                } :
+                project.tasks.create(GRAILS_WAR_TASK, GrailsTask).with {
+                    command = 'war'
+                    description = 'Generates the application WAR file'
+                }
 
         project.tasks.getByName(BasePlugin.ASSEMBLE_TASK_NAME).dependsOn grailsAssemble
 
         //Add the 'run-app' task if this is a full Grails application and not a plugin
         if (!grailsProject.isPluginProject()) {
-            project.tasks.create(GRAILS_RUN_TASK, GrailsRunAppTask)
+            project.tasks.create(GRAILS_RUN_TASK, GrailsTask).with {
+                command = 'run-app'
+                description = 'Starts the Grails application'
+            }
         }
 
         //Create the Grails test task. Don't wire it to the 'test' task yet because it doesn't quite exist yet.
