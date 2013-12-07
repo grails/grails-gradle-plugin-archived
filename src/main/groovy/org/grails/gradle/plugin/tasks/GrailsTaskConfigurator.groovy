@@ -96,20 +96,20 @@ class GrailsTaskConfigurator {
      * Add the 'check' task
      */
     private void configureCheck(Project project) {
-        Task checkTask = project.getTasks().create(JavaBasePlugin.CHECK_TASK_NAME);
-        checkTask.setDescription("Runs all checks.");
-        checkTask.setGroup(JavaBasePlugin.VERIFICATION_GROUP);
+        Task checkTask = project.getTasks().create(JavaBasePlugin.CHECK_TASK_NAME)
+        checkTask.setDescription("Runs all checks.")
+        checkTask.setGroup(JavaBasePlugin.VERIFICATION_GROUP)
     }
 
     /**
      * Add the 'build' task and wire it to 'check' and 'assemble'
      */
     private void configureBuild(Project project) {
-        DefaultTask buildTask = project.getTasks().create(JavaBasePlugin.BUILD_TASK_NAME, DefaultTask.class);
-        buildTask.setDescription("Assembles and tests this project.");
-        buildTask.setGroup(BasePlugin.BUILD_GROUP);
-        buildTask.dependsOn(BasePlugin.ASSEMBLE_TASK_NAME);
-        buildTask.dependsOn(JavaBasePlugin.CHECK_TASK_NAME);
+        DefaultTask buildTask = project.getTasks().create(JavaBasePlugin.BUILD_TASK_NAME, DefaultTask.class)
+        buildTask.setDescription("Assembles and tests this project.")
+        buildTask.setGroup(BasePlugin.BUILD_GROUP)
+        buildTask.dependsOn(BasePlugin.ASSEMBLE_TASK_NAME)
+        buildTask.dependsOn(JavaBasePlugin.CHECK_TASK_NAME)
     }
 
     /**
@@ -117,8 +117,8 @@ class GrailsTaskConfigurator {
      */
     private void configureTest(Project project) {
         Task test = project.tasks.create(JavaPlugin.TEST_TASK_NAME, DefaultTask.class)
-        project.getTasks().getByName(JavaBasePlugin.CHECK_TASK_NAME).dependsOn(test);
-        test.setDescription("Runs the tests.");
-        test.setGroup(JavaBasePlugin.VERIFICATION_GROUP);
+        project.getTasks().getByName(JavaBasePlugin.CHECK_TASK_NAME).dependsOn(test)
+        test.setDescription("Runs the tests.")
+        test.setGroup(JavaBasePlugin.VERIFICATION_GROUP)
     }
 }
