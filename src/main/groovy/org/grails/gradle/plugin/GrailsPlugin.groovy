@@ -37,9 +37,6 @@ import org.grails.gradle.plugin.tasks.GrailsTaskConfigurator
 
 import javax.inject.Inject
 
-/**
- * Configures a Gradle project as a Grails project.
- */
 class GrailsPlugin implements Plugin<Project> {
 
     private final Instantiator instantiator
