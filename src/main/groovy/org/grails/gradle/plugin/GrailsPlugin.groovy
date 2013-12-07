@@ -42,9 +42,9 @@ import javax.inject.Inject
  */
 class GrailsPlugin implements Plugin<Project> {
 
-    GrailsTaskConfigurator taskConfigurator
-    GrailsSourceSetConfigurator sourceSetConfigurator
-    GrailsIdeaConfigurator ideaConfigurator
+    private final GrailsTaskConfigurator taskConfigurator
+    private final GrailsSourceSetConfigurator sourceSetConfigurator
+    private final GrailsIdeaConfigurator ideaConfigurator
 
     private final Instantiator instantiator
     private final FileResolver fileResolver
