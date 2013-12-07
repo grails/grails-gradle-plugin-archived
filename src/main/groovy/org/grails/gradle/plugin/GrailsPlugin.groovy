@@ -46,13 +46,13 @@ class GrailsPlugin implements Plugin<Project> {
     GrailsSourceSetConfigurator sourceSetConfigurator
     GrailsIdeaConfigurator ideaConfigurator
 
-    private final Instantiator instantiator;
+    private final Instantiator instantiator
     private final FileResolver fileResolver
 
     @Inject
     GrailsPlugin(Instantiator instantiator, FileResolver fileResolver) {
-        this.instantiator = instantiator;
-        this.fileResolver = fileResolver;
+        this.instantiator = instantiator
+        this.fileResolver = fileResolver
         this.sourceSetConfigurator = new GrailsSourceSetConfigurator(instantiator, fileResolver)
         this.taskConfigurator = new GrailsTaskConfigurator()
         this.ideaConfigurator = new GrailsIdeaConfigurator()
