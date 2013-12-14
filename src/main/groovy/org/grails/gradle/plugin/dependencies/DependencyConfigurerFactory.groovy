@@ -5,7 +5,7 @@ import org.grails.gradle.plugin.GrailsProject
 import org.grails.launcher.version.GrailsVersion
 
 /**
- * Creates the proper dependecy configuration instance for this Grails version.
+ * Creates the proper dependency configuration instance for this Grails version.
  * Currently all project use the same configuration, but future version may require
  * more substantial customization.
  */
