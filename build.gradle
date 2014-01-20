@@ -4,7 +4,7 @@ apply plugin: 'signing'
 apply plugin: 'idea'
 
 group = 'org.grails'
-version = '2.0.0-SNAPSHOT'
+version = '2.0.0'
 archivesBaseName = "grails-gradle-plugin"
 
 sourceCompatibility = "1.6"
@@ -18,7 +18,7 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     
-    compile "org.grails:grails-launcher:1.1-SNAPSHOT"
+    compile "org.grails:grails-launcher:1.1"
     testCompile "org.spockframework:spock-core:0.7-groovy-1.8", {
         exclude module: "groovy-all"
     }
