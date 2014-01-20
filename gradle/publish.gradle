@@ -61,6 +61,10 @@ poms*.whenConfigured {
                 id 'pledbrook'
                 name 'Peter Ledbrook'
             }
+            developer {
+                id 'johnrengelman'
+                name 'John Engelman'
+            }
         }
     }
 }
