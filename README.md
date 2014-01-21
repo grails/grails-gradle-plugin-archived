@@ -8,12 +8,8 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath "org.grails:grails-gradle-plugin:2.0.0-SNAPSHOT"
+    classpath "org.grails:grails-gradle-plugin:2.0.0"
   }
-}
-
-repositories {
-  grails.central() //creates a maven repo for the Grails Central repository (Core libraries and plugins)
 }
 
 version "0.1"
@@ -21,13 +17,18 @@ group "example"
 
 apply plugin: "grails"
 
+repositories {
+  grails.central() //creates a maven repo for the Grails Central repository (Core libraries and plugins)
+}
+
 grails {
-  groovyVersion = '2.1.7'
-  springLoadedVersion "1.1.3"
+  grailsVersion = '2.3.5'
+  groovyVersion = '2.1.9'
+  springLoadedVersion '1.1.3'
 }
 
 dependencies {
-  bootstrap "org.grails:grails-plugin-tomcat:${project.grails.grailsVersion}" // No container is deployed by default, so add this
+  bootstrap "org.grails.plugins:tomcat:7.0.50" // No container is deployed by default, so add this
   compile 'org.grails.plugins:resources:1.2' // Just an example of adding a Grails plugin
 }
 ```
