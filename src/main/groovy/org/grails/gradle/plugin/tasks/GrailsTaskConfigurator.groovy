@@ -26,10 +26,12 @@ class GrailsTaskConfigurator {
         project.tasks.create(GRAILS_INIT_TASK, GrailsInitTask)
 
         //Create the grails-clean task and wire it to the 'clean' task
-        def grailsClean = project.tasks.create(GRAILS_CLEAN_TASK, GrailsTask).with {
+        project.tasks.create(GRAILS_CLEAN_TASK, GrailsTask).with {
             command = "clean"
             description = 'Executes Grails clean'
         }
+
+        def grailsClean = project.tasks.getByName(GRAILS_CLEAN_TASK)
         project.tasks.getByName(BasePlugin.CLEAN_TASK_NAME).dependsOn grailsClean
 
         //Depending on the project type, configure either the package-plugin or war tasks
