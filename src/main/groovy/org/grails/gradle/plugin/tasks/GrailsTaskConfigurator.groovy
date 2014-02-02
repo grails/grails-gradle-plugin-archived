@@ -34,11 +34,8 @@ class GrailsTaskConfigurator {
         def grailsClean = project.tasks.getByName(GRAILS_CLEAN_TASK)
         project.tasks.getByName(BasePlugin.CLEAN_TASK_NAME).dependsOn grailsClean
 
-        //Depending on the project type, configure either the package-plugin or war tasks
-        //as the assemble task
-        def grailsAssemble = grailsProject.pluginProject ? createPackagePluginTask(project) : createWarTask(project)
-
-        project.tasks.getByName(BasePlugin.ASSEMBLE_TASK_NAME).dependsOn grailsAssemble
+        //Set up the proper assemble task and adds it's artifact to the configuration
+        configureAssemble(grailsProject, project)
 
         //Add the 'run-app' task if this is a full Grails application and not a plugin
         if (!grailsProject.isPluginProject()) {
@@ -78,19 +75,35 @@ class GrailsTaskConfigurator {
     }
 
     private GrailsTask createPackagePluginTask(Project project) {
-        project.tasks.create(GRAILS_PACKAGE_PLUGIN_TASK, GrailsTask).with {
+        project.tasks.create(GRAILS_PACKAGE_PLUGIN_TASK, GrailsAssembleTask).with {
             command = 'package-plugin'
             description = 'Packages a grails plugin'
+            defaultOutput = project.file("grails-${project.name}-${project.version}.zip")
         }
-        return project.tasks.findByName(GRAILS_PACKAGE_PLUGIN_TASK)
+        GrailsAssembleTask task = project.tasks.findByName(GRAILS_PACKAGE_PLUGIN_TASK)
+        project.artifacts {
+            runtime task.output {
+                type "zip"
+                builtBy task
+            }
+        }
+        return task
     }
 
     private GrailsTask createWarTask(Project project) {
-        project.tasks.create(GRAILS_WAR_TASK, GrailsTask).with {
+        project.tasks.create(GRAILS_WAR_TASK, GrailsAssembleTask).with {
             command = 'war'
             description = 'Generates the application WAR file'
+            defaultOutput = project.file("build")
         }
-        return project.tasks.findByName(GRAILS_WAR_TASK)
+        GrailsAssembleTask task = project.tasks.findByName(GRAILS_WAR_TASK)
+        project.artifacts {
+            runtime task.output {
+                type "war"
+                builtBy task
+            }
+        }
+        return task
     }
 
     /**
@@ -130,5 +143,14 @@ class GrailsTaskConfigurator {
         project.getTasks().getByName(JavaBasePlugin.CHECK_TASK_NAME).dependsOn(test)
         test.setDescription("Runs the tests.")
         test.setGroup(JavaBasePlugin.VERIFICATION_GROUP)
+    }
+
+    private void configureAssemble(GrailsProject grailsProject, Project project) {
+        //Depending on the project type, configure either the package-plugin or war tasks
+        //as the assemble task
+        def grailsAssemble = grailsProject.pluginProject ? createPackagePluginTask(project) : createWarTask(project)
+
+        project.tasks.getByName(BasePlugin.ASSEMBLE_TASK_NAME).dependsOn grailsAssemble
+        project.configurations.default.extendsFrom(project.configurations.runtime)
     }
 }
