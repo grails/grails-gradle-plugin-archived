@@ -110,6 +110,7 @@ class GrailsPlugin implements Plugin<Project> {
                 map("projectDir") { grailsProject.projectDir }
                 map("projectWorkDir") { grailsProject.projectWorkDir }
                 map("grailsVersion") { grailsProject.grailsVersion }
+                map("pluginProject") { grailsProject.pluginProject }
 
                 map("bootstrapClasspath") { bootstrapConfiguration }
 

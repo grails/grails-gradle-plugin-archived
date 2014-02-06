@@ -75,35 +75,13 @@ class GrailsTaskConfigurator {
     }
 
     private GrailsTask createPackagePluginTask(Project project) {
-        project.tasks.create(GRAILS_PACKAGE_PLUGIN_TASK, GrailsAssembleTask).with {
-            command = 'package-plugin'
-            description = 'Packages a grails plugin'
-            defaultOutput = project.file("grails-${project.name}-${project.version}.zip")
-        }
-        GrailsAssembleTask task = project.tasks.findByName(GRAILS_PACKAGE_PLUGIN_TASK)
-        project.artifacts {
-            runtime task.output {
-                type "zip"
-                builtBy task
-            }
-        }
-        return task
+        project.tasks.create(GRAILS_PACKAGE_PLUGIN_TASK, GrailsPluginPackageTask)
+        return project.tasks.findByName(GRAILS_PACKAGE_PLUGIN_TASK)
     }
 
     private GrailsTask createWarTask(Project project) {
-        project.tasks.create(GRAILS_WAR_TASK, GrailsAssembleTask).with {
-            command = 'war'
-            description = 'Generates the application WAR file'
-            defaultOutput = project.file("build")
-        }
-        GrailsAssembleTask task = project.tasks.findByName(GRAILS_WAR_TASK)
-        project.artifacts {
-            runtime task.output {
-                type "war"
-                builtBy task
-            }
-        }
-        return task
+        project.tasks.create(GRAILS_WAR_TASK, GrailsWarTask)
+        return project.tasks.findByName(GRAILS_WAR_TASK)
     }
 
     /**
@@ -148,9 +126,13 @@ class GrailsTaskConfigurator {
     private void configureAssemble(GrailsProject grailsProject, Project project) {
         //Depending on the project type, configure either the package-plugin or war tasks
         //as the assemble task
-        def grailsAssemble = grailsProject.pluginProject ? createPackagePluginTask(project) : createWarTask(project)
+        GrailsAssembleTask grailsAssemble = grailsProject.pluginProject ? createPackagePluginTask(project) : createWarTask(project)
 
         project.tasks.getByName(BasePlugin.ASSEMBLE_TASK_NAME).dependsOn grailsAssemble
         project.configurations.default.extendsFrom(project.configurations.runtime)
+        project.artifacts.add('runtime', grailsAssemble.outputFile) {
+            type grailsAssemble.outputFile.path.tokenize('.').last()
+            builtBy grailsAssemble
+        }
     }
 }

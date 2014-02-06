@@ -26,6 +26,7 @@ import org.gradle.process.ExecResult
 import org.gradle.process.JavaForkOptions
 import org.gradle.process.internal.DefaultJavaForkOptions
 import org.gradle.process.internal.JavaExecAction
+import org.grails.gradle.plugin.GrailsProject
 import org.grails.gradle.plugin.internal.GrailsLaunchConfigureAction
 import org.grails.launcher.context.GrailsLaunchContext
 import org.grails.launcher.context.SerializableGrailsLaunchContext
@@ -67,6 +68,7 @@ class GrailsTask extends DefaultTask {
 
     private projectDir
     private projectWorkDir
+    private boolean pluginProject
 
     boolean forwardStdIn
 
