@@ -4,7 +4,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectories
-import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.OutputDirectory
 import org.grails.launcher.context.GrailsLaunchContext
 
 /**
@@ -21,7 +21,7 @@ import org.grails.launcher.context.GrailsLaunchContext
  */
 class GrailsTestTask extends GrailsTask {
 
-    @OutputFile
+    @OutputDirectory
     @Optional
     File testResultsDir
 

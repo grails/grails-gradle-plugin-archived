@@ -94,7 +94,7 @@ class GrailsPlugin implements Plugin<Project> {
                                 details.useVersion groovyVersion
                             }
                             if (details.requested.name == 'groovy') {
-                                details.useTarget name: 'groovy-all', version: groovyVersion
+                                details.useTarget group: details.requested.group, name: 'groovy-all', version: groovyVersion
                             }
                         }
                     }
