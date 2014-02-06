@@ -1,6 +1,10 @@
 # Change Log
 
-## 2.0.1
+## v2.1.0
+
++ Add plugin Zip file or application War file as an output file to the runtime configuration.
+
+## v2.0.1
 
 + Fix a bug in setting `grails.groovyVersion` which resulted in an exception when a dependency tried to include the
   `groovy` library.
