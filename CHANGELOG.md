@@ -3,6 +3,7 @@
 ## v2.1.0
 
 + Add plugin Zip file or application War file as an output file to the runtime configuration.
++ Configured the default configuration to extend from runtime (similar to Java plugin behavior)
 
 ## v2.0.1
 
