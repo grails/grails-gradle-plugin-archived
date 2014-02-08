@@ -97,7 +97,10 @@ class GrailsTaskConfigurator {
      * Add the 'check' task
      */
     private void configureCheck(Project project) {
-        Task checkTask = project.getTasks().create(JavaBasePlugin.CHECK_TASK_NAME)
+        if (!project.tasks.findByName(JavaBasePlugin.CHECK_TASK_NAME)) {
+            project.tasks.create(JavaBasePlugin.CHECK_TASK_NAME)
+        }
+        Task checkTask = project.tasks.findByName(JavaBasePlugin.CHECK_TASK_NAME)
         checkTask.setDescription("Runs all checks.")
         checkTask.setGroup(JavaBasePlugin.VERIFICATION_GROUP)
     }
@@ -106,7 +109,10 @@ class GrailsTaskConfigurator {
      * Add the 'build' task and wire it to 'check' and 'assemble'
      */
     private void configureBuild(Project project) {
-        DefaultTask buildTask = project.getTasks().create(JavaBasePlugin.BUILD_TASK_NAME, DefaultTask.class)
+        if (!project.tasks.findByName(JavaBasePlugin.BUILD_TASK_NAME)) {
+            project.tasks.create(JavaBasePlugin.BUILD_TASK_NAME, DefaultTask.class)
+        }
+        DefaultTask buildTask = project.tasks.findByName(JavaBasePlugin.BUILD_TASK_NAME)
         buildTask.setDescription("Assembles and tests this project.")
         buildTask.setGroup(BasePlugin.BUILD_GROUP)
         buildTask.dependsOn(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -117,8 +123,11 @@ class GrailsTaskConfigurator {
      * Add the 'test' task and wire it to 'check'
      */
     private void configureTest(Project project) {
-        Task test = project.tasks.create(JavaPlugin.TEST_TASK_NAME, DefaultTask.class)
-        project.getTasks().getByName(JavaBasePlugin.CHECK_TASK_NAME).dependsOn(test)
+        if (!project.tasks.findByName(JavaPlugin.TEST_TASK_NAME)) {
+            project.tasks.create(JavaPlugin.TEST_TASK_NAME, DefaultTask.class)
+        }
+        Task test = project.tasks.findByName(JavaPlugin.TEST_TASK_NAME)
+        project.tasks.getByName(JavaBasePlugin.CHECK_TASK_NAME).dependsOn(test)
         test.setDescription("Runs the tests.")
         test.setGroup(JavaBasePlugin.VERIFICATION_GROUP)
     }
