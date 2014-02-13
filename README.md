@@ -50,6 +50,12 @@ Once you have this build file, you can create a Grails application with the 'ini
 ```sh
 gradle init
 ```
+
+Initialize a new Grails plugin project by running:
+```sh
+gradle init-plugin
+```
+
 The plugin creates standard tasks that mimic the Java lifecycle:
 
 * clean
