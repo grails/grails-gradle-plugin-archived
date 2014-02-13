@@ -44,12 +44,10 @@ class GrailsTaskConfigurator {
         //Set up the proper assemble task and adds it's artifact to the configuration
         configureAssemble(grailsProject, project)
 
-        //Add the 'run-app' task if this is a full Grails application and not a plugin
-        if (!grailsProject.isPluginProject()) {
-            project.tasks.create(GRAILS_RUN_TASK, GrailsTask).with {
-                command = 'run-app'
-                description = 'Starts the Grails application'
-            }
+        //Add the run task...this is allowable for both applications and plugins
+        project.tasks.create(GRAILS_RUN_TASK, GrailsTask).with {
+            command = 'run-app'
+            description = 'Starts the Grails application'
         }
 
         //Create the Grails test task. Don't wire it to the 'test' task yet because it doesn't quite exist yet.
