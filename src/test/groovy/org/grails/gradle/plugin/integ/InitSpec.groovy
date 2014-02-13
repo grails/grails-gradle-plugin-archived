@@ -22,44 +22,49 @@ import org.grails.launcher.version.GrailsVersion
 @Unroll
 class InitSpec extends IntegSpec {
 
-    def "can create grails #grailsVersion project"() {
+    def "can execute grails #initTask for #grailsVersion project"() {
         given:
+
         buildFile << """
             grails.grailsVersion '$grailsVersion'
         """
 
         if (grailsVersion.is(2, 1)) {
             buildFile << """
-                dependencies {
-                    compile "org.codehaus.groovy:groovy-all:${grailsVersion.is(2,1,0) ? "1.8.6" : "1.8.8"}"
-                    bootstrap "org.codehaus.groovy:groovy-all:${grailsVersion.is(2,1,0) ? "1.8.6" : "1.8.8"}"
-                }
+                grails.groovyVersion '${grailsVersion.is(2,1,0) ? "1.8.6" : "1.8.8"}'
             """
         }
 
         if (grailsVersion.is(2, 2)) {
             buildFile << """
-                dependencies {
-                    compile "org.codehaus.groovy:groovy-all:2.0.5"
-                    bootstrap "org.codehaus.groovy:groovy-all:2.0.5"
-                    test "org.grails:grails-test:$grailsVersion"
-                }
+                grails.groovyVersion '2.0.5'
+            """
+        }
+
+        if (grailsVersion.is(2, 3)) {
+            buildFile << """
+                grails.groovyVersion '2.1.9'
             """
         }
 
         when:
-        launcher("init", "-s").run().rethrowFailure()
+        launcher(initTask, "-s").run().rethrowFailure()
 
         then:
-        task("init").state.didWork
+        task(initTask).state.didWork
 
         and:
         file("grails-app").exists()
 
         when:
-        file("test/integration/SomeTest.groovy") << """
-            class SomeTest extends GroovyTestCase {
-                void testSomething() {
+        file("test/integration/test/SomeTest.groovy") << """
+            package test
+
+            import org.junit.Test
+
+            class SomeTest {
+                @Test
+                void something() {
                     assert true
                 }
             }
@@ -72,7 +77,13 @@ class InitSpec extends IntegSpec {
         task("grails-test-app").state.didWork
 
         where:
-        grailsVersion << ["2.0.0", "2.1.0", "2.2.0.RC1"].collect { GrailsVersion.parse(it) }
+        versionAndTask << ["2.0.0", "2.1.0", "2.2.0"].collectMany { String version ->
+            ['init', 'init-plugin'].collect { String task ->
+                [task: task, version: GrailsVersion.parse(version)]
+            }
+        }
+        grailsVersion = (GrailsVersion) versionAndTask.version
+        initTask = (String) versionAndTask.task
     }
 
 }

@@ -83,7 +83,7 @@ public class DefaultGrailsProject implements GrailsProject {
         onSetGrailsVersion.execute(grailsVersion)
     }
 
-    //Set the Groovy version and execute the configuratio callback the configures the Groovy resolution
+    //Set the Groovy version and execute the configuration callback the configures the Groovy resolution
     //strategy on the project
     public void setGroovyVersion(String groovyVersion) {
         if (this.groovyVersion != null) {

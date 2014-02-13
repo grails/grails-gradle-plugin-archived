@@ -16,6 +16,7 @@ class GrailsTaskConfigurator {
 
     public static final String GRAILS_CLEAN_TASK = 'grails-clean'
     public static final String GRAILS_INIT_TASK = 'init'
+    public static final String GRAILS_INIT_PLUGIN_TASK = 'init-plugin'
     public static final String GRAILS_TEST_TASK = 'grails-test-app'
     public static final String GRAILS_RUN_TASK = 'grails-run-app'
     public static final String GRAILS_PACKAGE_PLUGIN_TASK = 'grails-package-plugin'
@@ -24,6 +25,12 @@ class GrailsTaskConfigurator {
     void configure(Project project, GrailsProject grailsProject) {
         //Create the Grails init task
         project.tasks.create(GRAILS_INIT_TASK, GrailsInitTask)
+
+        //Create the Grails init plugin task
+        project.tasks.create(GRAILS_INIT_PLUGIN_TASK, GrailsInitTask).with {
+            command = 'create-plugin'
+            description = 'Creates a new Grails plugin in the current directory'
+        }
 
         //Create the grails-clean task and wire it to the 'clean' task
         project.tasks.create(GRAILS_CLEAN_TASK, GrailsTask).with {

@@ -20,7 +20,7 @@ class GrailsAssembleTask extends GrailsTask {
 class GrailsPluginPackageTask extends GrailsAssembleTask {
 
     GrailsPluginPackageTask() {
-        this.outputFile = project.file("grails-${project.name}-${project.version}.zip")
+        super.setOutputFile(project.file("grails-${project.name}-${project.version}.zip"))
         command = 'package-plugin'
         description = 'Packages a grails plugin'
     }
