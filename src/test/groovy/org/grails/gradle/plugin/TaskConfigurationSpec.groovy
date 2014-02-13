@@ -16,7 +16,61 @@
 
 package org.grails.gradle.plugin
 
+import org.gradle.testfixtures.ProjectBuilder
+
 class TaskConfigurationSpec extends PluginSpec {
+
+    def "basic tasks are in place"() {
+        given:
+        def baseTasks = ['test', 'check', 'build', 'assemble', 'clean']
+        def grailsTasks = ['init', 'init-plugin', 'grails-clean', 'grails-test-app', 'grails-run-app', 'grails-war']
+
+        expect:
+        (baseTasks + grailsTasks).each {
+            assert project.tasks.findByName(it)
+        }
+    }
+
+    def "default configuration extends the runtime configuration"() {
+        expect:
+        project.configurations.default.extendsFrom.contains(project.configurations.runtime)
+    }
+
+    def "war file is configured as runtime artifact for application"() {
+        given:
+        List<File> artifactFiles = project.configurations.runtime.artifacts.files.files as List
+
+        expect:
+        assert artifactFiles.size() == 1
+        assert artifactFiles.first() == project.file("build/distributions/${project.name}-${project.version}.war")
+
+        and:
+        assert project.configurations.default.allArtifacts.files.files.toList().first() ==
+                project.file("build/distributions/${project.name}-${project.version}.war")
+    }
+
+    def "zip file is configured as runtime artifact for plugin"() {
+        given:
+        project = ProjectBuilder.builder().build()
+
+        project.file("${project.name.capitalize()}GrailsPlugin.groovy") << """
+class ${project.name.capitalize()}GrailsPlugin { }
+"""
+        project.grailsVersion = "2.0.0"
+        project.apply plugin: "grails"
+        List<File> artifactFiles = project.configurations.runtime.artifacts.files.files as List
+
+        expect:
+        assert artifactFiles.size() == 1
+        assert artifactFiles.first() == project.file("grails-${project.name}-${project.version}.zip")
+
+        and:
+        assert project.configurations.default.allArtifacts.files.files.toList().first() ==
+                project.file("grails-${project.name}-${project.version}.zip")
+
+        and:
+        assert project.tasks.findByName('grails-package-plugin')
+    }
 
     def "command defaults to task name"() {
         given:
