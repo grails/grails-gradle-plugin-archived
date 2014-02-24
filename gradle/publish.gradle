@@ -1,3 +1,10 @@
+apply plugin: 'signing'
+apply plugin: 'maven'
+
+signing {
+    sign configurations.archives
+}
+
 def poms = [project.install.repositories.mavenInstaller.pom]
 
 uploadArchives { task ->

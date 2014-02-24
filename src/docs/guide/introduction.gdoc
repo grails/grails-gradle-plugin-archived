@@ -1,0 +1,3 @@
+The Grails Gradle Plugin provides integration of Grails applications into the Gradle framework. In simple terms,
+This plugin allows Gradle to build Grails applications in a compatible way with the internal build tooling of the
+Grails framework.
