@@ -1,128 +1,79 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-    <head>
-        <title>Grails Gradle Plugin 2.0.1</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
-        <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
+<head>
+    <title>2 Using the Plugin 2.0.1</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
     <script type="text/javascript">
-function addJsClass(el) {
+function addJsClass() {
     var classes = document.body.className.split(" ");
     classes.push("js");
     document.body.className = classes.join(" ");
 }
     </script>
-    </head>
+</head>
 
-    <body class="body" onload="addJsClass();">
-        <div id="navigation">
-            <ul>
-                <li>
-                    <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
-                        <a href="../guide/index.html" class="button">Table of contents</a>
-                        <div id="nav-summary-childs" style="display:none;">
-                            
-                            <div class="toc-item" style="margin-left:0"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
-                            
-                            <div class="toc-item" style="margin-left:0"><a href="#usage"><strong>2</strong><span>Using the Plugin</span></a></div>
-                            
-                        </div>
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
                     </div>
-                </li>
-                <li class="separator selected">
-                    <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
-                </li>
-            </ul>
-        </div>
-        <div id="header">
-            <div class="images clearfix">
-                
-                
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/usage.html"><strong>2</strong><span>Using the Plugin</span></a>
+                    </div>
+                    
+                </div>
             </div>
-            <p>Grails Gradle Plugin</p>
-        </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Grails Gradle Plugin</p>
+</div>
 
 
-        <table id="colset" border="0" cellpadding="0" cellspacing="0">
-            <tr>
-                <td id="col1">
-                    <div id="main" class="corner-all">
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
 
-                        <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+                
+                    <div class="toc-item prev-left"><a href="../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
 
-                        <div class="project">
-                            <h1>Grails Gradle Plugin - Reference Documentation</h1>
-                            <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
-                            <p><strong>Version:</strong> 2.0.1</p>
-                            
-                        </div>
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
-                        
-                        <div id="table-of-content">
-                            <h2>Table of Contents</h2>
-                            
-                            <div class="toc-item" style="margin-left:0px"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
-                            
-                            <div class="toc-item" style="margin-left:10px"><a href="#changes"><strong>1.1</strong><span>Change Log</span></a></div>
-                            
-                            <div class="toc-item" style="margin-left:0px"><a href="#usage"><strong>2</strong><span>Using the Plugin</span></a></div>
-                            
-                            <div style="clear:both" ></div>
-                        </div>
-                        
-                        
-
-<h1 id="introduction">1 Introduction</h1>
-The Grails Gradle Plugin provides integration of Grails applications into the Gradle framework. In simple terms,
-this plugin allows Gradle to build Grails applications in a compatible way with the internal build tooling of the
-Grails framework.<p class="paragraph"/><h4>Quick Start</h4><p class="paragraph"/>The following <code>build.gradle</code> example shows a Grails application configuration in Gradle that matches the default configuration
-generated by Grails for new projects. Not all the dependencies are required for every application.
-<div class="code"><pre>buildscript &#123;
-    repositories &#123;
-        jcenter()
-    &#125;
-    dependencies &#123;
-        'org.grails:grails&#45;gradle&#45;plugin:2.0.1'
-    &#125;
-&#125;<p class="paragraph"/>apply plugin: 'grails'<p class="paragraph"/>grails &#123;
-    grailsVersion = '2.3.6'
-    groovyVersion = '2.1.9'
-    springLoadedVersion = '1.1.3'
-&#125;<p class="paragraph"/>repositories &#123;
-    jcenter()
-    grails.central() //Adds the Grails Central Repository <span class="java&#45;keyword">for</span> resolving Grails plugins (replaces grailsPlugins(), grailsCentral() from BuildConfig.groovy)
-&#125;<p class="paragraph"/>dependencies &#123;
-    bootstrap 'org.grails.plugins:tomcat:7.0.50.1'<p class="paragraph"/>    compile 'org.grails.plugins:scaffolding:2.0.2'
-    compile 'org.grails.plugins:cache:1.1.1'<p class="paragraph"/>    runtime 'org.grails.plugins:hibernate:3.6.10.8' //or 'org.grails.plugins:hibernate4:4.3.1.1'
-    runtime 'org.grails.plugins:database&#45;migration:1.3.8'
-    runtime 'org.grails.plugins:jquery:1.11.0'
-    runtime 'org.grails.plugins:resources:1.2.2'<p class="paragraph"/>    //runtime 'mysql:mysql&#45;connector&#45;java:5.1.24'
-    //runtime 'org.postgresql:postgresql:9.3.1100&#45;jdbc41'<p class="paragraph"/>    //Additional resources capabilities
-    //runtime 'org.grails.plugins:zipped&#45;resources:1.0.1'
-    //runtime 'org.grails.plugins:cached&#45;resources:1.1'
-    //runtime 'org.grails.plugins:yui&#45;minify&#45;resources:0.1.5'<p class="paragraph"/>    //Alternate to the resources plugin
-    //compile 'org.grails.plugins:asset&#45;pipeline:1.5.0'<p class="paragraph"/>    //Additional asset&#45;pipeline capabilities
-    //compile 'org.grails.plugins:sass&#45;asset&#45;pipeline:1.5.1'
-    //compile 'org.grails.plugins:less&#45;asset&#45;pipeline:1.5.0'
-    //compile 'org.grails.plugins:coffee&#45;asset&#45;pipeline:1.5.0'
-    //compile 'org.grails.plugins:handlebars&#45;asset&#45;pipeline:1.0.0.3'
-&#125;</pre></div>
+                
 
 
-<h2 id="changes">1.1 Change Log</h2>
-<h4>v2.0.1</h4>
-<ul class="star">
-<li>Fix a bug in setting <code>grails.groovyVersion</code> which resulted in an exception when a dependency tried to include the groovy library.</li>
-<li>Fix a bug where when a <code>GrailsTestTask</code> is configured with both a set of Task Inputs and a <code>testResultsDir</code> that results in an exception because <code>testResultsDir</code> is a directory but Gradle expects it to be a file.</li>
-<li>Fix a bug in the task dependency configuration for the <code>clean</code> task that results in Gradle being unable to determine the task graph.</li>
-<li>Add plugin Zip file or application War file as an output file to the runtime configuration.</li>
-<li>Configured the default configuration to extend from runtime (similar to Java plugin behavior)</li>
-<li>Springloaded is only configured for the <code>grails-run-app</code> task (this is what Grails itself does in <code>grailsStart</code> script).</li>
-<li>Added the <code>init-plugin</code> task to initialize a Grails plugin instead of an application.</li>
-<li>The <code>grails-run-app</code> task is now  available on plugin projects as well (Grails allows this)</li>
-</ul><p class="paragraph"/>
+                <div class="project">
+                    <h1>2 Using the Plugin - Reference Documentation</h1>
 
+                    <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
+
+                    <p><strong>Version:</strong> 2.0.1</p>
+
+                    
+                </div>
+
+                
+
+                
 
 <h1 id="usage">2 Using the Plugin</h1>
 <h4>Applying the Plugin</h4><p class="paragraph"/>The Grails Gradle Plugin is available from Bintray's JCenter and the Maven Central repositories. Apply it to a Gradle
@@ -186,9 +137,15 @@ as a dependency to <code>test</code>.<p class="paragraph"/><div class="code"><pr
 creating the project's output. For applications, the <code>assemble</code> task depends on <code>grails-war</code> and produces a War output.
 For plugins, the <code>assemble</code> task depends on <code>grails-package-plugin</code> and produces the plugin Zip output.<p class="paragraph"/>Additionally, the plugin configures the normal Gradle <code>build</code> task to depend on <code>test</code> and <code>assemble</code>
 
-                    </div>
-                </td>
-                <td id="col2">
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
             <div class="local clearfix">
                 <div class="local-title">
                     <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
@@ -199,17 +156,15 @@ For plugins, the <code>assemble</code> task depends on <code>grails-package-plug
                 </div>
             </div>
         </td>
-            </tr>
-        </table>
+    </tr>
+</table>
 
-        <div id="footer">
-            
-            
-        </div>
-
-
+<div id="footer">
+    
+    
+</div>
 
 <script type="text/javascript" src="../js/docs.js"></script>
 
-    </body>
+</body>
 </html>
