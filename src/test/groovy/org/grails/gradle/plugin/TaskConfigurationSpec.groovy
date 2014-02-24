@@ -17,6 +17,8 @@
 package org.grails.gradle.plugin
 
 import org.gradle.testfixtures.ProjectBuilder
+import org.grails.gradle.plugin.tasks.GrailsPluginPackageTask
+import org.grails.gradle.plugin.tasks.GrailsWarTask
 
 class TaskConfigurationSpec extends PluginSpec {
 
@@ -38,6 +40,7 @@ class TaskConfigurationSpec extends PluginSpec {
 
     def "war file is configured as runtime artifact for application"() {
         given:
+        project.evaluate()
         List<File> artifactFiles = project.configurations.runtime.artifacts.files.files as List
 
         expect:
@@ -47,6 +50,27 @@ class TaskConfigurationSpec extends PluginSpec {
         and:
         assert project.configurations.default.allArtifacts.files.files.toList().first() ==
                 project.file("build/distributions/${project.name}-${project.version}.war")
+
+    }
+
+    def "version is included in war file name"() {
+        given:
+        project.version = '1.0'
+        project.evaluate()
+        List<File> artifactFiles = project.configurations.runtime.artifacts.files.files as List
+
+        expect:
+        GrailsWarTask war = project.tasks.getByName('grails-war')
+        assert war.outputFile.path == project.file("build/distributions/${project.name}-1.0.war").path
+
+        and:
+        assert artifactFiles.size() == 1
+        assert artifactFiles.first() == project.file("build/distributions/${project.name}-1.0.war")
+
+        and:
+        assert project.configurations.default.allArtifacts.files.files.toList().first() ==
+                project.file("build/distributions/${project.name}-1.0.war")
+
     }
 
     def "zip file is configured as runtime artifact for plugin"() {
@@ -58,6 +82,7 @@ class ${project.name.capitalize()}GrailsPlugin { }
 """
         project.grailsVersion = "2.0.0"
         project.apply plugin: "grails"
+        project.evaluate()
         List<File> artifactFiles = project.configurations.runtime.artifacts.files.files as List
 
         expect:
@@ -70,6 +95,33 @@ class ${project.name.capitalize()}GrailsPlugin { }
 
         and:
         assert project.tasks.findByName('grails-package-plugin')
+    }
+
+    def "version included in zip file artifact for plugin"() {
+        given:
+        project = ProjectBuilder.builder().build()
+
+        project.file("${project.name.capitalize()}GrailsPlugin.groovy") << """
+class ${project.name.capitalize()}GrailsPlugin { }
+"""
+        project.grailsVersion = "2.0.0"
+        project.apply plugin: "grails"
+        project.version = '1.0'
+        project.evaluate()
+        List<File> artifactFiles = project.configurations.runtime.artifacts.files.files as List
+
+        expect:
+        GrailsPluginPackageTask war = project.tasks.getByName('grails-package-plugin')
+        assert war.outputFile.path == project.file("grails-${project.name}-1.0.zip").path
+
+        and:
+        assert artifactFiles.size() == 1
+        assert artifactFiles.first() == project.file("grails-${project.name}-1.0.zip")
+
+        and:
+        assert project.configurations.default.allArtifacts.files.files.toList().first() ==
+                project.file("grails-${project.name}-1.0.zip")
+
     }
 
     def "command defaults to task name"() {
