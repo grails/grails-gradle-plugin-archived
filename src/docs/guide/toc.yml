@@ -1,5 +1,11 @@
 introduction:
   title: Introduction
+  quickstart: Quick Start
   changes: Change Log
 usage:
   title: Using the Plugin
+  init: Initializing a Grails Project
+  deps: Configuring Project Dependencies
+  run: Running a Grails Project
+  test: Running Tests
+  package: Packing a Grails Project
