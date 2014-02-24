@@ -1,5 +1,7 @@
 # Change Log
 
+## v2.1.0
+
 ## v2.0.1
 
 + Fix a bug in setting `grails.groovyVersion` which resulted in an exception when a dependency tried to include the
