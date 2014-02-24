@@ -144,9 +144,11 @@ class GrailsTaskConfigurator {
 
         project.tasks.getByName(BasePlugin.ASSEMBLE_TASK_NAME).dependsOn grailsAssemble
         project.configurations.default.extendsFrom(project.configurations.runtime)
-        project.artifacts.add('runtime', grailsAssemble.outputFile) {
-            type grailsAssemble.outputFile.path.tokenize('.').last()
-            builtBy grailsAssemble
+        project.afterEvaluate {
+            project.artifacts.add('runtime', grailsAssemble.outputFile) {
+                type grailsAssemble.outputFile.path.tokenize('.').last()
+                builtBy grailsAssemble
+            }
         }
     }
 }
