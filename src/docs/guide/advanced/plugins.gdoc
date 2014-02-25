@@ -1,0 +1,47 @@
+The plugin configures the @build@ task to call the appropriate @package-plugin@ task for Grails plugin projects to produce
+the plugin zip file. Additionally, the plugin configures the Gradle configuration inheritance so that including Grails
+plugin projects via a Gradle @project@ dependency should include the transitive dependencies for the plugin.
+
+h4. Plugin Publication
+
+{warning}
+Plugin Publication is not fully supported at this time. Additional information will be added to this page as use cases
+are defined.
+{warning}
+
+h5. Publishing a Simple Grails Plugin
+
+For simple Grails plugin projects, that is projects that have *NO* external dependencies, plugin release and plublication
+can be accomplished using the "Grails Release Plugin":http://grails.org/plugin/release. Add the @release@ plugin to
+the @bootstrap@ configuration and execute the @grails-release-plugin@ task.
+
+{code}
+dependencies {
+    bootstrap 'org.grails.plugin:release:2.2.1'
+}
+
+$ gradle grails-release-plugin
+{code}
+
+{warning}
+See the plugin page http://grails.org/plugin/release for compatibility notes regarding the release plugin and the Grails version
+{warning}
+
+{note}
+Using the Release Plugin is only supported when there are not external dependencies because the @release-plugin@ command
+utilizes the dependencies configured in @BuildConfig.groovy@ to build the plugin's @pom.xml@ file. Since dependencies
+are being configure through Gradle, the @BuildConfig.groovy@ will not have the correct information and the @pom.xml@
+will be incorrect (especially when using Gradle @project@ dependencies).
+{note}
+
+h5. Publishing Using the Gradle Maven Plugin
+
+Plugin publication using the "@maven":http://www.gradle.org/docs/current/userguide/artifact_management.html plugin is
+currently untested.
+
+h5. Publishing Using the Gradle Maven-Publish (incubating) Plugin
+
+Plugin publication using the "@maven-publish@":http://www.gradle.org/docs/current/userguide/publishing_maven.html plugin
+is not fully supported. This is an incubating plugin and dependency information is not generated correctly in the POM.
+Specifically, at the time of writing, all dependencies were added to the @runtime@ scope in the POM and installing the
+resulting plugin in a project did not resolve transitive dependencies correctly.
