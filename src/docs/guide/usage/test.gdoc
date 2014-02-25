@@ -32,3 +32,77 @@ Total time: 1.177 secs
 {code}
 
 The plugin configures test results by default to be output to @build/test-results@
+
+h4. Running Specific Test Phases
+
+The @GrailsTestTask@ allows for configuring the specific test phases through the @phases@ property. By default the
+@grails-test-app@ task is configured with no phases which results in Grails executing **ALL** test phases. This can be
+modified as such:
+
+{code}
+'grails-test-app' {
+    phases = ['unit', 'integration']
+}
+{code}
+
+The above block will configure @grails-test-app@ to only execute the @unit@ and @integration@ test phases.
+
+h4. Configuring a Test Task Rule
+
+It may be beneficial to configure a Gradle task rule to execute specific test phases from the command line. This can
+be accomplished as so:
+
+{code}
+project.tasks.addRule('Pattern: grails-test-app-<phase>') { String taskName ->
+    if (taskName.startsWith('grails-test-app') && taskName != 'grails-test-app') {
+        task(tasName, type: GrailsTestTask) {
+            String testPhase = (taskName - 'grails-test-app').toLowerCase()
+            phases = [testPhase]
+        }
+    }
+}
+
+$ gradle grails-test-app-unit //Execute the unit test phase
+{code}
+
+h4. Running Specific Tests
+
+In matching with the Gradle standard, use the @-Dtest.single@ property to defined single tests to run. The @GrailsTestTask@
+observes this system property and will pass the value as is to the Grails test task.
+
+{code}
+$ gradle grails-test-app -Dtest.single=FooController
+{code}
+
+{note}
+The @--test@ syntax introduced in  Gradle 1.10 is not supported for selecting tests to execute. This is because the plugin
+is delegating to the underlying @GrailsLauncher@ to execute tests and not using Gradle's @Test@ class as a base. All the
+normal test selection methods for the Grails "@test-app@":http://grails.org/doc/latest/ref/Command%20Line/test-app.html
+command are supported since the value of @test.single@ is passed directly as a command line argument to the Grails script.
+
+{code}
+$ gradle grails-test-app -Dtest.single="Foo Bar"
+{code}
+{note}
+
+h4. Setting the Test Results Output Directly
+
+If multiple @GrailsTestTasks@ are configured in a project and are part of the normal build process, it may be benefical
+to configure each task to output its test results to a different directory. By default, Grails cleans the test output
+directory before running tests so that the test report matches the tests executed. Use the @testResultsDir@ property on
+@GrailsTestTask@ to configure the test output directory.
+
+{code}
+task unit(type: GrailsTestTask) {
+    testResultsDir = file('build/reports/test-unit'
+    phases = ['unit']
+}
+
+task integration(type: GrailsTestTask) {
+    testResultsDir = file('build/reports/test-int'
+    phases = ['int']
+}
+
+'grails-test-app'.enabled = false // Disable the default test task that executes all phases
+test.dependsOn [unit, integration] // Configure test phase tasks to execute on the 'test' task
+{code}
