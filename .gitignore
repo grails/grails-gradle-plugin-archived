@@ -7,4 +7,5 @@ bin/
 *.iws
 .idea
 out
+*.orig
 /docs/
