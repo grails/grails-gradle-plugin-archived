@@ -9,7 +9,7 @@ usage:
   run: Running a Grails Project
   test: Running Tests
   scripts: Executing Grails Scripts
-  package: Packing a Grails Project
+  package: Packaging a Grails Project
 advanced:
   title: Advanced Plugin Configuration & Usage
   overview: Overview of Plugin Integration with Grails
