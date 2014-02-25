@@ -1,0 +1,25 @@
+Using the Grails Gradle Plugin bypasses the normal Grails application build framework in favor of Gradle. The consequence
+of this is that the @BuildConfig.groovy@ is no longer consulted for repository or dependency information. All repositories
+and dependencies **MUST** be configured via Gradle.
+
+{note}
+Because Grails is no longer resolving the dependency information, the short syntax for plugins cannot be used:
+
+{code}
+plugins {
+  compile ':resources:1.1.1'
+}
+{code}
+
+In Grails, the syntax omits the Maven groupId for Grails plugins because all public Grails plugins are published under
+the @org.grails.plugins@ groupId. With Gradle, the groupId **MUST** be specified:
+
+{code}
+dependencies {
+    compile 'org.grails.plugins:resources:1.1.1'
+}
+{code}
+{note}
+
+The Grails Gradle Plugin configures the following scopes for dependency resolution: @bootstrap@, @provided@, @compile@,
+@runtime@, @test@. These scopes map to the same scopes normally used in @BuildConfig.groovy@.

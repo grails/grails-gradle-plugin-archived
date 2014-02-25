@@ -8,4 +8,13 @@ usage:
   deps: Configuring Project Dependencies
   run: Running a Grails Project
   test: Running Tests
+  scripts: Executing Grails Scripts
   package: Packing a Grails Project
+advanced:
+  title: Advanced Plugin Configuration & Usage
+  overview: Overview of Plugin Integration with Grails
+  args: Passing arguments to Grails Tasks
+  env: Setting the Grails Environment
+  memory: Configuring JVM Memory for Grails Tasks
+  multi: Using Grails Gradle Plugin in Multi-Project build
+  plugins: Managing Grails Plugins with Gradle

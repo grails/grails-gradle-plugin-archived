@@ -1,0 +1,13 @@
+The plugin configures a Gradle Task Rule to allow execution of any available Grails scripts as Gradle tasks. Simply
+prefix the Grails script name with @grails-@ and execute from Gradle.
+
+{code}
+$ gradle grails-refresh-dependencies
+{code}
+
+{note}
+Similar to the behavior of Grails itself, the provided script will be passed as the execution for Grails. If the
+requested script is provided via a Grails plugin that is not yet installed, then the execution will fail because plugin
+resolution in Grails occurs after validating the script. This can be avoided by executing a @gradle classes@ so that
+Grails compilation & plugin resolution occurs after adding a new Grails plugin to the build dependencies.
+{note}
