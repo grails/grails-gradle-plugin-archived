@@ -1,0 +1,344 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+    <head>
+        <title>Grails Gradle Plugin 2.1.0-SNAPSHOT</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
+        <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
+    <script type="text/javascript">
+function addJsClass(el) {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+    </head>
+
+    <body class="body" onload="addJsClass();">
+        <div id="navigation">
+            <ul>
+                <li>
+                    <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                        <a href="../guide/index.html" class="button">Table of contents</a>
+                        <div id="nav-summary-childs" style="display:none;">
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#usage"><strong>2</strong><span>Using the Plugin</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#advanced"><strong>3</strong><span>Advanced Plugin Configuration &amp; Usage</span></a></div>
+                            
+                        </div>
+                    </div>
+                </li>
+                <li class="separator selected">
+                    <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+                </li>
+            </ul>
+        </div>
+        <div id="header">
+            <div class="images clearfix">
+                
+                
+            </div>
+            <p>Grails Gradle Plugin</p>
+        </div>
+
+
+        <table id="colset" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td id="col1">
+                    <div id="main" class="corner-all">
+
+                        <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                        <div class="project">
+                            <h1>Grails Gradle Plugin - Reference Documentation</h1>
+                            <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
+                            <p><strong>Version:</strong> 2.1.0-SNAPSHOT</p>
+                            
+                        </div>
+
+                        
+                        <div id="table-of-content">
+                            <h2>Table of Contents</h2>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#quickstart"><strong>1.1</strong><span>Quick Start</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#changes"><strong>1.2</strong><span>Change Log</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#usage"><strong>2</strong><span>Using the Plugin</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#init"><strong>2.1</strong><span>Initializing a Grails Project</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#deps"><strong>2.2</strong><span>Configuring Project Dependencies</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#run"><strong>2.3</strong><span>Running a Grails Project</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#test"><strong>2.4</strong><span>Running Tests</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#scripts"><strong>2.5</strong><span>Executing Grails Scripts</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#package"><strong>2.6</strong><span>Packaging a Grails Project</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#advanced"><strong>3</strong><span>Advanced Plugin Configuration &amp; Usage</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#overview"><strong>3.1</strong><span>Overview of Plugin Integration with Grails</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#args"><strong>3.2</strong><span>Passing arguments to Grails Tasks</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#env"><strong>3.3</strong><span>Setting the Grails Environment</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#memory"><strong>3.4</strong><span>Configuring JVM Memory for Grails Tasks</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#multi"><strong>3.5</strong><span>Using Grails Gradle Plugin in Multi-Project build</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#plugins"><strong>3.6</strong><span>Managing Grails Plugins with Gradle</span></a></div>
+                            
+                            <div style="clear:both" ></div>
+                        </div>
+                        
+                        
+
+<h1 id="introduction">1 Introduction</h1>
+The Grails Gradle Plugin provides integration of Grails applications into the Gradle framework. In simple terms,
+this plugin allows Gradle to build Grails applications in a compatible way with the internal build tooling of the
+Grails framework.
+
+
+
+<h2 id="quickstart">1.1 Quick Start</h2>
+The following <code>build.gradle</code> example shows a Grails application configuration in Gradle that matches the default configuration
+generated by Grails for new projects. Not all the dependencies are required for every application.<p class="paragraph"/><div class="code"><pre>buildscript &#123;
+    repositories &#123;
+        jcenter()
+    &#125;
+    dependencies &#123;
+        'org.grails:grails&#45;gradle&#45;plugin:2.0.1'
+    &#125;
+&#125;<p class="paragraph"/>apply plugin: 'grails'<p class="paragraph"/>grails &#123;
+    grailsVersion = '2.3.6'
+    groovyVersion = '2.1.9'
+    springLoadedVersion = '1.1.3'
+&#125;<p class="paragraph"/>repositories &#123;
+    jcenter()
+    grails.central() //Adds the Grails Central Repository <span class="java&#45;keyword">for</span> resolving Grails plugins (replaces grailsPlugins(), grailsCentral() from BuildConfig.groovy)
+&#125;<p class="paragraph"/>dependencies &#123;
+    bootstrap 'org.grails.plugins:tomcat:7.0.50.1'<p class="paragraph"/>    compile 'org.grails.plugins:scaffolding:2.0.2'
+    compile 'org.grails.plugins:cache:1.1.1'<p class="paragraph"/>    runtime 'org.grails.plugins:hibernate:3.6.10.8' //or 'org.grails.plugins:hibernate4:4.3.1.1'
+    runtime 'org.grails.plugins:database&#45;migration:1.3.8'
+    runtime 'org.grails.plugins:jquery:1.11.0'
+    runtime 'org.grails.plugins:resources:1.2.2'<p class="paragraph"/>    //runtime 'mysql:mysql&#45;connector&#45;java:5.1.24'
+    //runtime 'org.postgresql:postgresql:9.3.1100&#45;jdbc41'<p class="paragraph"/>    //Additional resources capabilities
+    //runtime 'org.grails.plugins:zipped&#45;resources:1.0.1'
+    //runtime 'org.grails.plugins:cached&#45;resources:1.1'
+    //runtime 'org.grails.plugins:yui&#45;minify&#45;resources:0.1.5'<p class="paragraph"/>    //Alternate to the resources plugin
+    //compile 'org.grails.plugins:asset&#45;pipeline:1.5.0'<p class="paragraph"/>    //Additional asset&#45;pipeline capabilities
+    //compile 'org.grails.plugins:sass&#45;asset&#45;pipeline:1.5.1'
+    //compile 'org.grails.plugins:less&#45;asset&#45;pipeline:1.5.0'
+    //compile 'org.grails.plugins:coffee&#45;asset&#45;pipeline:1.5.0'
+    //compile 'org.grails.plugins:handlebars&#45;asset&#45;pipeline:1.0.0.3'
+&#125;</pre></div>
+
+
+<h2 id="changes">1.2 Change Log</h2>
+<h4>v2.0.1</h4>
+<ul class="star">
+<li>Fix a bug in setting <code>grails.groovyVersion</code> which resulted in an exception when a dependency tried to include the groovy library.</li>
+<li>Fix a bug where when a <code>GrailsTestTask</code> is configured with both a set of Task Inputs and a <code>testResultsDir</code> that results in an exception because <code>testResultsDir</code> is a directory but Gradle expects it to be a file.</li>
+<li>Fix a bug in the task dependency configuration for the <code>clean</code> task that results in Gradle being unable to determine the task graph.</li>
+<li>Add plugin Zip file or application War file as an output file to the runtime configuration.</li>
+<li>Configured the default configuration to extend from runtime (similar to Java plugin behavior)</li>
+<li>Springloaded is only configured for the <code>grails-run-app</code> task (this is what Grails itself does in <code>grailsStart</code> script).</li>
+<li>Added the <code>init-plugin</code> task to initialize a Grails plugin instead of an application.</li>
+<li>The <code>grails-run-app</code> task is now  available on plugin projects as well (Grails allows this)</li>
+</ul><p class="paragraph"/>
+
+
+<h1 id="usage">2 Using the Plugin</h1>
+The Grails Gradle Plugin is available from Bintray's JCenter and the Maven Central repositories. Apply it to a Gradle
+project the same way as any other plugin:<p class="paragraph"/><div class="code"><pre>buildscript &#123;
+    repositories &#123;
+        jcenter()
+    &#125;
+    dependencies &#123;
+        classpath 'org.grails:grails&#45;gradle&#45;plugin:2.0.1'
+    &#125;
+&#125;<p class="paragraph"/>apply plugin: 'grails'<p class="paragraph"/>version = 1.0<p class="paragraph"/>grails &#123;
+    grailsVersion = '2.3.6'
+    groovyVersion = '2.1.9'
+&#125;<p class="paragraph"/>repositories &#123;
+    grails.central()
+&#125;</pre></div><p class="paragraph"/><blockquote class="note">
+The plugin requires that the <code>grails.grailsVersion</code> is specified for the project. Additionally, the <code>version</code> property
+is required for executing the <code>init</code> task since Grails needs the application version during project initialization.
+</blockquote><p class="paragraph"/><blockquote class="note">
+While the <code>grails.groovyVersion</code> property is not required, specifying it allows the plugin to properly configure the
+Groovy runtime for the <code>bootstrap</code> and <code>compile</code> classpaths. Additionally, specifying it will configure a Gradle
+<code>ResolutionStrategy</code> to prevent different versions of <code>groovy</code> or <code>groovy-all</code> from entering the classpath through
+dependencies.
+</blockquote><p class="paragraph"/><blockquote class="note">
+If you are using the Grails Gradle Plugin to build applications with a version of Grails prior to 2.3.0, configuring the
+<code>grails.groovyVersion</code> property may have some side effects.
+</blockquote><p class="paragraph"/><blockquote class="warning">
+Specifying a <code>grails.groovyVersion</code> that does not match the Groovy version supplied with the specified <code>grails.grailsVersion</code>
+is not supported. It is possible to make this configuration, but unforeseen behavior may occur.
+</blockquote>
+
+
+<h2 id="init">2.1 Initializing a Grails Project</h2>
+Once the plugin is applied, a new Grails project can be initialized through Gradle.<p class="paragraph"/><div class="code"><pre>$ gradle init //Initializes a Grails application</pre></div><p class="paragraph"/>OR<p class="paragraph"/><div class="code"><pre>$ gradle init&#45;plugin //Initializes a Grails plugin</pre></div><p class="paragraph"/>Both tasks initialize the Grails project in the current working directory.<p class="paragraph"/><blockquote class="note">
+The plugin initializes the application/plugin with the name of the Gradle project and the current Gradle project version
+</blockquote>
+
+
+<h2 id="deps">2.2 Configuring Project Dependencies</h2>
+Using the Grails Gradle Plugin bypasses the normal Grails application build framework in favor of Gradle. The consequence
+of this is that the <code>BuildConfig.groovy</code> is no longer consulted for repository or dependency information. All repositories
+and dependencies <strong class="bold"></strong>MUST<strong class="bold"></strong> be configured via Gradle.<p class="paragraph"/><blockquote class="note">
+Because Grails is no longer resolving the dependency information, the short syntax for plugins cannot be used:<p class="paragraph"/><div class="code"><pre>plugins &#123;
+  compile ':resources:1.1.1'
+&#125;</pre></div><p class="paragraph"/>In Grails, the syntax omits the Maven groupId for Grails plugins because all public Grails plugins are published under
+the <code>org.grails.plugins</code> groupId. With Gradle, the groupId <strong class="bold"></strong>MUST<strong class="bold"></strong> be specified:<p class="paragraph"/><div class="code"><pre>dependencies &#123;
+    compile 'org.grails.plugins:resources:1.1.1'
+&#125;</pre></div>
+</blockquote><p class="paragraph"/>The Grails Gradle Plugin configures the following scopes for dependency resolution: <code>bootstrap</code>, <code>provided</code>, <code>compile</code>,
+<code>runtime</code>, <code>test</code>. These scopes map to the same scopes normally used in <code>BuildConfig.groovy</code>.
+
+
+<h2 id="run">2.3 Running a Grails Project</h2>
+The Grails Gradle Plugin creates a <code>grails-run-app</code> task on the projec that will start the Grails application container
+in the normal development environment.<p class="paragraph"/><div class="code"><pre>$ gradle grails&#45;run&#45;app</pre></div><p class="paragraph"/>Grails does not ship with an application container provided, so the build must specify a Grails plugin dependency. Typically,
+this will be the Grails tomcat plugin:<p class="paragraph"/><div class="code"><pre>depedencies &#123;
+    bootstrap 'org.grails.plugins:tomcat:7.0.50'
+&#125;</pre></div><p class="paragraph"/><blockquote class="note">
+Running the <code>grails-run-app</code> task will prevent the Gradle execution from completing (i.e. the task blocks on the running container).
+To terminate the Grails application, use Ctrl+C to terminate the Gradle run
+</blockquote>
+
+
+<h2 id="test">2.4 Running Tests</h2>
+The Grails Gradle Plugin configures a <code>grails-test-app</code> task that executes the projects tests through the Grails framework.
+Additionally, the plugin configures the normal Gradle <code>test</code> and <code>check</code> tasks and configures the <code>grails-test-app</code> task
+as a dependency to <code>test</code>.<p class="paragraph"/><div class="code"><pre>$ gradle grails&#45;test&#45;app
+:grails&#45;test&#45;app
+| Loading Grails 2.3.5
+&#8230;
+| Tests PASSED &#45; view reports in /Users/jengelman/workspace/personal/gg&#45;test/build/test&#45;results<p class="paragraph"/>BUILD SUCCESSFUL<p class="paragraph"/>Total time: 14.181 secs<p class="paragraph"/>$ gradle test
+:grails&#45;test&#45;app UP&#45;TO&#45;DATE
+:test UP&#45;TO&#45;DATE<p class="paragraph"/>BUILD SUCCESSFUL<p class="paragraph"/>Total time: 1.145 secs<p class="paragraph"/>$ gradle check
+:grails&#45;test&#45;app UP&#45;TO&#45;DATE
+:test UP&#45;TO&#45;DATE
+:check UP&#45;TO&#45;DATE<p class="paragraph"/>BUILD SUCCESSFUL<p class="paragraph"/>Total time: 1.177 secs</pre></div><p class="paragraph"/>The plugin configures test results by default to be output to <code>build/test-results</code>
+
+
+<h2 id="scripts">2.5 Executing Grails Scripts</h2>
+The plugin configures a Gradle Task Rule to allow execution of any available Grails scripts as Gradle tasks. Simply
+prefix the Grails script name with <code>grails-</code> and execute from Gradle.<p class="paragraph"/><div class="code"><pre>$ gradle grails&#45;refresh&#45;dependencies</pre></div><p class="paragraph"/><blockquote class="note">
+Similar to the behavior of Grails itself, the provided script will be passed as the execution for Grails. If the
+requested script is provided via a Grails plugin that is not yet installed, then the execution will fail because plugin
+resolution in Grails occurs after validating the script. This can be avoided by executing a <code>gradle classes</code> so that
+Grails compilation &#38; plugin resolution occurs after adding a new Grails plugin to the build dependencies.
+</blockquote>
+
+
+<h2 id="package">2.6 Packaging a Grails Project</h2>
+The Grails Gradle Plugin configures the normal Gradle <code>assemble</code> task to execute the appropriate Grails command for
+creating the project's output. For applications, the <code>assemble</code> task depends on <code>grails-war</code> and produces a War output.
+For plugins, the <code>assemble</code> task depends on <code>grails-package-plugin</code> and produces the plugin Zip output.<p class="paragraph"/>Additionally, the plugin configures the normal Gradle <code>build</code> task to depend on <code>test</code> and <code>assemble</code>
+
+
+<h1 id="advanced">3 Advanced Plugin Configuration & Usage</h1>
+This section covers advanced topics in the Gradle Grails Plugin. It includes topics related to configuring the
+underlying JVM that is executing the Grails tasks and integrating Grails builds into larger multi-project build.
+
+
+<h2 id="overview">3.1 Overview of Plugin Integration with Grails</h2>
+Integration of Grails into Gradle via this plugin is a complicated endeavour. The Grails framework contains its own
+build tooling that performs source compilation, test execution, and artifact packaging. Additionally, it has an extensive
+and mature plugin community of its own. Each plugin can add its own scripts to a Grails build and provide additional
+dependencies.<p class="paragraph"/>Because Grails contains is own build tooling, Grails projects, despite being based on Java &#38; Groovy, do <strong class="bold"></strong>NOT<strong class="bold"></strong> use
+the Groovy, Java, or War plugins for Gradle. As a consequence, these projects lose many of the conveniences for
+configuration that a standard Gradle project would receive. The Gradle Grails Plugin tries to address many of these
+shortcomings but some may not be possible with the current state of the frameworks.<p class="paragraph"/><blockquote class="note">
+The Grails 3 Road Map currently includes re-writing the Grails build system to be based on Gradle.
+</blockquote><p class="paragraph"/>The Grails Gradle Plugin integrates with Grails through another library <a href="https://github.com/grails/grails-launcher." target="blank">Grails Launcher</a>
+This library functions by creating a <code>LaunchContext</code> instance that contains the necessary classpath information,
+script name, and arguments and serializing it to disk in a known location. Gradle then forks a JVM instance that will
+execute the <code>Main</code> class in the Grails Launcher project with the path to the serialized <code>LaunchContext</code>.<p class="paragraph"/>The Grails Launcher project is a library that integrates at a low-level into the Grails framework. In short, it
+configures the JVM is the same manner that the <code>grails</code> scripts on the command line do when executing Grails natively.
+
+
+<h2 id="args">3.2 Passing arguments to Grails Tasks</h2>
+The plugin tries to configure the known Grails tasks to the best of its abilities. However, sometimes additional
+parameters are necessary to be be passed from the command line. In order to pass options to the underlying JVM that
+is forked using the <code>grailsArgs</code> system property from the command line:<p class="paragraph"/><div class="code"><pre>$ gradle &#45;PgrailsArgs=<span class="java&#45;quote">"&#45;&#45;non&#45;interactive"</span> grails&#45;run&#45;app</pre></div><p class="paragraph"/>The above line with pass the <code>--non-interactive</code> switch to the underlying Grails <code>run-app</code> command. This maybe be useful
+when updating plugins and Grails prompts for allowing the upgrade.<p class="paragraph"/><blockquote class="note">
+The <code>grailsArgs</code> property is a single system property. You can only specify it once and it is not parsed in anyway before
+being passed to the Grails JVM. It is strongly recommended to use "" around the value being passed to avoid any type of
+shell interpretation of the value.
+</blockquote>
+
+
+<h2 id="env">3.3 Setting the Grails Environment</h2>
+The plugin allows you to override the Grails environment on the command line by using the <code>grailsEnv</code> property on the
+command line:<p class="paragraph"/><div class="code"><pre>$ gradle &#45;PgrailsEnv=prod grails&#45;run&#45;app</pre></div><p class="paragraph"/>The above command will execute the Grails <code>run-app</code> command in the <code>prod</code> environment.
+
+
+<h2 id="memory">3.4 Configuring JVM Memory for Grails Tasks</h2>
+Grails applications are known for quickly growing in memory size (especially in PermGen). Currently, the plugin makes
+no efforts to configure the memory settings for the Grails JVM. By default then, the Grails JVM will have the same
+memory settings as the Gradle JVM which forked it.<p class="paragraph"/>Each <code>GrailsTask</code> exposes a <code>jvmOptions</code> property that can be used to configure the underlying JVM. The <code>jvmOptions</code>
+property is an instance of <a href="http://www.gradle.org/docs/current/javadoc/org/gradle/process/JavaForkOptions.html" target="blank">JavaForkOptions</a>
+and all the properties and methods from that class are available.<p class="paragraph"/><div class="code"><pre>'grails&#45;run&#45;app' &#123;
+    jvmOptions &#123;
+        minHeapSize = '512m'
+        maxHeapSize = '1g'
+        jvmArgs '&#45;XX:MaxPermSize=512m'
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Alternatively, it may be beneficial to configure all the <code>GrailsTask</code> in the build to have the same memory settings.<p class="paragraph"/><div class="code"><pre>project.tasks.withType(GrailsTask) &#123; GrailsTask task &#45;&#62;
+    task.jvmOptions &#123;
+        minHeapSize = '512m'
+        maxHeapSize = '1g'
+        jvmArgs '&#45;XX:MaxPermSize=512m'
+    &#125;
+&#125;</pre></div>
+
+
+<h2 id="multi">3.5 Using Grails Gradle Plugin in Multi-Project build</h2>
+
+
+
+<h2 id="plugins">3.6 Managing Grails Plugins with Gradle</h2>
+
+
+                    </div>
+                </td>
+                <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+            </tr>
+        </table>
+
+        <div id="footer">
+            
+            
+        </div>
+
+
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+    </body>
+</html>

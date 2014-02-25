@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>1.2 Change Log 2.1.0-SNAPSHOT</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/usage.html"><strong>2</strong><span>Using the Plugin</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/advanced.html"><strong>3</strong><span>Advanced Plugin Configuration &amp; Usage</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Grails Gradle Plugin</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/usage.html"><strong>2</strong><span>Using the Plugin</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>1.2 Change Log - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
+
+                    <p><strong>Version:</strong> 2.1.0-SNAPSHOT</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h2 id="changes">1.2 Change Log</h2>
+<h4>v2.0.1</h4>
+<ul class="star">
+<li>Fix a bug in setting <code>grails.groovyVersion</code> which resulted in an exception when a dependency tried to include the groovy library.</li>
+<li>Fix a bug where when a <code>GrailsTestTask</code> is configured with both a set of Task Inputs and a <code>testResultsDir</code> that results in an exception because <code>testResultsDir</code> is a directory but Gradle expects it to be a file.</li>
+<li>Fix a bug in the task dependency configuration for the <code>clean</code> task that results in Gradle being unable to determine the task graph.</li>
+<li>Add plugin Zip file or application War file as an output file to the runtime configuration.</li>
+<li>Configured the default configuration to extend from runtime (similar to Java plugin behavior)</li>
+<li>Springloaded is only configured for the <code>grails-run-app</code> task (this is what Grails itself does in <code>grailsStart</code> script).</li>
+<li>Added the <code>init-plugin</code> task to initialize a Grails plugin instead of an application.</li>
+<li>The <code>grails-run-app</code> task is now  available on plugin projects as well (Grails allows this)</li>
+</ul><p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/usage.html"><strong>2</strong><span>Using the Plugin</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
