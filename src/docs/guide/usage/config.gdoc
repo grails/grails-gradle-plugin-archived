@@ -1,0 +1,42 @@
+The plugin provides a number of properties that can be configure for each build. These properties are configure
+through the @grails@ extension in the Gradle build:
+
+{code}
+grails {
+    grailsVersion = '2.3.6'
+    groovyVersion = '2.1.9'
+    springLoadedVersion = '1.1.3'
+}
+{code}
+
+h4. GrailsVersion
+
+The @grailsVersion@ property specifies the version of Grails to build the application against. This will transitively
+include a number of Grails libraries onto the classpath for compilation.
+
+h4. GroovyVersion
+
+The @groovyVersion@ property specifies the version of Groovy to use to build the application. This is a convenience method.
+By setting this property, the plugin will add the specified version of the @groovy-all@ library to both the @boot@ and
+@compile@ configurations. Additionally, it will configure a @ResolutionStrategy@ rule to convert all requests for @groovy-all@
+to use this version for the dependency and all requests for the standard @groovy@ library will be converted to request
+the @groovy-all@ library instead.
+
+{note}
+If you are using the Grails Gradle Plugin to build applications with a version of Grails prior to 2.3.0, configuring the
+@grails.groovyVersion@ property may have some side effects.
+{note}
+
+{warning}
+Specifying a @grails.groovyVersion@ that does not match the Groovy version supplied with the specified @grails.grailsVersion@
+is not supported. It is possible to make this configuration, but unforeseen behavior may occur.
+{warning}
+
+h4. SpringLoadedVersion
+
+The @springLoadedVersion@ property specifies the version of the SpringLoaded library to place on the classpath when
+executing the @grails-run-app@ command. This library is enables class reloading. Internally, the plugin configures a
+Java Agent using this library which performs the reload in the JVM. The plugin configures a default version of the library,
+and this property can be used to specify a different version than the default.
+
+By default, the plugin only configures the springLoaded library and reloading on the @grails-run-app@ task.

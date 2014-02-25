@@ -98,6 +98,9 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0px"><a href="#package"><strong>2.6</strong><span>Packaging a Grails Project</span></a>
                     </div>
                     
+                    <div class="toc-item" style="margin-left:0px"><a href="#config"><strong>2.7</strong><span>Configuring Plugin Properties</span></a>
+                    </div>
+                    
                 </div>
                 
 
@@ -177,7 +180,35 @@ as a dependency to <code>test</code>.<p class="paragraph"/><div class="code"><pr
 :test UP&#45;TO&#45;DATE<p class="paragraph"/>BUILD SUCCESSFUL<p class="paragraph"/>Total time: 1.145 secs<p class="paragraph"/>$ gradle check
 :grails&#45;test&#45;app UP&#45;TO&#45;DATE
 :test UP&#45;TO&#45;DATE
-:check UP&#45;TO&#45;DATE<p class="paragraph"/>BUILD SUCCESSFUL<p class="paragraph"/>Total time: 1.177 secs</pre></div><p class="paragraph"/>The plugin configures test results by default to be output to <code>build/test-results</code>
+:check UP&#45;TO&#45;DATE<p class="paragraph"/>BUILD SUCCESSFUL<p class="paragraph"/>Total time: 1.177 secs</pre></div><p class="paragraph"/>The plugin configures test results by default to be output to <code>build/test-results</code><p class="paragraph"/><h4>Running Specific Test Phases</h4><p class="paragraph"/>The <code>GrailsTestTask</code> allows for configuring the specific test phases through the <code>phases</code> property. By default the
+<code>grails-test-app</code> task is configured with no phases which results in Grails executing <strong class="bold"></strong>ALL<strong class="bold"></strong> test phases. This can be
+modified as such:<p class="paragraph"/><div class="code"><pre>'grails&#45;test&#45;app' &#123;
+    phases = &#91;'unit', 'integration'&#93;
+&#125;</pre></div><p class="paragraph"/>The above block will configure <code>grails-test-app</code> to only execute the <code>unit</code> and <code>integration</code> test phases.<p class="paragraph"/><h4>Configuring a Test Task Rule</h4><p class="paragraph"/>It may be beneficial to configure a Gradle task rule to execute specific test phases from the command line. This can
+be accomplished as so:<p class="paragraph"/><div class="code"><pre>project.tasks.addRule('Pattern: grails&#45;test&#45;app&#45;&#60;phase&#62;') &#123; <span class="java&#45;object">String</span> taskName &#45;&#62;
+    <span class="java&#45;keyword">if</span> (taskName.startsWith('grails&#45;test&#45;app') &#38;&#38; taskName != 'grails&#45;test&#45;app') &#123;
+        task(tasName, type: GrailsTestTask) &#123;
+            <span class="java&#45;object">String</span> testPhase = (taskName &#45; 'grails&#45;test&#45;app').toLowerCase()
+            phases = &#91;testPhase&#93;
+        &#125;
+    &#125;
+&#125;<p class="paragraph"/>$ gradle grails&#45;test&#45;app&#45;unit //Execute the unit test phase</pre></div><p class="paragraph"/><h4>Running Specific Tests</h4><p class="paragraph"/>In matching with the Gradle standard, use the <code>-Dtest.single</code> property to defined single tests to run. The <code>GrailsTestTask</code>
+observes this system property and will pass the value as is to the Grails test task.<p class="paragraph"/><div class="code"><pre>$ gradle grails&#45;test&#45;app &#45;Dtest.single=FooController</pre></div><p class="paragraph"/><blockquote class="note">
+The <code>--test</code> syntax introduced in  Gradle 1.10 is not supported for selecting tests to execute. This is because the plugin
+is delegating to the underlying <code>GrailsLauncher</code> to execute tests and not using Gradle's <code>Test</code> class as a base. All the
+normal test selection methods for the Grails <a href="http://grails.org/doc/latest/ref/Command%20Line/test-app.html" target="blank"><code>test-app</code></a>
+command are supported since the value of <code>test.single</code> is passed directly as a command line argument to the Grails script.<p class="paragraph"/><div class="code"><pre>$ gradle grails&#45;test&#45;app &#45;Dtest.single=<span class="java&#45;quote">"Foo Bar"</span></pre></div>
+</blockquote><p class="paragraph"/><h4>Setting the Test Results Output Directly</h4><p class="paragraph"/>If multiple <code>GrailsTestTasks</code> are configured in a project and are part of the normal build process, it may be benefical
+to configure each task to output its test results to a different directory. By default, Grails cleans the test output
+directory before running tests so that the test report matches the tests executed. Use the <code>testResultsDir</code> property on
+<code>GrailsTestTask</code> to configure the test output directory.<p class="paragraph"/><div class="code"><pre>task unit(type: GrailsTestTask) &#123;
+    testResultsDir = file('build/reports/test&#45;unit'
+    phases = &#91;'unit'&#93;
+&#125;<p class="paragraph"/>task integration(type: GrailsTestTask) &#123;
+    testResultsDir = file('build/reports/test&#45;<span class="java&#45;object">int</span>'
+    phases = &#91;'<span class="java&#45;object">int</span>'&#93;
+&#125;<p class="paragraph"/>'grails&#45;test&#45;app'.enabled = <span class="java&#45;keyword">false</span> // Disable the <span class="java&#45;keyword">default</span> test task that executes all phases
+test.dependsOn &#91;unit, integration&#93; // Configure test phase tasks to execute on the 'test' task</pre></div>
 
 
 <h2 id="scripts">2.5 Executing Grails Scripts</h2>
@@ -194,6 +225,29 @@ Grails compilation &#38; plugin resolution occurs after adding a new Grails plug
 The Grails Gradle Plugin configures the normal Gradle <code>assemble</code> task to execute the appropriate Grails command for
 creating the project's output. For applications, the <code>assemble</code> task depends on <code>grails-war</code> and produces a War output.
 For plugins, the <code>assemble</code> task depends on <code>grails-package-plugin</code> and produces the plugin Zip output.<p class="paragraph"/>Additionally, the plugin configures the normal Gradle <code>build</code> task to depend on <code>test</code> and <code>assemble</code>
+
+
+<h2 id="config">2.7 Configuring Plugin Properties</h2>
+The plugin provides a number of properties that can be configure for each build. These properties are configure
+through the <code>grails</code> extension in the Gradle build:<p class="paragraph"/><div class="code"><pre>grails &#123;
+    grailsVersion = '2.3.6'
+    groovyVersion = '2.1.9'
+    springLoadedVersion = '1.1.3'
+&#125;</pre></div><p class="paragraph"/><h4>GrailsVersion</h4><p class="paragraph"/>The <code>grailsVersion</code> property specifies the version of Grails to build the application against. This will transitively
+include a number of Grails libraries onto the classpath for compilation.<p class="paragraph"/><h4>GroovyVersion</h4><p class="paragraph"/>The <code>groovyVersion</code> property specifies the version of Groovy to use to build the application. This is a convenience method.
+By setting this property, the plugin will add the specified version of the <code>groovy-all</code> library to both the <code>boot</code> and
+<code>compile</code> configurations. Additionally, it will configure a <code>ResolutionStrategy</code> rule to convert all requests for <code>groovy-all</code>
+to use this version for the dependency and all requests for the standard <code>groovy</code> library will be converted to request
+the <code>groovy-all</code> library instead.<p class="paragraph"/><blockquote class="note">
+If you are using the Grails Gradle Plugin to build applications with a version of Grails prior to 2.3.0, configuring the
+<code>grails.groovyVersion</code> property may have some side effects.
+</blockquote><p class="paragraph"/><blockquote class="warning">
+Specifying a <code>grails.groovyVersion</code> that does not match the Groovy version supplied with the specified <code>grails.grailsVersion</code>
+is not supported. It is possible to make this configuration, but unforeseen behavior may occur.
+</blockquote><p class="paragraph"/><h4>SpringLoadedVersion</h4><p class="paragraph"/>The <code>springLoadedVersion</code> property specifies the version of the SpringLoaded library to place on the classpath when
+executing the <code>grails-run-app</code> command. This library is enables class reloading. Internally, the plugin configures a
+Java Agent using this library which performs the reload in the JVM. The plugin configures a default version of the library,
+and this property can be used to specify a different version than the default.<p class="paragraph"/>By default, the plugin only configures the springLoaded library and reloading on the <code>grails-run-app</code> task.
 
 
                 <div style="clear:both;margin-top:15px;"></div>
