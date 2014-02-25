@@ -1,0 +1,17 @@
+Once the plugin is applied, a new Grails project can be initialized through Gradle.
+
+{code}
+$ gradle init //Initializes a Grails application
+{code}
+
+OR
+
+{code}
+$ gradle init-plugin //Initializes a Grails plugin
+{code}
+
+Both tasks initialize the Grails project in the current working directory.
+
+{note}
+The plugin initializes the application/plugin with the name of the Gradle project and the current Gradle project version
+{note}

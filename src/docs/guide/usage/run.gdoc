@@ -1,0 +1,20 @@
+The Grails Gradle Plugin creates a @grails-run-app@ task on the projec that will start the Grails application container
+in the normal development environment.
+
+{code}
+$ gradle grails-run-app
+{code}
+
+Grails does not ship with an application container provided, so the build must specify a Grails plugin dependency. Typically,
+this will be the Grails tomcat plugin:
+
+{code}
+depedencies {
+    bootstrap 'org.grails.plugins:tomcat:7.0.50'
+}
+{code}
+
+{note}
+Running the @grails-run-app@ task will prevent the Gradle execution from completing (i.e. the task blocks on the running container).
+To terminate the Grails application, use Ctrl+C to terminate the Gradle run
+{note}

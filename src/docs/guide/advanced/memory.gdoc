@@ -1,0 +1,29 @@
+Grails applications are known for quickly growing in memory size (especially in PermGen). Currently, the plugin makes
+no efforts to configure the memory settings for the Grails JVM. By default then, the Grails JVM will have the same
+memory settings as the Gradle JVM which forked it.
+
+Each @GrailsTask@ exposes a @jvmOptions@ property that can be used to configure the underlying JVM. The @jvmOptions@
+property is an instance of "JavaForkOptions":http://www.gradle.org/docs/current/javadoc/org/gradle/process/JavaForkOptions.html
+and all the properties and methods from that class are available.
+
+{code}
+'grails-run-app' {
+    jvmOptions {
+        minHeapSize = '512m'
+        maxHeapSize = '1g'
+        jvmArgs '-XX:MaxPermSize=512m'
+    }
+}
+{code}
+
+Alternatively, it may be beneficial to configure all the @GrailsTask@ in the build to have the same memory settings.
+
+{code}
+project.tasks.withType(GrailsTask) { GrailsTask task ->
+    task.jvmOptions {
+        minHeapSize = '512m'
+        maxHeapSize = '1g'
+        jvmArgs '-XX:MaxPermSize=512m'
+    }
+}
+{code}
