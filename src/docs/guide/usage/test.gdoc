@@ -1,0 +1,34 @@
+The Grails Gradle Plugin configures a @grails-test-app@ task that executes the projects tests through the Grails framework.
+Additionally, the plugin configures the normal Gradle @test@ and @check@ tasks and configures the @grails-test-app@ task
+as a dependency to @test@.
+
+{code}
+$ gradle grails-test-app
+:grails-test-app
+| Loading Grails 2.3.5
+...
+| Tests PASSED - view reports in /Users/jengelman/workspace/personal/gg-test/build/test-results
+
+BUILD SUCCESSFUL
+
+Total time: 14.181 secs
+
+$ gradle test
+:grails-test-app UP-TO-DATE
+:test UP-TO-DATE
+
+BUILD SUCCESSFUL
+
+Total time: 1.145 secs
+
+$ gradle check
+:grails-test-app UP-TO-DATE
+:test UP-TO-DATE
+:check UP-TO-DATE
+
+BUILD SUCCESSFUL
+
+Total time: 1.177 secs
+{code}
+
+The plugin configures test results by default to be output to @build/test-results@

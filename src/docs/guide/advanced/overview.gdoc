@@ -1,0 +1,21 @@
+Integration of Grails into Gradle via this plugin is a complicated endeavour. The Grails framework contains its own
+build tooling that performs source compilation, test execution, and artifact packaging. Additionally, it has an extensive
+and mature plugin community of its own. Each plugin can add its own scripts to a Grails build and provide additional
+dependencies.
+
+Because Grails contains is own build tooling, Grails projects, despite being based on Java & Groovy, do **NOT** use
+the Groovy, Java, or War plugins for Gradle. As a consequence, these projects lose many of the conveniences for
+configuration that a standard Gradle project would receive. The Gradle Grails Plugin tries to address many of these
+shortcomings but some may not be possible with the current state of the frameworks.
+
+{note}
+The Grails 3 Road Map currently includes re-writing the Grails build system to be based on Gradle.
+{note}
+
+The Grails Gradle Plugin integrates with Grails through another library "Grails Launcher":https://github.com/grails/grails-launcher.
+This library functions by creating a @LaunchContext@ instance that contains the necessary classpath information,
+script name, and arguments and serializing it to disk in a known location. Gradle then forks a JVM instance that will
+execute the @Main@ class in the Grails Launcher project with the path to the serialized @LaunchContext@.
+
+The Grails Launcher project is a library that integrates at a low-level into the Grails framework. In short, it
+configures the JVM is the same manner that the @grails@ scripts on the command line do when executing Grails natively.

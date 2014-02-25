@@ -1,0 +1,2 @@
+This section covers advanced topics in the Gradle Grails Plugin. It includes topics related to configuring the
+underlying JVM that is executing the Grails tasks and integrating Grails builds into larger multi-project build.
