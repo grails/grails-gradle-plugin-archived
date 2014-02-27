@@ -1,3 +1,9 @@
+h4. v2.0.2
+
+* Fix a bug in the IntelliJ IDEA integration where only 1 plugin per configuration was being registered as project source
+* Include bootstrap scope plugins as project source in IntelliJ IDEA
+* Mark test scope plugins directories as Test Source instead of Source in IntelliJ IDEA
+
 h4. v2.0.1
 
 * Fix a bug in setting @grails.groovyVersion@ which resulted in an exception when a dependency tried to include the groovy library.
