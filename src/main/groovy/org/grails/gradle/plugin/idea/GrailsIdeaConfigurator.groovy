@@ -3,6 +3,7 @@ package org.grails.gradle.plugin.idea
 import org.gradle.api.Project
 import org.gradle.api.XmlProvider
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModule
 
@@ -38,7 +39,7 @@ class GrailsIdeaConfigurator {
     }
 
     /**
-     * returns source directories from the projects and any installed Grails plugins
+     * Register the source directories for the project and any plugins with IDEA
      */
     private void sourceDirs(Project project, IdeaModule module) {
         module.conventionMapping.sourceDirs = {
@@ -57,8 +58,8 @@ class GrailsIdeaConfigurator {
      */
     private void pluginSourceDirs(Project project, IdeaModule module) {
         ['compile', 'test', 'runtime'].collect { scope ->
-            project.configurations.getByName(scope).allDependencies.matching({dependency ->
-                dependency.group == 'org.grails.plugins'
+            project.configurations.getByName(scope).allDependencies.matching({Dependency dependency ->
+                isPluginZip(dependency)
             }).all { dependency ->
                 ['src/groovy', 'grails-app/i18n', 'grails-app/controllers', 'grails-app/domain',
                         'grails-app/services', 'grails-app/taglib', 'src/java'].collect { root ->
@@ -66,6 +67,14 @@ class GrailsIdeaConfigurator {
                 }
             }
         }
+    }
+
+    private boolean isPluginZip(Dependency dependency) {
+        if (!(dependency instanceof ProjectDependency) &&
+                dependency.group == 'org.grails.plugins') {
+            return true
+        }
+        return false
     }
 
     private void testDirs(Project project, IdeaModule module) {
