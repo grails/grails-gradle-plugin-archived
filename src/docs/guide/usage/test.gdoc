@@ -41,11 +41,25 @@ modified as such:
 
 {code}
 'grails-test-app' {
-    phases = ['unit', 'integration']
+    phases = ['unit:', 'integration:']
 }
 {code}
 
 The above block will configure @grails-test-app@ to only execute the @unit@ and @integration@ test phases.
+
+{note}
+The @phases@ property of @GrailsTestTask@ gets passed to Grails's @test-app@ command directory. Therefor you must provide
+content that is compatible with the @test-app@ command. Grails test phase/type selection is of the form @<phase>:<type>@.
+Valid syntaxes include (not a complete list): @unit:
+{code}
+phases = ['unit:'] //Execute all tests types in the unit phase
+phases = ['integration:spock'] //Execute all Spock tests in the integration phase
+phases = [':unit'] //Execute all JUnit test type in all phases
+{code}
+
+Refer to the section "Targeting Test Types and/or Phases":http://grails.org/doc/2.3.x/guide/single.html#testing in the
+Grails User Guide for additional information.
+{note}
 
 h4. Configuring a Test Task Rule
 
@@ -57,7 +71,7 @@ project.tasks.addRule('Pattern: grails-test-app-<phase>') { String taskName ->
     if (taskName.startsWith('grails-test-app') && taskName != 'grails-test-app') {
         task(tasName, type: GrailsTestTask) {
             String testPhase = (taskName - 'grails-test-app').toLowerCase()
-            phases = [testPhase]
+            phases = [testPhase + ':']
         }
     }
 }
@@ -95,12 +109,12 @@ directory before running tests so that the test report matches the tests execute
 {code}
 task unit(type: GrailsTestTask) {
     testResultsDir = file('build/reports/test-unit'
-    phases = ['unit']
+    phases = ['unit:']
 }
 
 task integration(type: GrailsTestTask) {
     testResultsDir = file('build/reports/test-int'
-    phases = ['int']
+    phases = ['integration:']
 }
 
 'grails-test-app'.enabled = false // Disable the default test task that executes all phases
