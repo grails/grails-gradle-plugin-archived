@@ -62,16 +62,28 @@ class IdeaConfigurationSpec extends PluginSpec {
             runtime 'org.grails.plugins:zipped-resources:1.0.1'
             test 'org.grails.plugins:build-test-data:2.1.1'
         }
+        def srcDirs = [
+                'src/groovy', 'src/java', 'grails-app/controllers',
+                'grails-app/domain', 'grails-app/services', 'grails-app/taglib'
+        ]
 
         expect:
-        ['resources-1.2.2', 'zipped-resources-1.0.1', 'build-test-data-2.1.1'].each { plugin ->
-            [
-                    'src/groovy', 'src/java', 'grails-app/controllers',
-                    'grails-app/domain', 'grails-app/services', 'grails-app/taglib'
-            ].each { subdir ->
+        ['tomcat-7.0.50.1', 'resources-1.2.2', 'zipped-resources-1.0.1'].each { plugin ->
+            srcDirs.each { subdir ->
                 def directory = project.file("buildPlugins/$plugin/$subdir")
                 assert project.idea.module.sourceDirs.contains(directory)
             }
+        }
+
+        and:
+        assert !project.idea.module.sourceDirs.any {
+            it.path.startsWith(project.file('buildPlugins/build-test-data-2.1.1').path)
+        }
+
+        and:
+        srcDirs.each { subdir ->
+            def directory = project.file("buildPlugins/build-test-data-2.1.1/$subdir")
+            assert project.idea.module.testSourceDirs.contains(directory)
         }
     }
 

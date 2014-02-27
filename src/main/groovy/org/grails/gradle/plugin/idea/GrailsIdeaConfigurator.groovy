@@ -2,6 +2,7 @@ package org.grails.gradle.plugin.idea
 
 import org.gradle.api.Project
 import org.gradle.api.XmlProvider
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.plugins.ide.idea.IdeaPlugin
@@ -26,6 +27,7 @@ class GrailsIdeaConfigurator {
                 //Configure additional source and test directories
                 sourceDirs(project, module)
                 testDirs(project, module)
+                pluginSourceDirs(project, module)
                 module.conventionMapping.excludeDirs = { excludedBuildFiles(project) }
                 module.iml.withXml { XmlProvider xmlProvider ->
                     declareGrailsFacets(project, xmlProvider.asNode())
@@ -46,7 +48,6 @@ class GrailsIdeaConfigurator {
             (project.sourceSets.main.allSource.srcDirs as LinkedHashSet) -
                     (project.sourceSets.main.resources.srcDirs as LinkedHashSet)
         }
-        pluginSourceDirs(project, module)
     }
 
     /**
@@ -57,14 +58,23 @@ class GrailsIdeaConfigurator {
      * This needs to be made more robust (perhaps a 'pluginCompile' and 'pluginRuntime' configuration)
      */
     private void pluginSourceDirs(Project project, IdeaModule module) {
-        ['compile', 'test', 'runtime'].collect { scope ->
-            project.configurations.getByName(scope).allDependencies.matching({Dependency dependency ->
-                isPluginZip(dependency)
-            }).all { dependency ->
-                ['src/groovy', 'grails-app/i18n', 'grails-app/controllers', 'grails-app/domain',
-                        'grails-app/services', 'grails-app/taglib', 'src/java'].collect { root ->
-                    module.sourceDirs += pluginDir(dependency, project, root)
-                }
+        ['bootstrap', 'compile', 'runtime'].each { name ->
+            registerPluginSourceDirectory(project, project.configurations.getByName(name)) { dir ->
+                module.sourceDirs += dir
+            }
+        }
+        registerPluginSourceDirectory(project, project.configurations.test) { dir ->
+            module.testSourceDirs += dir
+        }
+    }
+
+    private void registerPluginSourceDirectory(Project project, Configuration configuration, Closure mapping) {
+        configuration.allDependencies.matching({ dependency ->
+            isPluginZip(dependency)
+        }).all { dependency ->
+            ['src/groovy', 'grails-app/i18n', 'grails-app/controllers', 'grails-app/domain',
+                    'grails-app/services', 'grails-app/taglib', 'src/java'].collect { root ->
+                mapping(pluginDir(dependency, project, root))
             }
         }
     }
