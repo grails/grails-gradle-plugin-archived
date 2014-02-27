@@ -4,6 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.XmlProvider
 import org.gradle.api.artifacts.Dependency
 import org.gradle.plugins.ide.idea.IdeaPlugin
+import org.gradle.plugins.ide.idea.model.IdeaModule
 
 /**
  * Configure the IDEA integration for the project.
@@ -22,8 +23,8 @@ class GrailsIdeaConfigurator {
                         TEST: [plus: [configurations.test], minus: [configurations.runtime]]
                 ]
                 //Configure additional source and test directories
-                module.conventionMapping.sourceDirs = { sourceDirs(project) }
-                module.conventionMapping.testSourceDirs = { testDirs(project) }
+                sourceDirs(project, module)
+                testDirs(project, module)
                 module.conventionMapping.excludeDirs = { excludedBuildFiles(project) }
                 module.iml.withXml { XmlProvider xmlProvider ->
                     declareGrailsFacets(project, xmlProvider.asNode())
@@ -39,9 +40,12 @@ class GrailsIdeaConfigurator {
     /**
      * returns source directories from the projects and any installed Grails plugins
      */
-    private LinkedHashSet sourceDirs(Project project) {
-        (project.sourceSets.main.allSource.srcDirs as LinkedHashSet) -
-                (project.sourceSets.main.resources.srcDirs as LinkedHashSet) + pluginSourceDirs(project)
+    private void sourceDirs(Project project, IdeaModule module) {
+        module.conventionMapping.sourceDirs = {
+            (project.sourceSets.main.allSource.srcDirs as LinkedHashSet) -
+                    (project.sourceSets.main.resources.srcDirs as LinkedHashSet)
+        }
+        pluginSourceDirs(project, module)
     }
 
     /**
@@ -51,21 +55,23 @@ class GrailsIdeaConfigurator {
      * This is a little hacky in that it assumes that all plugins have the 'org.grails.plugins' group.
      * This needs to be made more robust (perhaps a 'pluginCompile' and 'pluginRuntime' configuration)
      */
-    private LinkedHashSet pluginSourceDirs(Project project) {
+    private void pluginSourceDirs(Project project, IdeaModule module) {
         ['compile', 'test', 'runtime'].collect { scope ->
-            project.configurations.getByName(scope).dependencies.find { dependency ->
+            project.configurations.getByName(scope).allDependencies.matching({dependency ->
                 dependency.group == 'org.grails.plugins'
-            }.collect { dependency ->
+            }).all { dependency ->
                 ['src/groovy', 'grails-app/i18n', 'grails-app/controllers', 'grails-app/domain',
                         'grails-app/services', 'grails-app/taglib', 'src/java'].collect { root ->
-                    pluginDir(dependency, project, root)
+                    module.sourceDirs += pluginDir(dependency, project, root)
                 }
             }
-        }.flatten()
+        }
     }
 
-    private LinkedHashSet testDirs(Project project) {
-        project.sourceSets.test.allSource.srcDirs as LinkedHashSet
+    private void testDirs(Project project, IdeaModule module) {
+        module.conventionMapping.testSourceDirs = {
+            project.sourceSets.test.allSource.srcDirs as LinkedHashSet
+        }
     }
 
     private File pluginDir(Dependency dependency, Project project, String root) {
