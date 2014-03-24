@@ -91,8 +91,14 @@ class GrailsTaskConfigurator {
         if (task.hasProperty('env') && project.hasProperty(GrailsTask.GRAILS_ENV_PROPERTY)) {
             task.env = project.property(GrailsTask.GRAILS_ENV_PROPERTY)
         }
-        if (task.hasProperty('jvmOptions') && project.hasProperty(GrailsTask.GRAILS_DEBUG_PROPERTY)) {
-            task.jvmOptions.debug = Boolean.parseBoolean(project.property(GrailsTask.GRAILS_DEBUG_PROPERTY))
+        if (task.hasProperty('jvmOptions')) {
+            if(project.hasProperty(GrailsTask.GRAILS_JVM_ARGS_PROPERTY)) {
+                task.jvmOptions.setAllJvmArgs(project.property(GrailsTask.GRAILS_JVM_ARGS_PROPERTY).tokenize())
+            }
+
+            if(project.hasProperty(GrailsTask.GRAILS_DEBUG_PROPERTY)) {
+                task.jvmOptions.debug = Boolean.parseBoolean(project.property(GrailsTask.GRAILS_DEBUG_PROPERTY))
+            }
         }
 
         task

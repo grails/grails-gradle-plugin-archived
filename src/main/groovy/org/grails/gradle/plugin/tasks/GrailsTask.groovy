@@ -43,6 +43,7 @@ class GrailsTask extends DefaultTask {
     static public final GRAILS_ARGS_PROPERTY = 'grailsArgs'
     static public final GRAILS_ENV_PROPERTY = 'grailsEnv'
     static public final GRAILS_DEBUG_PROPERTY = 'grailsDebug'
+    static public final GRAILS_JVM_ARGS_PROPERTY = 'grailsJvmArgs'
     static public final GRAILS_GROUP = 'grails'
 
     String grailsVersion
