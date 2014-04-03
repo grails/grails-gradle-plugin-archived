@@ -1,6 +1,7 @@
 introduction:
   title: Introduction
   quickstart: Quick Start
+  commands: Basic Task Reference
   changes: Change Log
 usage:
   title: Using the Plugin
