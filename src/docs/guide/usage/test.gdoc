@@ -67,17 +67,23 @@ It may be beneficial to configure a Gradle task rule to execute specific test ph
 be accomplished as so:
 
 {code}
-project.tasks.addRule('Pattern: grails-test-app-<phase>') { String taskName ->
-    if (taskName.startsWith('grails-test-app') && taskName != 'grails-test-app') {
-        task(tasName, type: GrailsTestTask) {
-            String testPhase = (taskName - 'grails-test-app').toLowerCase()
+project.tasks.addRule('Pattern: grailsTestApp-<phase>') { String taskName ->
+    if (taskName.startsWith('grailsTestApp')) {
+        task(taskName, type: GrailsTestTask) {
+            String testPhase = (taskName - 'grailsTestApp-').toLowerCase()
             phases = [testPhase + ':']
         }
     }
 }
 
-$ gradle grails-test-app-unit //Execute the unit test phase
+$ gradle grailsTestApp-unit //Execute the unit test phase
 {code}
+
+{note}
+When adding a a TaskRule for Grails tasks, avoid using a prefix that begins with {code}grails-{code}. This is the prefix
+that the plugin uses for executing arbitrary Grails scripts. Gradle doesn't provide a method to order TaskRules, so
+using this prefix will likely result in a duplicate task exception.
+{note}
 
 h4. Running Specific Tests
 
