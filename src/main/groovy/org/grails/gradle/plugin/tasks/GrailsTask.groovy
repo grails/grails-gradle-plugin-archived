@@ -45,6 +45,9 @@ class GrailsTask extends DefaultTask {
     static public final GRAILS_DEBUG_PROPERTY = 'grailsDebug'
     static public final GRAILS_GROUP = 'grails'
 
+    static public final String APP_GRAILS_VERSION = 'app.grails.version'
+    static public final String APP_VERSION = 'app.version'
+
     String grailsVersion
 
     String grailsHome
@@ -102,6 +105,7 @@ class GrailsTask extends DefaultTask {
 
     @TaskAction
     def executeCommand() {
+        handleVersionSync()
         def launchContext = createLaunchContext()
         def file = new File(getTemporaryDir(), "launch.context")
 
@@ -246,5 +250,37 @@ class GrailsTask extends DefaultTask {
 
     protected File projectWorkDirFile(String path) {
         new File(getProjectWorkDir(), path)
+    }
+
+    private void handleVersionSync() {
+        File appProperties = project.file('application.properties')
+        URLClassLoader cl = new URLClassLoader(effectiveBootstrapClasspath.collect { it.toURI().toURL() } as URL[])
+        Class metadataClass = cl.loadClass('grails.util.Metadata')
+        Object metadata = metadataClass.newInstance(appProperties)
+        if (syncVersions(metadata)) {
+            metadata.persist()
+        }
+    }
+
+    private boolean syncVersions(Object metadata) {
+        boolean result = false;
+
+        Object appGrailsVersion = metadata.get(APP_GRAILS_VERSION);
+        if (!getGrailsVersion().equals(appGrailsVersion)) {
+            logger.info("updating ${APP_GRAILS_VERSION} to ${getGrailsVersion()}")
+            metadata.put(APP_GRAILS_VERSION, this.getGrailsVersion());
+            result = true;
+        }
+
+        Object appVersion = metadata.get(APP_VERSION);
+        if (appVersion != null) {
+            if (!project.version.equals(appVersion)) {
+                logger.info("updating ${APP_VERSION} to ${project.version}")
+                metadata.put(APP_VERSION, project.version);
+                result = true;
+            }
+        }
+
+        return result;
     }
 }

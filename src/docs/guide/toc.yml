@@ -12,6 +12,7 @@ usage:
   scripts: Executing Grails Scripts
   package: Packaging a Grails Project
   config: Configuring Plugin Properties
+  upgrade: Upgrading a Grails Application
 advanced:
   title: Advanced Plugin Configuration & Usage
   overview: Overview of Plugin Integration with Grails
