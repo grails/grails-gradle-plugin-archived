@@ -3,7 +3,7 @@ build tooling that performs source compilation, test execution, and artifact pac
 and mature plugin community of its own. Each plugin can add its own scripts to a Grails build and provide additional
 dependencies.
 
-Because Grails contains is own build tooling, Grails projects, despite being based on Java & Groovy, do **NOT** use
+Because Grails contains is own build tooling, Grails projects, despite being based on Java & Groovy, do *NOT* use
 the Groovy, Java, or War plugins for Gradle. As a consequence, these projects lose many of the conveniences for
 configuration that a standard Gradle project would receive. The Gradle Grails Plugin tries to address many of these
 shortcomings but some may not be possible with the current state of the frameworks.

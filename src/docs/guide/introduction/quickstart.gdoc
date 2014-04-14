@@ -55,7 +55,7 @@ dependencies {
 {code}
 
 {warning}
-If you are using a version of Grails that is < @1.3.5@ or @1.2.4@, the following @runtime@ dependency **MUST** be added:
+If you are using a version of Grails that is < @1.3.5@ or @1.2.4@, the following @runtime@ dependency *MUST* be added:
 {code}
 runtime 'org.aspectj:aspectjrt:1.6.8'
 {code}

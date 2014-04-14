@@ -36,7 +36,7 @@ The plugin configures test results by default to be output to @build/test-result
 h4. Running Specific Test Phases
 
 The @GrailsTestTask@ allows for configuring the specific test phases through the @phases@ property. By default the
-@grails-test-app@ task is configured with no phases which results in Grails executing **ALL** test phases. This can be
+@grails-test-app@ task is configured with no phases which results in Grails executing *ALL* test phases. This can be
 modified as such:
 
 {code}

@@ -25,6 +25,7 @@ import org.gradle.api.tasks.*
 import org.gradle.process.ExecResult
 import org.gradle.process.JavaForkOptions
 import org.gradle.process.internal.DefaultJavaForkOptions
+import org.gradle.process.internal.ExecException
 import org.gradle.process.internal.JavaExecAction
 import org.grails.gradle.plugin.GrailsProject
 import org.grails.gradle.plugin.internal.GrailsLaunchConfigureAction
@@ -119,18 +120,30 @@ class GrailsTask extends DefaultTask {
 
         def launcher = new GrailsLaunchConfigureAction(launchContext, springloadedJar, file)
 
+        OutputStream out = logger.infoEnabled ? System.out : new ByteArrayOutputStream()
+        OutputStream err = logger.infoEnabled ? System.out : new ByteArrayOutputStream()
         ExecResult result = project.javaexec {
             JavaExecAction action = delegate
+            action.ignoreExitValue = true
             getJvmOptions().copyTo(action)
             if (forwardStdIn) {
                 action.standardInput = System.in
             }
-            action.standardOutput = System.out
-            action.errorOutput = System.err
+            action.standardOutput = out
+            action.errorOutput = err
             launcher.execute(action)
         }
 
-        result.rethrowFailure()
+        try {
+            result.rethrowFailure()
+            result.assertNormalExitValue()
+        } catch (ExecException e) {
+            if (!logger.infoEnabled) {
+                out.writeTo(System.out)
+                err.writeTo(System.err)
+            }
+            throw e
+        }
     }
 
     File getEffectiveGrailsHome() {
