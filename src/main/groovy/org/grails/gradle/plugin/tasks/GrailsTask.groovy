@@ -213,7 +213,7 @@ class GrailsTask extends DefaultTask {
 
         // Provided deps are 2.0 only
         files = getProvidedClasspath()
-        if (providedClasspath) {
+        if (files) {
             try {
                 launchContext.providedDependencies = files as List
             } catch (NoSuchMethodException ignore) {
