@@ -42,6 +42,8 @@ abstract class DependencyConfigurer {
 
     abstract void configureResources(Configuration configuration)
 
+    abstract void configureSpringloaded(Configuration configuration)
+
     protected ModuleDependency addDependency(String notation, Configuration configuration) {
         ModuleDependency dependency = project.dependencies.create(notation) as ModuleDependency
         configuration.dependencies.add(dependency)

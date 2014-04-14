@@ -137,8 +137,8 @@ class GrailsPlugin implements Plugin<Project> {
             conventionMapping.with {
                 map("springloaded") {
                     if (springloadedConfiguration.dependencies.empty) {
-                        def defaultSpringloaded = project.dependencies.create("org.springsource.springloaded:springloaded-core:$grailsProject.springLoadedVersion")
-                        springloadedConfiguration.dependencies.add(defaultSpringloaded)
+                        DependencyConfigurer dependenciesUtil = DependencyConfigurerFactory.build(project, grailsProject)
+                        dependenciesUtil.configureSpringloaded(springloadedConfiguration)
                     }
 
                     def lenient = springloadedConfiguration.resolvedConfiguration.lenientConfiguration
