@@ -276,24 +276,44 @@ class GrailsTask extends DefaultTask {
     }
 
     private boolean syncVersions(Object metadata) {
-        boolean result = false;
+        boolean result = false
 
-        Object appGrailsVersion = metadata.get(APP_GRAILS_VERSION);
+        Object appGrailsVersion = metadata.get(APP_GRAILS_VERSION)
         if (!getGrailsVersion().equals(appGrailsVersion)) {
             logger.info("updating ${APP_GRAILS_VERSION} to ${getGrailsVersion()}")
-            metadata.put(APP_GRAILS_VERSION, this.getGrailsVersion());
-            result = true;
+            metadata.put(APP_GRAILS_VERSION, this.getGrailsVersion())
+            result = true
         }
 
-        Object appVersion = metadata.get(APP_VERSION);
-        if (appVersion != null) {
-            if (!project.version.equals(appVersion)) {
-                logger.info("updating ${APP_VERSION} to ${project.version}")
-                metadata.put(APP_VERSION, project.version);
-                result = true;
+        if (!isPluginProject()) {
+            Object appVersion = metadata.get(APP_VERSION)
+            if (appVersion != null) {
+                if (!project.version.equals(appVersion)) {
+                    logger.info("updating ${APP_VERSION} to ${project.version}")
+                    metadata.put(APP_VERSION, project.version)
+                    result = true
+                }
             }
+        } else {
+            syncPluginVersion()
         }
 
-        return result;
+        return result
+    }
+
+    // Reimplemented from https://github.com/grails/grails-core/blob/master/scripts/SetVersion.groovy
+    private void syncPluginVersion() {
+        File descriptor = project.grails.getPluginDescriptor()
+        String content = descriptor.getText('UTF-8')
+        def pattern = ~/def\s*version\s*=\s*"(.*)"/
+        def matcher = (content =~ pattern)
+
+        String newVersionString = "def version = \"${project.version}\""
+        if (matcher.size() > 0) {
+            content = content.replaceFirst(/def\s*version\s*=\s*".*"/, newVersionString)
+        } else {
+            content = content.replaceFirst(/\{/, "{\n\t$newVersionString // added by Gradle")
+        }
+        descriptor.withWriter('UTF-8') { it.write content }
     }
 }

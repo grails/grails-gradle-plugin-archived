@@ -36,6 +36,8 @@ interface GrailsProject {
 
     boolean isPluginProject()
 
+    File getPluginDescriptor()
+
     File getProjectWorkDir()
 
     File getProjectDir()
