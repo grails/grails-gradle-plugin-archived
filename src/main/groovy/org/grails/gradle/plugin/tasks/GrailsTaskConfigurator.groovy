@@ -23,70 +23,14 @@ class GrailsTaskConfigurator {
     public static final String GRAILS_WAR_TASK = 'grails-war'
 
     void configure(Project project, GrailsProject grailsProject) {
-        //Create the Grails init task
-        project.tasks.create(GRAILS_INIT_TASK, GrailsInitTask)
-
-        //Create the Grails init plugin task
-        project.tasks.create(GRAILS_INIT_PLUGIN_TASK, GrailsInitTask).with {
-            command = 'create-plugin'
-            description = 'Creates a new Grails plugin in the current directory'
-        }
-
-        //Create the grails-clean task and wire it to the 'clean' task
-        project.tasks.create(GRAILS_CLEAN_TASK, GrailsTask).with {
-            command = "clean"
-            description = 'Executes Grails clean'
-        }
-
-        def grailsClean = project.tasks.getByName(GRAILS_CLEAN_TASK)
-        project.tasks.getByName(BasePlugin.CLEAN_TASK_NAME).dependsOn grailsClean
-
-        //Set up the proper assemble task and adds it's artifact to the configuration
-        configureAssemble(grailsProject, project)
-
-        //Add the run task...this is allowable for both applications and plugins
-        project.tasks.create(GRAILS_RUN_TASK, GrailsTask).with {
-            command = 'run-app'
-            description = 'Starts the Grails application'
-        }
-
-        //Create the Grails test task. Don't wire it to the 'test' task yet because it doesn't quite exist yet.
-        def grailsTest = project.tasks.create(GRAILS_TEST_TASK, GrailsTestTask)
-
-        //Create a task rule that converts any task with that starts with 'grail-' into an invocation of
-        //the corresponding Grails script
-        project.tasks.addRule("Grails command") { String name ->
-            if (name.startsWith(GrailsTask.GRAILS_TASK_PREFIX)) {
-                project.task(name, type: GrailsTask) {
-                    command = (name - GrailsTask.GRAILS_TASK_PREFIX)
-                    if (project.hasProperty(GrailsTask.GRAILS_ARGS_PROPERTY)) {
-                        args = project.property(GrailsTask.GRAILS_ARGS_PROPERTY)
-                    }
-                    if (project.hasProperty(GrailsTask.GRAILS_ENV_PROPERTY)) {
-                        env = project.property(GrailsTask.GRAILS_ENV_PROPERTY)
-                    }
-                    if (project.hasProperty(GrailsTask.GRAILS_DEBUG_PROPERTY)) {
-                        jvmOptions.debug = Boolean.parseBoolean(project.property(GrailsTask.GRAILS_DEBUG_PROPERTY))
-                    }
-                }
-            }
-        }
-
         //Setup some tasks that mimic the Java build pattern
         configureJavaStyleTasks(project)
 
-        //Now wire the grails-test task to the 'test' task
-        project.tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn grailsTest
-    }
+        // Setup the Grails-specific tasks
+        configureGrailsTasks(grailsProject, project)
 
-    private GrailsTask createPackagePluginTask(Project project) {
-        project.tasks.create(GRAILS_PACKAGE_PLUGIN_TASK, GrailsPluginPackageTask)
-        return project.tasks.findByName(GRAILS_PACKAGE_PLUGIN_TASK)
-    }
-
-    private GrailsTask createWarTask(Project project) {
-        project.tasks.create(GRAILS_WAR_TASK, GrailsWarTask)
-        return project.tasks.findByName(GRAILS_WAR_TASK)
+        project.tasks.findByName(BasePlugin.CLEAN_TASK_NAME).dependsOn(project.tasks.findByName(GRAILS_CLEAN_TASK))
+        project.tasks.findByName(JavaPlugin.TEST_TASK_NAME).dependsOn(project.tasks.findByName(GRAILS_TEST_TASK))
     }
 
     /**
@@ -96,6 +40,76 @@ class GrailsTaskConfigurator {
         configureCheck(project)
         configureBuild(project)
         configureTest(project)
+    }
+
+    /**
+     * Wire up all of the Grails Gradle tasks.
+     * @param grailsProject The {@link GrailsProject}.
+     * @param project The Gradle {@link Project}.
+     */
+    private void configureGrailsTasks(GrailsProject grailsProject, Project project) {
+        createGrailsTask(project, GrailsInitTask, GRAILS_INIT_TASK, 'create-app', 'Creates a new Grails application in the current directory.')
+        createGrailsTask(project, GrailsInitTask, GRAILS_INIT_PLUGIN_TASK, 'create-plugin', 'Creates a new Grails plugin in the current directory.')
+        createGrailsTask(project, GrailsTask, GRAILS_CLEAN_TASK, 'clean', 'Executes Grails clean.')
+        createGrailsTask(project, GrailsTask, GRAILS_RUN_TASK, 'run-app', 'Starts the Grails application.')
+        createGrailsTask(project, GrailsTestTask, GRAILS_TEST_TASK, 'test-app', 'Executes Grails tests.')
+
+        //Create a task rule that converts any custom task with that starts with 'grails-' into an invocation of
+        //the corresponding Grails script
+        project.tasks.addRule("Grails command") { String name ->
+            if (name.startsWith(GrailsTask.GRAILS_TASK_PREFIX) && !isNativeTask(name)) {
+                createGrailsTask(project, GrailsTask, name, (name - GrailsTask.GRAILS_TASK_PREFIX), 'Custom Grails script task.')
+            }
+        }
+
+        //Depending on the project type, configure either the package-plugin or war tasks
+        //as the assemble task.  Then, set up the proper assemble task and adds it's
+        // artifact to the configuration
+        if(grailsProject.pluginProject) {
+            configureAssemble(project, createGrailsTask(project, GrailsPluginPackageTask, GRAILS_PACKAGE_PLUGIN_TASK, 'package-plugin', 'Packages a grails plugin.'))
+        } else {
+            configureAssemble(project, createGrailsTask(project, GrailsWarTask, GRAILS_WAR_TASK, 'war', 'Generates the application WAR file.'))
+        }
+
+    }
+
+    /**
+     * Creates and registers a new Gradle task with the {@link Project}.
+     * @param project The Gradle {@link Project}.
+     * @param taskType The class of the task to be created.
+     * @param taskName The name of the task.
+     * @param command The Grails command.
+     * @param description The description of the Grails task.
+     */
+    private Task createGrailsTask(Project project, Class taskType, String taskName, String command, String description) {
+        // Some of the Grails tasks replace existing Gradle tasks.  Therefore,
+        // if we find a match, remove it first so that we can re-create it
+        // (or create it for the first time).
+        if (project.tasks.findByName(taskName)) {
+            project.tasks.removeByName(taskName)
+        }
+
+        Task task = project.tasks.create(taskName, taskType)
+        task.command = command
+        task.description = description
+
+        if (task.hasProperty('args') && project.hasProperty(GrailsTask.GRAILS_ARGS_PROPERTY)) {
+            task.args = createArgs(task, project)
+        }
+        if (task.hasProperty('env') && project.hasProperty(GrailsTask.GRAILS_ENV_PROPERTY)) {
+            task.env = project.property(GrailsTask.GRAILS_ENV_PROPERTY)
+        }
+        if (task.hasProperty('jvmOptions')) {
+            if(project.hasProperty(GrailsTask.GRAILS_JVM_ARGS_PROPERTY)) {
+                task.jvmOptions.setAllJvmArgs(project.property(GrailsTask.GRAILS_JVM_ARGS_PROPERTY).tokenize())
+            }
+
+            if(project.hasProperty(GrailsTask.GRAILS_DEBUG_PROPERTY)) {
+                task.jvmOptions.debug = Boolean.parseBoolean(project.property(GrailsTask.GRAILS_DEBUG_PROPERTY))
+            }
+        }
+
+        task
     }
 
     /**
@@ -132,23 +146,53 @@ class GrailsTaskConfigurator {
             project.tasks.create(JavaPlugin.TEST_TASK_NAME, DefaultTask.class)
         }
         Task test = project.tasks.findByName(JavaPlugin.TEST_TASK_NAME)
-        project.tasks.getByName(JavaBasePlugin.CHECK_TASK_NAME).dependsOn(test)
+        project.tasks.findByName(JavaBasePlugin.CHECK_TASK_NAME).dependsOn(test)
         test.setDescription("Runs the tests.")
         test.setGroup(JavaBasePlugin.VERIFICATION_GROUP)
     }
 
-    private void configureAssemble(GrailsProject grailsProject, Project project) {
-        //Depending on the project type, configure either the package-plugin or war tasks
-        //as the assemble task
-        GrailsAssembleTask grailsAssemble = grailsProject.pluginProject ? createPackagePluginTask(project) : createWarTask(project)
-
-        project.tasks.getByName(BasePlugin.ASSEMBLE_TASK_NAME).dependsOn grailsAssemble
+    private void configureAssemble(Project project, Task grailsAssembleTask) {
+        project.tasks.findByName(BasePlugin.ASSEMBLE_TASK_NAME).dependsOn grailsAssembleTask
         project.configurations.default.extendsFrom(project.configurations.runtime)
         project.afterEvaluate {
-            project.artifacts.add('runtime', grailsAssemble.outputFile) {
-                type grailsAssemble.outputFile.path.tokenize('.').last()
-                builtBy grailsAssemble
+            project.artifacts.add('runtime', grailsAssembleTask.outputFile) {
+                type grailsAssembleTask.outputFile.path.tokenize('.').last()
+                builtBy grailsAssembleTask
             }
         }
+    }
+
+    /**
+     * Creates the command line argument string for the Grails command.  Note that
+     * if the task already contains command line arguments, any arguments found
+     * as properties in the project will be appended to the existing arguments.
+     * @param task The Gradle tasks that represents the Grails command.
+     * @param project The {@link Project} that may contain command line arguments for the
+     * 	Grails task.
+     * @return The updated Grails command line arguments, if any are present in the project.
+     */
+    private CharSequence createArgs(Task task, Project project) {
+        if(task.args != null && task.args.toString()) {
+            StringBuilder builder = new StringBuilder(task.args)
+            builder.append(' ')
+            builder.append(project.property(GrailsTask.GRAILS_ARGS_PROPERTY))
+            builder
+        } else {
+            project.property(GrailsTask.GRAILS_ARGS_PROPERTY)
+        }
+    }
+
+    /**
+     * Test whether or not the provided task name matches one of the native Grails tasks
+     * supported by the Gradle plugin.
+     * @param taskName The name of a Grails Gradle task.
+     * @return {@code true} if the name matches one of the supported, native tasks or {@code false}
+     * 	if it does not match one of the supported tasks.
+     * @since 2.1.0
+     */
+    private static boolean isNativeTask(String taskName) {
+        //TODO Extract these to an enumeration or something more manageable
+        GRAILS_CLEAN_TASK.equals(taskName) || GRAILS_INIT_TASK.equals(taskName) || GRAILS_INIT_PLUGIN_TASK.equals(taskName) ||
+            GRAILS_TEST_TASK.equals(taskName) || GRAILS_RUN_TASK.equals(taskName) || GRAILS_PACKAGE_PLUGIN_TASK.equals(taskName) || GRAILS_WAR_TASK.equals(taskName)
     }
 }

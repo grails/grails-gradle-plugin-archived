@@ -9,3 +9,5 @@ bin/
 out
 *.orig
 /docs/
+.classpath
+.project
