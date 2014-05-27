@@ -33,7 +33,7 @@ class GrailsSourceSetConfigurator {
         //Add the 'groovy' DSL extension to the source sets
         project.sourceSets.all(new Action<SourceSet>() {
             public void execute(final SourceSet sourceSet) {
-                FunctionalSourceSet functionalSourceSet = projectSourceSet.create(sourceSet.name)
+                FunctionalSourceSet functionalSourceSet = projectSourceSet.maybeCreate(sourceSet.name)
                 SourceSetCompileClasspath compileClasspath = new SourceSetCompileClasspath(sourceSet)
                 DefaultJavaSourceSet javaSourceSet = instantiator.newInstance(DefaultJavaSourceSet.class, "java", sourceSet.getJava(), compileClasspath, functionalSourceSet)
                 functionalSourceSet.add(javaSourceSet)
