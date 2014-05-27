@@ -51,7 +51,11 @@ class GrailsWarTask extends GrailsAssembleTask {
 
     @Override
     CharSequence getArgs() {
-        return "${-> output} ${-> super.args}"
+        StringBuilder builder = new StringBuilder()
+        builder.append("${-> output}")
+        if(super.args) {
+            builder.append(" ${-> super.args}")
+        }
+        builder.toString()
     }
-
 }
