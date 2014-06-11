@@ -1,8 +1,8 @@
-The Grails Gradle Plugin creates a @grails-run-app@ task on the projec that will start the Grails application container
-in the normal development environment.
+The Grails Gradle Plugin creates a @run@ task on the project that will start the Grails application container
+in the normal development environment by executing the Grails @run-app@ script.
 
 {code}
-$ gradle grails-run-app
+$ gradle run
 {code}
 
 Grails does not ship with an application container provided, so the build must specify a Grails plugin dependency. Typically,
@@ -14,7 +14,12 @@ depedencies {
 }
 {code}
 
+By default, the plugin configures the @run@ task and dynamic @grails-run-app@ task to enabled class reloading via
+SpringLoaded. Other other tasks created by the plugin or dynamically created via the Grails Script pattern will
+have reloading disabled. To enable reloading for @GrailsTask@, define the task and configure the @reload@ property
+to @true@.
+
 {note}
-Running the @grails-run-app@ task will prevent the Gradle execution from completing (i.e. the task blocks on the running container).
+Running the @run@ task will prevent the Gradle execution from completing (i.e. the task blocks on the running container).
 To terminate the Grails application, use Ctrl+C to terminate the Gradle run
 {note}

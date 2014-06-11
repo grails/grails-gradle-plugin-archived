@@ -14,3 +14,9 @@ The @grailsArgs@ property is a single system property. You can only specify it o
 being passed to the Grails JVM. It is strongly recommended to use "" around the value being passed to avoid any type of
 shell interpretation of the value.
 {note}
+
+{note}
+The @grailsArgs@ property is wired *ONLY* to dynamically created tasks using the @grails-@ prefix. Tasks created by
+the plugin are intended to provide for a repeatable build experience and as such do *NOT* accept additional parameters
+via the command line. The proper way to configure these tasks is via the Gradle build file
+{note}

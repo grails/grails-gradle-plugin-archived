@@ -24,8 +24,8 @@ class TaskConfigurationSpec extends PluginSpec {
 
     def "basic tasks are in place"() {
         given:
-        def baseTasks = ['test', 'check', 'build', 'assemble', 'clean']
-        def grailsTasks = ['init', 'init-plugin', 'grails-clean', 'grails-test-app', 'grails-run-app', 'grails-war']
+        def baseTasks = ['check', 'build', 'assemble', 'clean']
+        def grailsTasks = ['init', 'init-plugin', 'test', 'run', 'war']
 
         expect:
         (baseTasks + grailsTasks).each {
@@ -60,7 +60,7 @@ class TaskConfigurationSpec extends PluginSpec {
         List<File> artifactFiles = project.configurations.runtime.artifacts.files.files as List
 
         expect:
-        GrailsWarTask war = project.tasks.getByName('grails-war')
+        GrailsWarTask war = project.tasks.getByName('war')
         assert war.outputFile.path == project.file("build/distributions/${project.name}-1.0.war").path
 
         and:
@@ -94,7 +94,7 @@ class ${project.name.capitalize()}GrailsPlugin { }
                 project.file("grails-${project.name}-${project.version}.zip")
 
         and:
-        assert project.tasks.findByName('grails-package-plugin')
+        assert project.tasks.findByName('packagePlugin')
     }
 
     def "version included in zip file artifact for plugin"() {
@@ -111,7 +111,7 @@ class ${project.name.capitalize()}GrailsPlugin { }
         List<File> artifactFiles = project.configurations.runtime.artifacts.files.files as List
 
         expect:
-        GrailsPluginPackageTask war = project.tasks.getByName('grails-package-plugin')
+        GrailsPluginPackageTask war = project.tasks.getByName('packagePlugin')
         assert war.outputFile.path == project.file("grails-${project.name}-1.0.zip").path
 
         and:
@@ -145,7 +145,6 @@ class ${project.name.capitalize()}GrailsPlugin { }
         task.runtimeClasspath = project.files("r")
         task.testClasspath = project.files("t")
         task.bootstrapClasspath = project.files("b")
-        task.bootstrapRuntimeClasspath = project.files("br")
 
         when:
         task.logClasspaths()

@@ -120,21 +120,6 @@ class GrailsPlugin implements Plugin<Project> {
                 map("testClasspath") { testConfiguration }
                 map("sourceSets") { grailsProject.sourceSets }
 
-                map("springloaded") { null }
-            }
-
-            doFirst {
-                if (grailsProject.grailsVersion == null) {
-                    throw new InvalidUserDataException("You must set 'grails.grailsVersion' property before Grails tasks can be run")
-                }
-            }
-        }
-
-        //Only add springloaded to the run-app task
-        //This is the same thing that grailsStart does so we should do it too.
-        project.tasks.getByName(GrailsTaskConfigurator.GRAILS_RUN_TASK) { GrailsTask task ->
-            ConventionMapping conventionMapping = task.conventionMapping
-            conventionMapping.with {
                 map("springloaded") {
                     if (springloadedConfiguration.dependencies.empty) {
                         DependencyConfigurer dependenciesUtil = DependencyConfigurerFactory.build(project, grailsProject)
@@ -149,6 +134,12 @@ class GrailsPlugin implements Plugin<Project> {
                     } else {
                         springloadedConfiguration
                     }
+                }
+            }
+
+            doFirst {
+                if (grailsProject.grailsVersion == null) {
+                    throw new InvalidUserDataException("You must set 'grails.grailsVersion' property before Grails tasks can be run")
                 }
             }
         }

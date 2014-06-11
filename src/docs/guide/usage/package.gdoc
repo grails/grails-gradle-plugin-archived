@@ -1,5 +1,7 @@
 The Grails Gradle Plugin configures the normal Gradle @assemble@ task to execute the appropriate Grails command for
-creating the project's output. For applications, the @assemble@ task depends on @grails-war@ and produces a War output.
-For plugins, the @assemble@ task depends on @grails-package-plugin@ and produces the plugin Zip output.
+creating the project's output. For applications, the @assemble@ task depends on @war@ which executes the Grails @war@
+script and produces a War output.
+For plugins, the @assemble@ task depends on @packagePlugin@ which executes the Grails @package-plugin@ script
+and produces the plugin Zip output.
 
 Additionally, the plugin configures the normal Gradle @build@ task to depend on @test@ and @assemble@

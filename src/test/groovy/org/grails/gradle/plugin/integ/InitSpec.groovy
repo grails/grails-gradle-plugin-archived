@@ -53,7 +53,7 @@ class InitSpec extends IntegSpec {
 
         if (grailsVersion.is(2, 4)) {
             buildFile << """
-                grails.groovyVersion '2.3.0'
+                grails.groovyVersion '2.3.1'
 
                 dependencies {
                     bootstrap 'org.grails.plugins:tomcat:7.0.52.1'
@@ -85,13 +85,13 @@ class InitSpec extends IntegSpec {
         """
 
         and:
-        launcher("grails-test-app", "-s").run().rethrowFailure()
+        launcher("test", "-s").run().rethrowFailure()
 
         then:
-        task("grails-test-app").state.didWork
+        task("test").state.didWork
 
         where:
-        versionAndTask << ["2.0.0", "2.1.0", "2.2.0", "2.3.5", "2.4.0.RC1"].collectMany { String version ->
+        versionAndTask << ["2.0.0", "2.1.0", "2.2.0", "2.3.5", "2.4.0"].collectMany { String version ->
             ['init', 'init-plugin'].collect { String task ->
                 [task: task, version: GrailsVersion.parse(version)]
             }

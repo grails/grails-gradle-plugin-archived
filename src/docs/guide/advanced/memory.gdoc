@@ -7,7 +7,7 @@ property is an instance of "JavaForkOptions":http://www.gradle.org/docs/current/
 and all the properties and methods from that class are available.
 
 {code}
-'grails-run-app' {
+run {
     jvmOptions {
         minHeapSize = '512m'
         maxHeapSize = '1g'

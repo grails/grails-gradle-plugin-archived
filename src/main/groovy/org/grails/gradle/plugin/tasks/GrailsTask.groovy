@@ -55,6 +55,7 @@ class GrailsTask extends DefaultTask {
     String command
     CharSequence args
     String env
+    boolean reload
 
     @Optional @InputFiles FileCollection providedClasspath
     @Optional @InputFiles FileCollection compileClasspath
@@ -112,7 +113,7 @@ class GrailsTask extends DefaultTask {
 
         def springloaded = getSpringloaded()
         def springloadedJar
-        if (springloaded == null) {
+        if (springloaded == null || !isReload()) {
             springloadedJar == null
         } else {
             springloadedJar = springloaded.singleFile
