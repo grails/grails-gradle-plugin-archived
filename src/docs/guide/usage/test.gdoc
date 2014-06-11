@@ -114,12 +114,12 @@ directory before running tests so that the test report matches the tests execute
 
 {code}
 task unit(type: GrailsTestTask) {
-    testResultsDir = file('build/reports/test-unit'
+    testResultsDir = file('build/reports/test-unit')
     phases = ['unit:']
 }
 
 task integration(type: GrailsTestTask) {
-    testResultsDir = file('build/reports/test-int'
+    testResultsDir = file('build/reports/test-int')
     phases = ['integration:']
 }
 

@@ -36,7 +36,7 @@ will be incorrect (especially when using Gradle @project@ dependencies).
 
 h5. Publishing Using the Gradle Maven Plugin
 
-Plugin publication using the "@maven":http://www.gradle.org/docs/current/userguide/artifact_management.html plugin is
+Plugin publication using the "@maven@":http://www.gradle.org/docs/current/userguide/artifact_management.html plugin is
 currently untested.
 
 h5. Publishing Using the Gradle Maven-Publish (incubating) Plugin
