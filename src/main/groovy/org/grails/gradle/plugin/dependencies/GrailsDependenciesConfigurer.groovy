@@ -63,7 +63,7 @@ class GrailsDependenciesConfigurer extends DependencyConfigurer {
     }
 
     void configureRuntimeClasspath(Configuration configuration) {
-        if (grailsVersion.is(2, 3)) {
+        if (grailsVersion.is(2) && grailsVersion.minor >= 3) {
             addDependency('com.h2database:h2:1.3.170', configuration)
         }
     }
