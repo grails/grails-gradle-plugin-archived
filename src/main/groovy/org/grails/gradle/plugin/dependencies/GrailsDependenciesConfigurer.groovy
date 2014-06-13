@@ -71,6 +71,10 @@ class GrailsDependenciesConfigurer extends DependencyConfigurer {
     void configureTestClasspath(Configuration configuration) {
         addDependency("org.grails:grails-plugin-testing:${grailsVersion}", configuration)
         addDependency("org.grails:grails-test:${grailsVersion}", configuration)
+        if (grailsVersion.is(2, 4)) {
+            addDependency('junit:junit:4.11', configuration)
+            addDependency('org.spockframework:spock-core:0.7-groovy-2.0', configuration)
+        }
     }
 
     void configureResources(Configuration configuration) {
