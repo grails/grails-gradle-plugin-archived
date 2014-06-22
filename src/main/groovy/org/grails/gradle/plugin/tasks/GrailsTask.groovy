@@ -121,8 +121,8 @@ class GrailsTask extends DefaultTask {
 
         def launcher = new GrailsLaunchConfigureAction(launchContext, springloadedJar, file)
 
-        OutputStream out = logger.infoEnabled ? System.out : new ByteArrayOutputStream()
-        OutputStream err = logger.infoEnabled ? System.out : new ByteArrayOutputStream()
+        OutputStream out = System.out
+        OutputStream err = System.out
         ExecResult result = project.javaexec {
             JavaExecAction action = delegate
             action.ignoreExitValue = true
