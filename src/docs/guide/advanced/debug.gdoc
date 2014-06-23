@@ -1,0 +1,33 @@
+The plugin allows Grails tasks to enable a debugger by setting the @grailsDebug@ property to @true@.
+
+{code}
+    $ gradle -PgrailsDebug="true" run
+{code}
+
+The above command will execute the Grails @run-app@ command with debug mode activated. This flag sets the debug mode
+by setting @jvmOptions.debug=true@ on the underlying Gradle @JavaExec@ instance for the Grails task. By default this
+activates debugging in a suspended mode on port 5005.
+
+{note}
+The @grailsDebug@ is passed to *ALL* Grails tasks in Gradle.
+{note}
+
+To manually configure the debug properties (i.e., suspend mode, port, etc) for the tasks,
+configure the options via the @jvmOptions.jvmArgs@ property:
+
+{code}
+run {
+  jvmOptions {
+    jvmArgs([
+      '-Xdebug',
+      '-Xnoagent',
+      '-Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5006'
+    ])
+  }
+}
+{code}
+
+The above block configures the JVM that Grails executes in to have a remote debugger on port 5006 and does *NOT*
+suspend the JVM on startup.
+
+

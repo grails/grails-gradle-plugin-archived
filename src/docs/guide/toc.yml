@@ -18,5 +18,6 @@ advanced:
   overview: Overview of Plugin Integration with Grails
   args: Passing arguments to Grails Tasks
   env: Setting the Grails Environment
+  debug: Debugging Grails tasks
   memory: Configuring JVM Memory for Grails Tasks
   plugins: Managing Grails Plugins with Gradle

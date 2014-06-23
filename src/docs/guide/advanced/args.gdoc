@@ -3,11 +3,10 @@ parameters are necessary to be be passed from the command line. In order to pass
 is forked using the @grailsArgs@ system property from the command line:
 
 {code}
-    $ gradle -PgrailsArgs="--non-interactive" grails-run-app
+    $ gradle -PgrailsArgs="FooController" grails-create-controller
 {code}
 
-The above line with pass the @--non-interactive@ switch to the underlying Grails @run-app@ command. This maybe be useful
-when updating plugins and Grails prompts for allowing the upgrade.
+The above line with pass the @FooController@ string to the underlying Grails @create-controller@ command.
 
 {note}
 The @grailsArgs@ property is a single system property. You can only specify it once and it is not parsed in anyway before

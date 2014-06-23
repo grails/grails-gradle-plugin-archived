@@ -1,11 +1,11 @@
 h4. v2.1.0
 
-* Renamed default tasks created by plugin:
+* Renamed default tasks created by plugin: ("ISSUE-81":https://github.com/grails/grails-gradle-plugin/issues/81)
 ** @run@ replaces @grails-run-app@
 ** @test@ replaces @grails-test-app@
 ** @war@ replaces @grails-war@
 ** @packagePlugin@ replaces @grails-package-plugin@
-* Added the @reload@ property @GrailsTask@ to enabled SpringLoaded class reloading for a task.
+* Added the @reload@ property @GrailsTask@ to enabled SpringLoaded class reloading for a task. ("ISSUE-84": https://github.com/grails/grails-gradle-plugin/issues/84)
 * Configure the static @run@ task and dynamic @grails-run-app@ task to enabled reloading by default.
 * Removed creating the @grails-clean@ task by default. Configure the normal @clean@ task to delete the @buildPlugins/@ directory.
 * Fix a bug in the IntelliJ IDEA integration where only 1 plugin per configuration was being registered as project source
@@ -15,9 +15,7 @@ h4. v2.1.0
 * Add support to automatically synchronize @app.version@ and @app.grails.version@ in the @application.properties@
   file to @project.version@ and @project.grails.grailsVersion@ respectively ("MAVEN-137":http://jira.grails.org/browse/MAVEN-137)
 * Correctly mapped @provided@ scope dependencies to the Grails environment
-* Redirect Grails output to @LogLevel.INFO@ by default. Output is written to @System.out@ and @System.err@ at the
-  end of the command in failure situations regardless of log level. This helps reduce output in multi-project builds
-  and to de-tangle the output in parallel builds.
+* Allow passing of the @-PgrailsDebug=true@ flag to all Grails tasks. ("ISSUE-97":https://github.com/grails/grails-gradle-plugin/issues/97)
 
 h4. v2.0.1
 
