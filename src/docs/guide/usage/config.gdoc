@@ -35,8 +35,8 @@ is not supported. It is possible to make this configuration, but unforeseen beha
 h4. SpringLoadedVersion
 
 The @springLoadedVersion@ property specifies the version of the SpringLoaded library to place on the classpath when
-executing the @grails-run-app@ command. This library is enables class reloading. Internally, the plugin configures a
+executing the @run@ or @grails-run-app@ tasks. This library enables class reloading. Internally, the plugin configures a
 Java Agent using this library which performs the reload in the JVM. The plugin configures a default version of the library,
 and this property can be used to specify a different version than the default.
 
-By default, the plugin only configures the springLoaded library and reloading on the @grails-run-app@ task.
+By default, the plugin only configures the springLoaded library and reloading on the @run@ and @grails-run-app@ tasks.

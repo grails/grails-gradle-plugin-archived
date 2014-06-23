@@ -1,0 +1,23 @@
+Grails ships with an @upgrade@ that is used to upgrade an application or plugin from one version of Grails
+to another. Use of this command is *NOT* supported via the Grails-Gradle plugin. This script requires an actual
+Grails installation on the machine.
+
+Instead, the plugin will automatically modify the @application.properties@ to reflect both the version of
+Grails and the application's version (as specific by @grails.grailsVersion@ and @project.version@
+respectively). This synchronization will occur as the during any @GrailsTask@.
+
+{note}
+This behavior is identical to the behavior of Maven enabled Grails packages as stated in 
+"MAVEN-137":http://jira.grails.org/browse/MAVEN-137
+{note}
+
+{warning}
+The Grails version synchronization will allow you to change the Grails version via the @build.gradle@ file, however, it
+will *NOT* apply any upgrades that maybe be obtained through a normal @grails upgrade@ process. It is the responsibility
+of the user to manually apply any differences that may occur.
+
+A good resource for this is the "What's new in Grails x.y":http://grails.org/doc/latest/guide/introduction.html.
+
+Alternatively, you can initialize a new project with the new Grails version and compare the 2 directories with your
+favorite diff tool.
+{warning}

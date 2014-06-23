@@ -11,7 +11,7 @@ are defined.
 
 h5. Publishing a Simple Grails Plugin
 
-For simple Grails plugin projects, that is projects that have *NO* external dependencies, plugin release and plublication
+For simple Grails plugin projects, that is projects that have *NO* external dependencies, plugin release and publication
 can be accomplished using the "Grails Release Plugin":http://grails.org/plugin/release. Add the @release@ plugin to
 the @bootstrap@ configuration and execute the @grails-release-plugin@ task.
 
@@ -28,7 +28,7 @@ See the plugin page http://grails.org/plugin/release for compatibility notes reg
 {warning}
 
 {note}
-Using the Release Plugin is only supported when there are not external dependencies because the @release-plugin@ command
+Using the Release Plugin is only supported when there are no external dependencies because the @release-plugin@ command
 utilizes the dependencies configured in @BuildConfig.groovy@ to build the plugin's @pom.xml@ file. Since dependencies
 are being configure through Gradle, the @BuildConfig.groovy@ will not have the correct information and the @pom.xml@
 will be incorrect (especially when using Gradle @project@ dependencies).
@@ -36,7 +36,7 @@ will be incorrect (especially when using Gradle @project@ dependencies).
 
 h5. Publishing Using the Gradle Maven Plugin
 
-Plugin publication using the "@maven":http://www.gradle.org/docs/current/userguide/artifact_management.html plugin is
+Plugin publication using the "@maven@":http://www.gradle.org/docs/current/userguide/artifact_management.html plugin is
 currently untested.
 
 h5. Publishing Using the Gradle Maven-Publish (incubating) Plugin

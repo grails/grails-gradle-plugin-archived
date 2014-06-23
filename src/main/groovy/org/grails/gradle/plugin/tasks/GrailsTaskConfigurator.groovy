@@ -6,6 +6,7 @@ import org.gradle.api.Task
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.WarPlugin
 import org.grails.gradle.plugin.GrailsProject
 
 /**
@@ -14,13 +15,12 @@ import org.grails.gradle.plugin.GrailsProject
  */
 class GrailsTaskConfigurator {
 
-    public static final String GRAILS_CLEAN_TASK = 'grails-clean'
     public static final String GRAILS_INIT_TASK = 'init'
     public static final String GRAILS_INIT_PLUGIN_TASK = 'init-plugin'
-    public static final String GRAILS_TEST_TASK = 'grails-test-app'
-    public static final String GRAILS_RUN_TASK = 'grails-run-app'
-    public static final String GRAILS_PACKAGE_PLUGIN_TASK = 'grails-package-plugin'
-    public static final String GRAILS_WAR_TASK = 'grails-war'
+    public static final String GRAILS_TEST_TASK = JavaPlugin.TEST_TASK_NAME
+    public static final String GRAILS_RUN_TASK = 'run'
+    public static final String GRAILS_PACKAGE_PLUGIN_TASK = 'packagePlugin'
+    public static final String GRAILS_WAR_TASK = WarPlugin.WAR_TASK_NAME
 
     void configure(Project project, GrailsProject grailsProject) {
         //Create the Grails init task
@@ -32,14 +32,9 @@ class GrailsTaskConfigurator {
             description = 'Creates a new Grails plugin in the current directory'
         }
 
-        //Create the grails-clean task and wire it to the 'clean' task
-        project.tasks.create(GRAILS_CLEAN_TASK, GrailsTask).with {
-            command = "clean"
-            description = 'Executes Grails clean'
+        project.tasks.getByName(BasePlugin.CLEAN_TASK_NAME) {
+            delete('buildPlugins')
         }
-
-        def grailsClean = project.tasks.getByName(GRAILS_CLEAN_TASK)
-        project.tasks.getByName(BasePlugin.CLEAN_TASK_NAME).dependsOn grailsClean
 
         //Set up the proper assemble task and adds it's artifact to the configuration
         configureAssemble(grailsProject, project)
@@ -48,43 +43,48 @@ class GrailsTaskConfigurator {
         project.tasks.create(GRAILS_RUN_TASK, GrailsTask).with {
             command = 'run-app'
             description = 'Starts the Grails application'
+            reload = true
         }
 
-        //Create the Grails test task. Don't wire it to the 'test' task yet because it doesn't quite exist yet.
-        def grailsTest = project.tasks.create(GRAILS_TEST_TASK, GrailsTestTask)
+        //Create the Grails test task.
+        project.tasks.create(GRAILS_TEST_TASK, GrailsTestTask)
 
         //Create a task rule that converts any task with that starts with 'grail-' into an invocation of
         //the corresponding Grails script
-        project.tasks.addRule("Grails command") { String name ->
+        project.tasks.addRule("Pattern: ${GrailsTask.GRAILS_TASK_PREFIX}<script-name>: Execute the specified Grails script") { String name ->
             if (name.startsWith(GrailsTask.GRAILS_TASK_PREFIX)) {
                 project.task(name, type: GrailsTask) {
-                    command = (name - GrailsTask.GRAILS_TASK_PREFIX)
+                    String scriptName = name - GrailsTask.GRAILS_TASK_PREFIX
+                    command = scriptName
                     if (project.hasProperty(GrailsTask.GRAILS_ARGS_PROPERTY)) {
                         args = project.property(GrailsTask.GRAILS_ARGS_PROPERTY)
                     }
                     if (project.hasProperty(GrailsTask.GRAILS_ENV_PROPERTY)) {
                         env = project.property(GrailsTask.GRAILS_ENV_PROPERTY)
                     }
-                    if (project.hasProperty(GrailsTask.GRAILS_DEBUG_PROPERTY)) {
-                        jvmOptions.debug = Boolean.parseBoolean(project.property(GrailsTask.GRAILS_DEBUG_PROPERTY))
+                    if (scriptName == 'run-app') {
+                        reload = true
                     }
                 }
             }
         }
 
+        project.tasks.withType(GrailsTask) {
+            if (project.hasProperty(GrailsTask.GRAILS_DEBUG_PROPERTY)) {
+                jvmOptions.debug = Boolean.parseBoolean(project.property(GrailsTask.GRAILS_DEBUG_PROPERTY))
+            }
+        }
+
         //Setup some tasks that mimic the Java build pattern
         configureJavaStyleTasks(project)
-
-        //Now wire the grails-test task to the 'test' task
-        project.tasks.getByName(JavaPlugin.TEST_TASK_NAME).dependsOn grailsTest
     }
 
-    private GrailsTask createPackagePluginTask(Project project) {
+    private GrailsAssembleTask createPackagePluginTask(Project project) {
         project.tasks.create(GRAILS_PACKAGE_PLUGIN_TASK, GrailsPluginPackageTask)
         return project.tasks.findByName(GRAILS_PACKAGE_PLUGIN_TASK)
     }
 
-    private GrailsTask createWarTask(Project project) {
+    private GrailsAssembleTask createWarTask(Project project) {
         project.tasks.create(GRAILS_WAR_TASK, GrailsWarTask)
         return project.tasks.findByName(GRAILS_WAR_TASK)
     }
@@ -128,19 +128,16 @@ class GrailsTaskConfigurator {
      * Add the 'test' task and wire it to 'check'
      */
     private void configureTest(Project project) {
-        if (!project.tasks.findByName(JavaPlugin.TEST_TASK_NAME)) {
-            project.tasks.create(JavaPlugin.TEST_TASK_NAME, DefaultTask.class)
-        }
         Task test = project.tasks.findByName(JavaPlugin.TEST_TASK_NAME)
         project.tasks.getByName(JavaBasePlugin.CHECK_TASK_NAME).dependsOn(test)
         test.setDescription("Runs the tests.")
-        test.setGroup(JavaBasePlugin.VERIFICATION_GROUP)
     }
 
     private void configureAssemble(GrailsProject grailsProject, Project project) {
         //Depending on the project type, configure either the package-plugin or war tasks
         //as the assemble task
-        GrailsAssembleTask grailsAssemble = grailsProject.pluginProject ? createPackagePluginTask(project) : createWarTask(project)
+        GrailsAssembleTask grailsAssemble = grailsProject.pluginProject ?
+                createPackagePluginTask(project) : createWarTask(project)
 
         project.tasks.getByName(BasePlugin.ASSEMBLE_TASK_NAME).dependsOn grailsAssemble
         project.configurations.default.extendsFrom(project.configurations.runtime)

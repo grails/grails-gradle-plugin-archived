@@ -121,12 +121,11 @@ public class DefaultGrailsProject implements GrailsProject {
     }
 
     public boolean isPluginProject() {
-        for (File file : getProjectDir().listFiles()) {
-            if (file.getName().endsWith("GrailsPlugin.groovy")) {
-                return true
-            }
-        }
-        return false
+        return getPluginDescriptor() as boolean
+    }
+
+    public File getPluginDescriptor() {
+        getProjectDir().listFiles().find { it.name.endsWith('GrailsPlugin.groovy') }
     }
 
     /**

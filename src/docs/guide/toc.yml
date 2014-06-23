@@ -1,6 +1,7 @@
 introduction:
   title: Introduction
   quickstart: Quick Start
+  commands: Basic Task Reference
   changes: Change Log
 usage:
   title: Using the Plugin
@@ -11,10 +12,12 @@ usage:
   scripts: Executing Grails Scripts
   package: Packaging a Grails Project
   config: Configuring Plugin Properties
+  upgrade: Upgrading a Grails Application
 advanced:
   title: Advanced Plugin Configuration & Usage
   overview: Overview of Plugin Integration with Grails
   args: Passing arguments to Grails Tasks
   env: Setting the Grails Environment
+  debug: Debugging Grails tasks
   memory: Configuring JVM Memory for Grails Tasks
   plugins: Managing Grails Plugins with Gradle

@@ -1,10 +1,9 @@
-The Grails Gradle Plugin configures a @grails-test-app@ task that executes the projects tests through the Grails framework.
-Additionally, the plugin configures the normal Gradle @test@ and @check@ tasks and configures the @grails-test-app@ task
-as a dependency to @test@.
+The Grails Gradle Plugin configures a @test@ task that executes the projects tests through the Grails framework.
+Additionally, the plugin configures the normal Gradle @check@ task with a dependency on @test@.
 
 {code}
-$ gradle grails-test-app
-:grails-test-app
+$ gradle test
+:test
 | Loading Grails 2.3.5
 ...
 | Tests PASSED - view reports in /Users/jengelman/workspace/personal/gg-test/build/test-results
@@ -12,14 +11,6 @@ $ gradle grails-test-app
 BUILD SUCCESSFUL
 
 Total time: 14.181 secs
-
-$ gradle test
-:grails-test-app UP-TO-DATE
-:test UP-TO-DATE
-
-BUILD SUCCESSFUL
-
-Total time: 1.145 secs
 
 $ gradle check
 :grails-test-app UP-TO-DATE
@@ -36,16 +27,31 @@ The plugin configures test results by default to be output to @build/test-result
 h4. Running Specific Test Phases
 
 The @GrailsTestTask@ allows for configuring the specific test phases through the @phases@ property. By default the
-@grails-test-app@ task is configured with no phases which results in Grails executing **ALL** test phases. This can be
+@test@ task is configured with no phases which results in Grails executing *ALL* test phases. This can be
 modified as such:
 
 {code}
-'grails-test-app' {
-    phases = ['unit', 'integration']
+test {
+    phases = ['unit:', 'integration:']
 }
 {code}
 
-The above block will configure @grails-test-app@ to only execute the @unit@ and @integration@ test phases.
+The above block will configure @test@ to only execute the @unit@ and @integration@ test phases.
+
+{note}
+The @phases@ property of @GrailsTestTask@ gets passed to Grails's @test-app@ command directly. Therefore, you must provide
+content that is compatible with the @test-app@ script. Grails test phase/type selection is of the form @<phase>:<type>@.
+Valid syntaxes include (not a complete list): @unit:@, @unit:unit@, @unit:spock@, @:spock@, etc.
+
+{code}
+phases = ['unit:'] //Execute all tests types in the unit phase
+phases = ['integration:spock'] //Execute all Spock tests in the integration phase
+phases = [':unit'] //Execute all JUnit test type in all phases
+{code}
+
+Refer to the section "Targeting Test Types and/or Phases":http://grails.org/doc/latest/guide/single.html#testing in the
+Grails User Guide for additional information.
+{note}
 
 h4. Configuring a Test Task Rule
 
@@ -53,17 +59,23 @@ It may be beneficial to configure a Gradle task rule to execute specific test ph
 be accomplished as so:
 
 {code}
-project.tasks.addRule('Pattern: grails-test-app-<phase>') { String taskName ->
-    if (taskName.startsWith('grails-test-app') && taskName != 'grails-test-app') {
-        task(tasName, type: GrailsTestTask) {
-            String testPhase = (taskName - 'grails-test-app').toLowerCase()
-            phases = [testPhase]
+project.tasks.addRule('Pattern: test<Phase>') { String taskName ->
+    if (taskName.startsWith('test')) {
+        task(taskName, type: GrailsTestTask) {
+            String testPhase = (taskName - 'test').toLowerCase()
+            phases = [testPhase + ':']
         }
     }
 }
 
-$ gradle grails-test-app-unit //Execute the unit test phase
+$ gradle testUnit //Execute the unit test phase
 {code}
+
+{note}
+When adding a a TaskRule for Grails tasks, avoid using a prefix that begins with {code}grails-{code}. This is the prefix
+that the plugin uses for executing arbitrary Grails scripts. Gradle doesn't provide a method to order TaskRules, so
+using this prefix will likely result in a duplicate task exception.
+{note}
 
 h4. Running Specific Tests
 
@@ -71,7 +83,7 @@ In matching with the Gradle standard, use the @-Dtest.single@ property to define
 observes this system property and will pass the value as is to the Grails test task.
 
 {code}
-$ gradle grails-test-app -Dtest.single=FooController
+$ gradle test -Dtest.single=FooController
 {code}
 
 {note}
@@ -81,7 +93,7 @@ normal test selection methods for the Grails "@test-app@":http://grails.org/doc/
 command are supported since the value of @test.single@ is passed directly as a command line argument to the Grails script.
 
 {code}
-$ gradle grails-test-app -Dtest.single="Foo Bar"
+$ gradle test -Dtest.single="Foo Bar"
 {code}
 {note}
 
@@ -94,15 +106,15 @@ directory before running tests so that the test report matches the tests execute
 
 {code}
 task unit(type: GrailsTestTask) {
-    testResultsDir = file('build/reports/test-unit'
-    phases = ['unit']
+    testResultsDir = file('build/reports/test-unit')
+    phases = ['unit:']
 }
 
 task integration(type: GrailsTestTask) {
-    testResultsDir = file('build/reports/test-int'
-    phases = ['int']
+    testResultsDir = file('build/reports/test-int')
+    phases = ['integration:']
 }
 
-'grails-test-app'.enabled = false // Disable the default test task that executes all phases
-test.dependsOn [unit, integration] // Configure test phase tasks to execute on the 'test' task
+test.enabled = false // Disable the default test task that executes all phases
+check.dependsOn [unit, integration] // Configure test phase tasks to execute on the 'check' task
 {code}

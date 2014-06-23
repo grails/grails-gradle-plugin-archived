@@ -63,7 +63,7 @@ class GrailsDependenciesConfigurer extends DependencyConfigurer {
     }
 
     void configureRuntimeClasspath(Configuration configuration) {
-        if (grailsVersion.is(2, 3)) {
+        if (grailsVersion.is(2) && grailsVersion.minor >= 3) {
             addDependency('com.h2database:h2:1.3.170', configuration)
         }
     }
@@ -71,10 +71,26 @@ class GrailsDependenciesConfigurer extends DependencyConfigurer {
     void configureTestClasspath(Configuration configuration) {
         addDependency("org.grails:grails-plugin-testing:${grailsVersion}", configuration)
         addDependency("org.grails:grails-test:${grailsVersion}", configuration)
+        if (grailsVersion.is(2, 4)) {
+            addDependency('junit:junit:4.11', configuration)
+            addDependency('org.spockframework:spock-core:0.7-groovy-2.0', configuration)
+        }
     }
 
     void configureResources(Configuration configuration) {
         addDependency("org.grails:grails-resources:$grailsVersion", configuration).transitive = false
+    }
+
+    void configureSpringloaded(Configuration configuration) {
+        String version = grailsProject.springLoadedVersion
+        if (version >= '1.1.5' && !version.endsWith('.RELEASE')) {
+            version += '.RELEASE'
+        }
+        if (grailsProject.springLoadedVersion.endsWith('.RELEASE')) {
+            addDependency("org.springframework:springloaded:$version", configuration)
+        } else {
+            addDependency("org.springsource.springloaded:springloaded-core:$version", configuration)
+        }
     }
 
     private addGroovyDependency(Configuration configuration) {

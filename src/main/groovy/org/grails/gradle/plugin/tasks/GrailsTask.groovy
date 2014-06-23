@@ -25,6 +25,7 @@ import org.gradle.api.tasks.*
 import org.gradle.process.ExecResult
 import org.gradle.process.JavaForkOptions
 import org.gradle.process.internal.DefaultJavaForkOptions
+import org.gradle.process.internal.ExecException
 import org.gradle.process.internal.JavaExecAction
 import org.grails.gradle.plugin.GrailsProject
 import org.grails.gradle.plugin.internal.GrailsLaunchConfigureAction
@@ -45,12 +46,16 @@ class GrailsTask extends DefaultTask {
     static public final GRAILS_DEBUG_PROPERTY = 'grailsDebug'
     static public final GRAILS_GROUP = 'grails'
 
+    static public final String APP_GRAILS_VERSION = 'app.grails.version'
+    static public final String APP_VERSION = 'app.version'
+
     String grailsVersion
 
     String grailsHome
     String command
     CharSequence args
     String env
+    boolean reload
 
     @Optional @InputFiles FileCollection providedClasspath
     @Optional @InputFiles FileCollection compileClasspath
@@ -102,12 +107,13 @@ class GrailsTask extends DefaultTask {
 
     @TaskAction
     def executeCommand() {
+        handleVersionSync()
         def launchContext = createLaunchContext()
         def file = new File(getTemporaryDir(), "launch.context")
 
         def springloaded = getSpringloaded()
         def springloadedJar
-        if (springloaded == null) {
+        if (springloaded == null || !isReload()) {
             springloadedJar == null
         } else {
             springloadedJar = springloaded.singleFile
@@ -115,18 +121,30 @@ class GrailsTask extends DefaultTask {
 
         def launcher = new GrailsLaunchConfigureAction(launchContext, springloadedJar, file)
 
+        OutputStream out = System.out
+        OutputStream err = System.out
         ExecResult result = project.javaexec {
             JavaExecAction action = delegate
+            action.ignoreExitValue = true
             getJvmOptions().copyTo(action)
             if (forwardStdIn) {
                 action.standardInput = System.in
             }
-            action.standardOutput = System.out
-            action.errorOutput = System.err
+            action.standardOutput = out
+            action.errorOutput = err
             launcher.execute(action)
         }
 
-        result.rethrowFailure()
+        try {
+            result.rethrowFailure()
+            result.assertNormalExitValue()
+        } catch (ExecException e) {
+            if (!logger.infoEnabled) {
+                out.writeTo(System.out)
+                err.writeTo(System.err)
+            }
+            throw e
+        }
     }
 
     File getEffectiveGrailsHome() {
@@ -185,7 +203,7 @@ class GrailsTask extends DefaultTask {
         launchContext.env = getEnv()
 
         launchContext.scriptName = NameUtils.toScriptName(getCommand())
-        launchContext.args = getArgs()
+        launchContext.args = getArgs() + ' --non-interactive'
 
         Iterable<File> files = getEffectiveBootstrapClasspath()
         if (files) {
@@ -209,7 +227,7 @@ class GrailsTask extends DefaultTask {
 
         // Provided deps are 2.0 only
         files = getProvidedClasspath()
-        if (providedClasspath) {
+        if (files) {
             try {
                 launchContext.providedDependencies = files as List
             } catch (NoSuchMethodException ignore) {
@@ -246,5 +264,57 @@ class GrailsTask extends DefaultTask {
 
     protected File projectWorkDirFile(String path) {
         new File(getProjectWorkDir(), path)
+    }
+
+    private void handleVersionSync() {
+        File appProperties = project.file('application.properties')
+        URLClassLoader cl = new URLClassLoader(effectiveBootstrapClasspath.collect { it.toURI().toURL() } as URL[])
+        Class metadataClass = cl.loadClass('grails.util.Metadata')
+        Object metadata = metadataClass.newInstance(appProperties)
+        if (syncVersions(metadata)) {
+            metadata.persist()
+        }
+    }
+
+    private boolean syncVersions(Object metadata) {
+        boolean result = false
+
+        Object appGrailsVersion = metadata.get(APP_GRAILS_VERSION)
+        if (!getGrailsVersion().equals(appGrailsVersion)) {
+            logger.info("updating ${APP_GRAILS_VERSION} to ${getGrailsVersion()}")
+            metadata.put(APP_GRAILS_VERSION, this.getGrailsVersion())
+            result = true
+        }
+
+        if (!isPluginProject()) {
+            Object appVersion = metadata.get(APP_VERSION)
+            if (appVersion != null) {
+                if (!project.version.equals(appVersion)) {
+                    logger.info("updating ${APP_VERSION} to ${project.version}")
+                    metadata.put(APP_VERSION, project.version)
+                    result = true
+                }
+            }
+        } else {
+            syncPluginVersion()
+        }
+
+        return result
+    }
+
+    // Reimplemented from https://github.com/grails/grails-core/blob/master/scripts/SetVersion.groovy
+    private void syncPluginVersion() {
+        File descriptor = project.grails.getPluginDescriptor()
+        String content = descriptor.getText('UTF-8')
+        def pattern = ~/def\s*version\s*=\s*"(.*)"/
+        def matcher = (content =~ pattern)
+
+        String newVersionString = "def version = \"${project.version}\""
+        if (matcher.size() > 0) {
+            content = content.replaceFirst(/def\s*version\s*=\s*".*"/, newVersionString)
+        } else {
+            content = content.replaceFirst(/\{/, "{\n\t$newVersionString // added by Gradle")
+        }
+        descriptor.withWriter('UTF-8') { it.write content }
     }
 }

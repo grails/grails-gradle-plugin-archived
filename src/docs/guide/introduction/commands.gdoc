@@ -1,0 +1,21 @@
+Applying the plugin creates the following default tasks in the Gradle project. Task dependencies are declared in brackets.
+
+* @run@
+* @test@
+* @war@
+* @packagePlugin@
+
+Additionally, the plugin creates set of default Gradle tasks to mimic the behavior of a standard Gradle Java project.
+These tasks are wired to the corresponding @GrailsTask@ to provide the behavior.
+
+* @clean@
+* @test@
+* @check@ \[@test@\]
+* @assemble@ \[@war@ or @packagePlugin@\]
+* @build@ \[@assemble@, @check@\]
+
+Finally, the plugin creates a Gradle Task Rule that allows for execution of any arbitrary Grails script by prefixing
+the script name with @grails-@
+{code}
+$ gradle grails-s2-quickstart //Execute the s2-quickstart script from the Spring Security Core plugin
+{code}
