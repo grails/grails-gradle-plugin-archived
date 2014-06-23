@@ -51,7 +51,7 @@ class GrailsTaskConfigurator {
 
         //Create a task rule that converts any task with that starts with 'grail-' into an invocation of
         //the corresponding Grails script
-        project.tasks.addRule("Pattern: grails-<script-name>: Execute the specified Grails script") { String name ->
+        project.tasks.addRule("Pattern: ${GrailsTask.GRAILS_TASK_PREFIX}<script-name>: Execute the specified Grails script") { String name ->
             if (name.startsWith(GrailsTask.GRAILS_TASK_PREFIX)) {
                 project.task(name, type: GrailsTask) {
                     String scriptName = name - GrailsTask.GRAILS_TASK_PREFIX
@@ -62,13 +62,16 @@ class GrailsTaskConfigurator {
                     if (project.hasProperty(GrailsTask.GRAILS_ENV_PROPERTY)) {
                         env = project.property(GrailsTask.GRAILS_ENV_PROPERTY)
                     }
-                    if (project.hasProperty(GrailsTask.GRAILS_DEBUG_PROPERTY)) {
-                        jvmOptions.debug = Boolean.parseBoolean(project.property(GrailsTask.GRAILS_DEBUG_PROPERTY))
-                    }
                     if (scriptName == 'run-app') {
                         reload = true
                     }
                 }
+            }
+        }
+
+        project.tasks.withType(GrailsTask) {
+            if (project.hasProperty(GrailsTask.GRAILS_DEBUG_PROPERTY)) {
+                jvmOptions.debug = Boolean.parseBoolean(project.property(GrailsTask.GRAILS_DEBUG_PROPERTY))
             }
         }
 
