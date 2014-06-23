@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>2.6 Packaging a Grails Project 2.1.0</title>
+    <title>3.4 Debugging Grails tasks 2.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -56,18 +56,16 @@ function addJsClass() {
             <div id="main" class="corner-all">
 
                 
-                    <div class="toc-item prev-left"><a href="../../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                    <div class="toc-item prev-left"><a href="../../guide/usage.html">&lt;&lt; <strong>2</strong><span>Using the Plugin</span></a></div>
                 
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
-                    <div class="toc-item next-right"><a href="../../guide/advanced.html"><strong>3</strong><span>Advanced Plugin Configuration &amp; Usage</span> >></a></div>
-                
 
 
                 <div class="project">
-                    <h1>2.6 Packaging a Grails Project - Reference Documentation</h1>
+                    <h1>3.4 Debugging Grails tasks - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
 
@@ -80,19 +78,28 @@ function addJsClass() {
 
                 
 
-<h2 id="package">2.6 Packaging a Grails Project</h2>
-The Grails Gradle Plugin configures the normal Gradle <code>assemble</code> task to execute the appropriate Grails command for
-creating the project's output. For applications, the <code>assemble</code> task depends on <code>war</code> which executes the Grails <code>war</code>
-script and produces a War output.
-For plugins, the <code>assemble</code> task depends on <code>packagePlugin</code> which executes the Grails <code>package-plugin</code> script
-and produces the plugin Zip output.<p class="paragraph"/>Additionally, the plugin configures the normal Gradle <code>build</code> task to depend on <code>test</code> and <code>assemble</code>
+<h2 id="debug">3.4 Debugging Grails tasks</h2>
+The plugin allows Grails tasks to enable a debugger by setting the <code>grailsDebug</code> property to <code>true</code>.<p class="paragraph"/><div class="code"><pre>$ gradle &#45;PgrailsDebug=<span class="java&#45;quote">"<span class="java&#45;keyword">true</span>"</span> run</pre></div><p class="paragraph"/>The above command will execute the Grails <code>run-app</code> command with debug mode activated. This flag sets the debug mode
+by setting <code>jvmOptions.debug=true</code> on the underlying Gradle <code>JavaExec</code> instance for the Grails task. By default this
+activates debugging in a suspended mode on port 5005.<p class="paragraph"/><blockquote class="note">
+The <code>grailsDebug</code> is passed to <strong class="bold">ALL</strong> Grails tasks in Gradle.
+</blockquote><p class="paragraph"/>To manually configure the debug properties (i.e., suspend mode, port, etc) for the tasks,
+configure the options via the <code>jvmOptions.jvmArgs</code> property:<p class="paragraph"/><div class="code"><pre>run &#123;
+  jvmOptions &#123;
+    jvmArgs(&#91;
+      '&#45;Xdebug',
+      '&#45;Xnoagent',
+      '&#45;Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5006'
+    &#93;)
+  &#125;
+&#125;</pre></div><p class="paragraph"/>The above block configures the JVM that Grails executes in to have a remote debugger on port 5006 and does <strong class="bold">NOT</strong>
+suspend the JVM on startup.<p class="paragraph"/>
+
 
 
                 <div style="clear:both;margin-top:15px;"></div>
                 
-                    <div class="toc-item prev-left"><a href="../../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
-                
-                    <div class="toc-item next-right"><a href="../../guide/advanced.html"><strong>3</strong><span>Advanced Plugin Configuration &amp; Usage</span> >></a></div>
+                    <div class="toc-item prev-left"><a href="../../guide/usage.html">&lt;&lt; <strong>2</strong><span>Using the Plugin</span></a></div>
                 
                 <div style="clear:both"></div>
             </div>

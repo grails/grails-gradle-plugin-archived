@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3.5 Managing Grails Plugins with Gradle 2.0.1</title>
+    <title>3.6 Managing Grails Plugins with Gradle 2.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -65,11 +65,11 @@ function addJsClass() {
 
 
                 <div class="project">
-                    <h1>3.5 Managing Grails Plugins with Gradle - Reference Documentation</h1>
+                    <h1>3.6 Managing Grails Plugins with Gradle - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
 
-                    <p><strong>Version:</strong> 2.0.1</p>
+                    <p><strong>Version:</strong> 2.1.0</p>
 
                     
                 </div>
@@ -78,24 +78,24 @@ function addJsClass() {
 
                 
 
-<h2 id="plugins">3.5 Managing Grails Plugins with Gradle</h2>
+<h2 id="plugins">3.6 Managing Grails Plugins with Gradle</h2>
 The plugin configures the <code>build</code> task to call the appropriate <code>package-plugin</code> task for Grails plugin projects to produce
 the plugin zip file. Additionally, the plugin configures the Gradle configuration inheritance so that including Grails
 plugin projects via a Gradle <code>project</code> dependency should include the transitive dependencies for the plugin.<p class="paragraph"/><h4>Plugin Publication</h4><p class="paragraph"/><blockquote class="warning">
 Plugin Publication is not fully supported at this time. Additional information will be added to this page as use cases
 are defined.
-</blockquote><p class="paragraph"/><h5>Publishing a Simple Grails Plugin</h5><p class="paragraph"/>For simple Grails plugin projects, that is projects that have <strong class="bold">NO</strong> external dependencies, plugin release and plublication
+</blockquote><p class="paragraph"/><h5>Publishing a Simple Grails Plugin</h5><p class="paragraph"/>For simple Grails plugin projects, that is projects that have <strong class="bold">NO</strong> external dependencies, plugin release and publication
 can be accomplished using the <a href="http://grails.org/plugin/release." target="blank">Grails Release Plugin</a> Add the <code>release</code> plugin to
 the <code>bootstrap</code> configuration and execute the <code>grails-release-plugin</code> task.<p class="paragraph"/><div class="code"><pre>dependencies &#123;
     bootstrap 'org.grails.plugin:release:2.2.1'
 &#125;<p class="paragraph"/>$ gradle grails&#45;release&#45;plugin</pre></div><p class="paragraph"/><blockquote class="warning">
 See the plugin page http://grails.org/plugin/release for compatibility notes regarding the release plugin and the Grails version
 </blockquote><p class="paragraph"/><blockquote class="note">
-Using the Release Plugin is only supported when there are not external dependencies because the <code>release-plugin</code> command
+Using the Release Plugin is only supported when there are no external dependencies because the <code>release-plugin</code> command
 utilizes the dependencies configured in <code>BuildConfig.groovy</code> to build the plugin's <code>pom.xml</code> file. Since dependencies
 are being configure through Gradle, the <code>BuildConfig.groovy</code> will not have the correct information and the <code>pom.xml</code>
 will be incorrect (especially when using Gradle <code>project</code> dependencies).
-</blockquote><p class="paragraph"/><h5>Publishing Using the Gradle Maven Plugin</h5><p class="paragraph"/>Plugin publication using the <a href="http://www.gradle.org/docs/current/userguide/artifact_management.html" target="blank">@maven</a> plugin is
+</blockquote><p class="paragraph"/><h5>Publishing Using the Gradle Maven Plugin</h5><p class="paragraph"/>Plugin publication using the <a href="http://www.gradle.org/docs/current/userguide/artifact_management.html" target="blank"><code>maven</code></a> plugin is
 currently untested.<p class="paragraph"/><h5>Publishing Using the Gradle Maven-Publish (incubating) Plugin</h5><p class="paragraph"/>Plugin publication using the <a href="http://www.gradle.org/docs/current/userguide/publishing_maven.html" target="blank"><code>maven-publish</code></a> plugin
 is not fully supported. This is an incubating plugin and dependency information is not generated correctly in the POM.
 Specifically, at the time of writing, all dependencies were added to the <code>runtime</code> scope in the POM and installing the

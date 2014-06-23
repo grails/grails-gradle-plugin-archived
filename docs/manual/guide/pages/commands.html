@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>2.6 Packaging a Grails Project 2.1.0</title>
+    <title>1.2 Basic Task Reference 2.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -56,18 +56,16 @@ function addJsClass() {
             <div id="main" class="corner-all">
 
                 
-                    <div class="toc-item prev-left"><a href="../../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
-                
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
-                    <div class="toc-item next-right"><a href="../../guide/advanced.html"><strong>3</strong><span>Advanced Plugin Configuration &amp; Usage</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../../guide/usage.html"><strong>2</strong><span>Using the Plugin</span> >></a></div>
                 
 
 
                 <div class="project">
-                    <h1>2.6 Packaging a Grails Project - Reference Documentation</h1>
+                    <h1>1.2 Basic Task Reference - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
 
@@ -80,19 +78,29 @@ function addJsClass() {
 
                 
 
-<h2 id="package">2.6 Packaging a Grails Project</h2>
-The Grails Gradle Plugin configures the normal Gradle <code>assemble</code> task to execute the appropriate Grails command for
-creating the project's output. For applications, the <code>assemble</code> task depends on <code>war</code> which executes the Grails <code>war</code>
-script and produces a War output.
-For plugins, the <code>assemble</code> task depends on <code>packagePlugin</code> which executes the Grails <code>package-plugin</code> script
-and produces the plugin Zip output.<p class="paragraph"/>Additionally, the plugin configures the normal Gradle <code>build</code> task to depend on <code>test</code> and <code>assemble</code>
+<h2 id="commands">1.2 Basic Task Reference</h2>
+Applying the plugin creates the following default tasks in the Gradle project. Task dependencies are declared in brackets.
+<ul class="star">
+<li><code>run</code></li>
+<li><code>test</code></li>
+<li><code>war</code></li>
+<li><code>packagePlugin</code></li>
+</ul><p class="paragraph"/>Additionally, the plugin creates set of default Gradle tasks to mimic the behavior of a standard Gradle Java project.
+These tasks are wired to the corresponding <code>GrailsTask</code> to provide the behavior.
+<ul class="star">
+<li><code>clean</code></li>
+<li><code>test</code></li>
+<li><code>check</code> &#91;<code>test</code>&#93;</li>
+<li><code>assemble</code> &#91;<code>war</code> or <code>packagePlugin</code>&#93;</li>
+<li><code>build</code> &#91;<code>assemble</code>, <code>check</code>&#93;</li>
+</ul><p class="paragraph"/>Finally, the plugin creates a Gradle Task Rule that allows for execution of any arbitrary Grails script by prefixing
+the script name with <code>grails-</code>
+<div class="code"><pre>$ gradle grails&#45;s2&#45;quickstart //Execute the s2&#45;quickstart script from the Spring Security Core plugin</pre></div>
 
 
                 <div style="clear:both;margin-top:15px;"></div>
                 
-                    <div class="toc-item prev-left"><a href="../../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
-                
-                    <div class="toc-item next-right"><a href="../../guide/advanced.html"><strong>3</strong><span>Advanced Plugin Configuration &amp; Usage</span> >></a></div>
+                    <div class="toc-item next-right"><a href="../../guide/usage.html"><strong>2</strong><span>Using the Plugin</span> >></a></div>
                 
                 <div style="clear:both"></div>
             </div>

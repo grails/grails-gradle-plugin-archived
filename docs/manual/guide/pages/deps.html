@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>2.2 Configuring Project Dependencies 2.0.1</title>
+    <title>2.2 Configuring Project Dependencies 2.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -71,7 +71,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
 
-                    <p><strong>Version:</strong> 2.0.1</p>
+                    <p><strong>Version:</strong> 2.1.0</p>
 
                     
                 </div>
@@ -83,11 +83,11 @@ function addJsClass() {
 <h2 id="deps">2.2 Configuring Project Dependencies</h2>
 Using the Grails Gradle Plugin bypasses the normal Grails application build framework in favor of Gradle. The consequence
 of this is that the <code>BuildConfig.groovy</code> is no longer consulted for repository or dependency information. All repositories
-and dependencies <strong class="bold"></strong>MUST<strong class="bold"></strong> be configured via Gradle.<p class="paragraph"/><blockquote class="note">
+and dependencies <strong class="bold">MUST</strong> be configured via Gradle.<p class="paragraph"/><blockquote class="note">
 Because Grails is no longer resolving the dependency information, the short syntax for plugins cannot be used:<p class="paragraph"/><div class="code"><pre>plugins &#123;
   compile ':resources:1.1.1'
 &#125;</pre></div><p class="paragraph"/>In Grails, the syntax omits the Maven groupId for Grails plugins because all public Grails plugins are published under
-the <code>org.grails.plugins</code> groupId. With Gradle, the groupId <strong class="bold"></strong>MUST<strong class="bold"></strong> be specified:<p class="paragraph"/><div class="code"><pre>dependencies &#123;
+the <code>org.grails.plugins</code> groupId. With Gradle, the groupId <strong class="bold">MUST</strong> be specified:<p class="paragraph"/><div class="code"><pre>dependencies &#123;
     compile 'org.grails.plugins:resources:1.1.1'
 &#125;</pre></div>
 </blockquote><p class="paragraph"/>The Grails Gradle Plugin configures the following scopes for dependency resolution: <code>bootstrap</code>, <code>provided</code>, <code>compile</code>,

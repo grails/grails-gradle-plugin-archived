@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3 Advanced Plugin Configuration &amp; Usage 2.0.1</title>
+    <title>3 Advanced Plugin Configuration &amp; Usage 2.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -69,7 +69,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
 
-                    <p><strong>Version:</strong> 2.0.1</p>
+                    <p><strong>Version:</strong> 2.1.0</p>
 
                     
                 </div>
@@ -87,10 +87,13 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0px"><a href="#env"><strong>3.3</strong><span>Setting the Grails Environment</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0px"><a href="#memory"><strong>3.4</strong><span>Configuring JVM Memory for Grails Tasks</span></a>
+                    <div class="toc-item" style="margin-left:0px"><a href="#debug"><strong>3.4</strong><span>Debugging Grails tasks</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0px"><a href="#plugins"><strong>3.5</strong><span>Managing Grails Plugins with Gradle</span></a>
+                    <div class="toc-item" style="margin-left:0px"><a href="#memory"><strong>3.5</strong><span>Configuring JVM Memory for Grails Tasks</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#plugins"><strong>3.6</strong><span>Managing Grails Plugins with Gradle</span></a>
                     </div>
                     
                 </div>
@@ -107,7 +110,7 @@ underlying JVM that is executing the Grails tasks and integrating Grails builds 
 Integration of Grails into Gradle via this plugin is a complicated endeavour. The Grails framework contains its own
 build tooling that performs source compilation, test execution, and artifact packaging. Additionally, it has an extensive
 and mature plugin community of its own. Each plugin can add its own scripts to a Grails build and provide additional
-dependencies.<p class="paragraph"/>Because Grails contains is own build tooling, Grails projects, despite being based on Java &#38; Groovy, do <strong class="bold"></strong>NOT<strong class="bold"></strong> use
+dependencies.<p class="paragraph"/>Because Grails contains is own build tooling, Grails projects, despite being based on Java &#38; Groovy, do <strong class="bold">NOT</strong> use
 the Groovy, Java, or War plugins for Gradle. As a consequence, these projects lose many of the conveniences for
 configuration that a standard Gradle project would receive. The Gradle Grails Plugin tries to address many of these
 shortcomings but some may not be possible with the current state of the frameworks.<p class="paragraph"/><blockquote class="note">
@@ -122,25 +125,51 @@ configures the JVM is the same manner that the <code>grails</code> scripts on th
 <h2 id="args">3.2 Passing arguments to Grails Tasks</h2>
 The plugin tries to configure the known Grails tasks to the best of its abilities. However, sometimes additional
 parameters are necessary to be be passed from the command line. In order to pass options to the underlying JVM that
-is forked using the <code>grailsArgs</code> system property from the command line:<p class="paragraph"/><div class="code"><pre>$ gradle &#45;PgrailsArgs=<span class="java&#45;quote">"&#45;&#45;non&#45;interactive"</span> grails&#45;run&#45;app</pre></div><p class="paragraph"/>The above line with pass the <code>--non-interactive</code> switch to the underlying Grails <code>run-app</code> command. This maybe be useful
-when updating plugins and Grails prompts for allowing the upgrade.<p class="paragraph"/><blockquote class="note">
+is forked using the <code>grailsArgs</code> system property from the command line:<p class="paragraph"/><div class="code"><pre>$ gradle &#45;PgrailsArgs=<span class="java&#45;quote">"FooController"</span> grails&#45;create&#45;controller</pre></div><p class="paragraph"/>The above line with pass the <code>FooController</code> string to the underlying Grails <code>create-controller</code> command.<p class="paragraph"/><blockquote class="note">
 The <code>grailsArgs</code> property is a single system property. You can only specify it once and it is not parsed in anyway before
 being passed to the Grails JVM. It is strongly recommended to use "" around the value being passed to avoid any type of
 shell interpretation of the value.
+</blockquote><p class="paragraph"/><blockquote class="note">
+The <code>grailsArgs</code> property is wired <strong class="bold">ONLY</strong> to dynamically created tasks using the <code>grails-</code> prefix. Tasks created by
+the plugin are intended to provide for a repeatable build experience and as such do <strong class="bold">NOT</strong> accept additional parameters
+via the command line. The proper way to configure these tasks is via the Gradle build file
 </blockquote>
 
 
 <h2 id="env">3.3 Setting the Grails Environment</h2>
 The plugin allows you to override the Grails environment on the command line by using the <code>grailsEnv</code> property on the
-command line:<p class="paragraph"/><div class="code"><pre>$ gradle &#45;PgrailsEnv=prod grails&#45;run&#45;app</pre></div><p class="paragraph"/>The above command will execute the Grails <code>run-app</code> command in the <code>prod</code> environment.
+command line:<p class="paragraph"/><div class="code"><pre>$ gradle &#45;PgrailsEnv=prod grails&#45;run&#45;app</pre></div><p class="paragraph"/>The above command will execute the Grails <code>run-app</code> command in the <code>prod</code> environment.<p class="paragraph"/><blockquote class="note">
+The <code>PgrailsEnv</code> property is wired <strong class="bold">ONLY</strong> to dynamically created tasks using the <code>grails-</code> prefix. Tasks created by
+the plugin are intended to provide for a repeatable build experience and as such do <strong class="bold">NOT</strong> accept additional parameters
+via the command line. The proper way to configure these tasks is via the Gradle build file
+</blockquote>
 
 
-<h2 id="memory">3.4 Configuring JVM Memory for Grails Tasks</h2>
+<h2 id="debug">3.4 Debugging Grails tasks</h2>
+The plugin allows Grails tasks to enable a debugger by setting the <code>grailsDebug</code> property to <code>true</code>.<p class="paragraph"/><div class="code"><pre>$ gradle &#45;PgrailsDebug=<span class="java&#45;quote">"<span class="java&#45;keyword">true</span>"</span> run</pre></div><p class="paragraph"/>The above command will execute the Grails <code>run-app</code> command with debug mode activated. This flag sets the debug mode
+by setting <code>jvmOptions.debug=true</code> on the underlying Gradle <code>JavaExec</code> instance for the Grails task. By default this
+activates debugging in a suspended mode on port 5005.<p class="paragraph"/><blockquote class="note">
+The <code>grailsDebug</code> is passed to <strong class="bold">ALL</strong> Grails tasks in Gradle.
+</blockquote><p class="paragraph"/>To manually configure the debug properties (i.e., suspend mode, port, etc) for the tasks,
+configure the options via the <code>jvmOptions.jvmArgs</code> property:<p class="paragraph"/><div class="code"><pre>run &#123;
+  jvmOptions &#123;
+    jvmArgs(&#91;
+      '&#45;Xdebug',
+      '&#45;Xnoagent',
+      '&#45;Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=5006'
+    &#93;)
+  &#125;
+&#125;</pre></div><p class="paragraph"/>The above block configures the JVM that Grails executes in to have a remote debugger on port 5006 and does <strong class="bold">NOT</strong>
+suspend the JVM on startup.<p class="paragraph"/>
+
+
+
+<h2 id="memory">3.5 Configuring JVM Memory for Grails Tasks</h2>
 Grails applications are known for quickly growing in memory size (especially in PermGen). Currently, the plugin makes
 no efforts to configure the memory settings for the Grails JVM. By default then, the Grails JVM will have the same
 memory settings as the Gradle JVM which forked it.<p class="paragraph"/>Each <code>GrailsTask</code> exposes a <code>jvmOptions</code> property that can be used to configure the underlying JVM. The <code>jvmOptions</code>
 property is an instance of <a href="http://www.gradle.org/docs/current/javadoc/org/gradle/process/JavaForkOptions.html" target="blank">JavaForkOptions</a>
-and all the properties and methods from that class are available.<p class="paragraph"/><div class="code"><pre>'grails&#45;run&#45;app' &#123;
+and all the properties and methods from that class are available.<p class="paragraph"/><div class="code"><pre>run &#123;
     jvmOptions &#123;
         minHeapSize = '512m'
         maxHeapSize = '1g'
@@ -155,24 +184,24 @@ and all the properties and methods from that class are available.<p class="parag
 &#125;</pre></div>
 
 
-<h2 id="plugins">3.5 Managing Grails Plugins with Gradle</h2>
+<h2 id="plugins">3.6 Managing Grails Plugins with Gradle</h2>
 The plugin configures the <code>build</code> task to call the appropriate <code>package-plugin</code> task for Grails plugin projects to produce
 the plugin zip file. Additionally, the plugin configures the Gradle configuration inheritance so that including Grails
 plugin projects via a Gradle <code>project</code> dependency should include the transitive dependencies for the plugin.<p class="paragraph"/><h4>Plugin Publication</h4><p class="paragraph"/><blockquote class="warning">
 Plugin Publication is not fully supported at this time. Additional information will be added to this page as use cases
 are defined.
-</blockquote><p class="paragraph"/><h5>Publishing a Simple Grails Plugin</h5><p class="paragraph"/>For simple Grails plugin projects, that is projects that have <strong class="bold">NO</strong> external dependencies, plugin release and plublication
+</blockquote><p class="paragraph"/><h5>Publishing a Simple Grails Plugin</h5><p class="paragraph"/>For simple Grails plugin projects, that is projects that have <strong class="bold">NO</strong> external dependencies, plugin release and publication
 can be accomplished using the <a href="http://grails.org/plugin/release." target="blank">Grails Release Plugin</a> Add the <code>release</code> plugin to
 the <code>bootstrap</code> configuration and execute the <code>grails-release-plugin</code> task.<p class="paragraph"/><div class="code"><pre>dependencies &#123;
     bootstrap 'org.grails.plugin:release:2.2.1'
 &#125;<p class="paragraph"/>$ gradle grails&#45;release&#45;plugin</pre></div><p class="paragraph"/><blockquote class="warning">
 See the plugin page http://grails.org/plugin/release for compatibility notes regarding the release plugin and the Grails version
 </blockquote><p class="paragraph"/><blockquote class="note">
-Using the Release Plugin is only supported when there are not external dependencies because the <code>release-plugin</code> command
+Using the Release Plugin is only supported when there are no external dependencies because the <code>release-plugin</code> command
 utilizes the dependencies configured in <code>BuildConfig.groovy</code> to build the plugin's <code>pom.xml</code> file. Since dependencies
 are being configure through Gradle, the <code>BuildConfig.groovy</code> will not have the correct information and the <code>pom.xml</code>
 will be incorrect (especially when using Gradle <code>project</code> dependencies).
-</blockquote><p class="paragraph"/><h5>Publishing Using the Gradle Maven Plugin</h5><p class="paragraph"/>Plugin publication using the <a href="http://www.gradle.org/docs/current/userguide/artifact_management.html" target="blank">@maven</a> plugin is
+</blockquote><p class="paragraph"/><h5>Publishing Using the Gradle Maven Plugin</h5><p class="paragraph"/>Plugin publication using the <a href="http://www.gradle.org/docs/current/userguide/artifact_management.html" target="blank"><code>maven</code></a> plugin is
 currently untested.<p class="paragraph"/><h5>Publishing Using the Gradle Maven-Publish (incubating) Plugin</h5><p class="paragraph"/>Plugin publication using the <a href="http://www.gradle.org/docs/current/userguide/publishing_maven.html" target="blank"><code>maven-publish</code></a> plugin
 is not fully supported. This is an incubating plugin and dependency information is not generated correctly in the POM.
 Specifically, at the time of writing, all dependencies were added to the <code>runtime</code> scope in the POM and installing the

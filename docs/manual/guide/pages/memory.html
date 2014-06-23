@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3.4 Configuring JVM Memory for Grails Tasks 2.0.1</title>
+    <title>3.5 Configuring JVM Memory for Grails Tasks 2.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -65,11 +65,11 @@ function addJsClass() {
 
 
                 <div class="project">
-                    <h1>3.4 Configuring JVM Memory for Grails Tasks - Reference Documentation</h1>
+                    <h1>3.5 Configuring JVM Memory for Grails Tasks - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
 
-                    <p><strong>Version:</strong> 2.0.1</p>
+                    <p><strong>Version:</strong> 2.1.0</p>
 
                     
                 </div>
@@ -78,12 +78,12 @@ function addJsClass() {
 
                 
 
-<h2 id="memory">3.4 Configuring JVM Memory for Grails Tasks</h2>
+<h2 id="memory">3.5 Configuring JVM Memory for Grails Tasks</h2>
 Grails applications are known for quickly growing in memory size (especially in PermGen). Currently, the plugin makes
 no efforts to configure the memory settings for the Grails JVM. By default then, the Grails JVM will have the same
 memory settings as the Gradle JVM which forked it.<p class="paragraph"/>Each <code>GrailsTask</code> exposes a <code>jvmOptions</code> property that can be used to configure the underlying JVM. The <code>jvmOptions</code>
 property is an instance of <a href="http://www.gradle.org/docs/current/javadoc/org/gradle/process/JavaForkOptions.html" target="blank">JavaForkOptions</a>
-and all the properties and methods from that class are available.<p class="paragraph"/><div class="code"><pre>'grails&#45;run&#45;app' &#123;
+and all the properties and methods from that class are available.<p class="paragraph"/><div class="code"><pre>run &#123;
     jvmOptions &#123;
         minHeapSize = '512m'
         maxHeapSize = '1g'

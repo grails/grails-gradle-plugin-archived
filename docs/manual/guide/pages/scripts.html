@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>2.5 Executing Grails Scripts 2.0.1</title>
+    <title>2.5 Executing Grails Scripts 2.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -71,7 +71,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
 
-                    <p><strong>Version:</strong> 2.0.1</p>
+                    <p><strong>Version:</strong> 2.1.0</p>
 
                     
                 </div>
@@ -85,7 +85,7 @@ The plugin configures a Gradle Task Rule to allow execution of any available Gra
 prefix the Grails script name with <code>grails-</code> and execute from Gradle.<p class="paragraph"/><div class="code"><pre>$ gradle grails&#45;refresh&#45;dependencies</pre></div><p class="paragraph"/><blockquote class="note">
 Similar to the behavior of Grails itself, the provided script will be passed as the execution for Grails. If the
 requested script is provided via a Grails plugin that is not yet installed, then the execution will fail because plugin
-resolution in Grails occurs after validating the script. This can be avoided by executing a <code>gradle classes</code> so that
+resolution in Grails occurs after validating the script. This can be avoided by executing a <code>gradle assemble</code> so that
 Grails compilation &#38; plugin resolution occurs after adding a new Grails plugin to the build dependencies.
 </blockquote>
 

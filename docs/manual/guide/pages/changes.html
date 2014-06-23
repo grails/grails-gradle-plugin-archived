@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>1.2 Change Log 2.0.1</title>
+    <title>1.3 Change Log 2.1.0</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -65,11 +65,11 @@ function addJsClass() {
 
 
                 <div class="project">
-                    <h1>1.2 Change Log - Reference Documentation</h1>
+                    <h1>1.3 Change Log - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
 
-                    <p><strong>Version:</strong> 2.0.1</p>
+                    <p><strong>Version:</strong> 2.1.0</p>
 
                     
                 </div>
@@ -78,8 +78,29 @@ function addJsClass() {
 
                 
 
-<h2 id="changes">1.2 Change Log</h2>
-<h4>v2.0.1</h4>
+<h2 id="changes">1.3 Change Log</h2>
+<h4>v2.1.0</h4>
+<ul class="star">
+<li>Renamed default tasks created by plugin: (<a href="https://github.com/grails/grails-gradle-plugin/issues/81)" target="blank">ISSUE-81</a></li>
+<ul class="star">
+<li><code>run</code> replaces <code>grails-run-app</code></li>
+<li><code>test</code> replaces <code>grails-test-app</code></li>
+<li><code>war</code> replaces <code>grails-war</code></li>
+<li><code>packagePlugin</code> replaces <code>grails-package-plugin</code></li>
+</ul>
+<li>Added the <code>reload</code> property <code>GrailsTask</code> to enabled SpringLoaded class reloading for a task. ("ISSUE-84": https://github.com/grails/grails-gradle-plugin/issues/84)</li>
+<li>Configure the static <code>run</code> task and dynamic <code>grails-run-app</code> task to enabled reloading by default.</li>
+<li>Removed creating the <code>grails-clean</code> task by default. Configure the normal <code>clean</code> task to delete the <code>buildPlugins/</code> directory.</li>
+<li>Fix a bug in the IntelliJ IDEA integration where only 1 plugin per configuration was being registered as project source</li>
+<li>Include bootstrap scope plugins as project source in IntelliJ IDEA</li>
+<li>Mark test scope plugins directories as Test Source instead of Source in IntelliJ IDEA</li>
+<li>Support new Maven group name for SpringLoaded library starting with v1.1.5.RELEASE</li>
+<li>Add support to automatically synchronize <code>app.version</code> and <code>app.grails.version</code> in the <code>application.properties</code></li>
+</ul><p class="paragraph"/>  file to <code>project.version</code> and <code>project.grails.grailsVersion</code> respectively (<a href="http://jira.grails.org/browse/MAVEN-137)" target="blank">MAVEN-137</a>
+<ul class="star">
+<li>Correctly mapped <code>provided</code> scope dependencies to the Grails environment</li>
+<li>Allow passing of the <code>-PgrailsDebug=true</code> flag to all Grails tasks. (<a href="https://github.com/grails/grails-gradle-plugin/issues/97)" target="blank">ISSUE-97</a></li>
+</ul><p class="paragraph"/><h4>v2.0.1</h4>
 <ul class="star">
 <li>Fix a bug in setting <code>grails.groovyVersion</code> which resulted in an exception when a dependency tried to include the groovy library.</li>
 <li>Fix a bug where when a <code>GrailsTestTask</code> is configured with both a set of Task Inputs and a <code>testResultsDir</code> that results in an exception because <code>testResultsDir</code> is a directory but Gradle expects it to be a file.</li>
