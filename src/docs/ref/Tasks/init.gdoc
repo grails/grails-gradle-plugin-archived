@@ -2,4 +2,8 @@ h1. init
 
 h2. Purpose
 
+Initialize a new Grails application project in the current directory.
+
 h3. Description
+
+Calls to the @create-app@ Grails script and passes the @version@ property.

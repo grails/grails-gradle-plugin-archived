@@ -2,4 +2,9 @@ h1. packagePlugin
 
 h2. Purpose
 
+Packages a Grails plugin project as a source ZIP file by default.
+
 h3. Description
+
+Calls to the @package-plugin@ Grails script.
+Configures the output artifact for the runtime and default Gradle configurations to the be the resulting ZIP file.

@@ -1,0 +1,23 @@
+h1. grails-<script-name>
+
+h2. Purpose
+
+Allows execution of arbitrary Grails scripts from the Gradle command line.
+
+h3. Description
+
+{code}
+$ gradle grails-refresh-dependencies
+{code}
+
+Pass arguments to Grails scripts
+
+{code}
+$ gradle grails-create-controller -PgrailsArgs="FooController"
+{code}
+
+Set environment for Grails script
+
+{code}
+$ gradle grails-run-app -PgrailsEnv=production
+{code}

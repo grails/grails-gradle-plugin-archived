@@ -2,4 +2,9 @@ h1. run
 
 h2. Purpose
 
+Start a Grails application using an embedded container.
+
 h3. Description
+
+Calls to the @run-app@ Grails script. By default executes in the @development@ environment. By default enables
+class-reloading via Spring Loaded if it is available on the classpath.

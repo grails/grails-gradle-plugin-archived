@@ -2,4 +2,18 @@ h1. test
 
 h2. Purpose
 
+Executes the Grails tests via the built in test runner in Grails.
+
 h3. Description
+
+Calls the @test-app@ Grails script. By default passes no arguments, which results in all test phases and types
+being executed.
+
+Select specific tests to execute:
+
+{code}
+$ gradle test -Dtest.single="Foo"
+{code}
+
+Value of @test.single@ is passed as a Grails argument which utilizes Grails's pattern matching for which tests will
+be executed.
