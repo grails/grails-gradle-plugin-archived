@@ -76,8 +76,9 @@ class GrailsEclipseConfigurator {
 
                 // Excluding resources source directories
                 (project.sourceSets.main.resources.srcDirs as LinkedHashSet).each {
+                    def path = it.absolutePath.minus("${project.projectDir.absolutePath}${File.separator}")
                     node.remove(node.'**'.find {
-                        it.@path == it.absolutePath.minus("${project.projectDir.absolutePath}${File.separator}")
+                        it.@path == path
                     })
                 }
 
