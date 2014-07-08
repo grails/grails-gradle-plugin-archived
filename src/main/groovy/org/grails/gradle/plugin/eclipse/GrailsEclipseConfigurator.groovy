@@ -26,8 +26,9 @@ import org.gradle.plugins.ide.eclipse.model.EclipseModel
  * Created by Jeevanandam M. (jeeva@myjeeva.com) on 7/4/14.
  */
 class GrailsEclipseConfigurator {
-    final GRAILS_PLUGIN_DIR_LINK_NAME = '.link_to_grails_plugins'
+    final GRADLE_GRAILS_PLUGIN_DIR_LINK_NAME = '.link_to_grails_plugins'
     final GRADLE_GRAILS_PLUGIN_RELATIVE_DIR = 'buildPlugins'
+    final GRADLE_GRAILS_OUTPUT_RELATIVE_DIR = 'build/classes'
 
     /**
      * Registering Eclipse IDE project configuration
@@ -37,12 +38,13 @@ class GrailsEclipseConfigurator {
     void configure(Project project) {
         project.plugins.withType(EclipsePlugin) {
             project.eclipse {
-                prepareEclipseProject(project, model)
+                createEclipseProject(project, model)
+                createEclipseClasspath(project, model)
             }
         }
     }
 
-    void prepareEclipseProject(Project project, EclipseModel model) {
+    void createEclipseProject(Project project, EclipseModel model) {
         model.project {
             buildCommand 'org.eclipse.wst.common.project.facet.core.builder'
             buildCommand 'org.eclipse.jdt.core.javabuilder'
@@ -52,9 +54,37 @@ class GrailsEclipseConfigurator {
                        'org.eclipse.jdt.core.javanature',
                        'org.eclipse.wst.common.project.facet.core.nature']
 
-            linkedResource name: GRAILS_PLUGIN_DIR_LINK_NAME,
+            linkedResource name: GRADLE_GRAILS_PLUGIN_DIR_LINK_NAME,
                 type: '2',
                 location: "${project.projectDir.absolutePath}${File.separator}${GRADLE_GRAILS_PLUGIN_RELATIVE_DIR}"
+        }
+    }
+
+    void createEclipseClasspath(Project project, EclipseModel model) {
+        model.classpath {
+            defaultOutputDir = new File(GRADLE_GRAILS_OUTPUT_RELATIVE_DIR)
+
+            containers.clear()
+
+            def configurations = project.configurations
+            plusConfigurations += [configurations.bootstrap]
+            plusConfigurations += [configurations.runtime]
+            plusConfigurations += [configurations.test]
+
+            file.withXml {
+                def node = it.asNode()
+
+                // Excluding resources source directories
+                (project.sourceSets.main.resources.srcDirs as LinkedHashSet).each {
+                    node.remove(node.'**'.find {
+                        it.@path == it.absolutePath.minus("${project.projectDir.absolutePath}${File.separator}")
+                    })
+                }
+
+                // Containers
+                node.appendNode 'classpathentry', [kind: 'con', path: 'org.eclipse.jdt.launching.JRE_CONTAINER']
+                node.appendNode 'classpathentry', [kind: 'con', path: 'GROOVY_DSL_SUPPORT']
+            }
         }
     }
 }
