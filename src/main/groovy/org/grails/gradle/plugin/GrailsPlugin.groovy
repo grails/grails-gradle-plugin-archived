@@ -30,6 +30,7 @@ import org.gradle.language.base.ProjectSourceSet
 import org.gradle.language.base.plugins.LanguageBasePlugin
 import org.grails.gradle.plugin.dependencies.DependencyConfigurer
 import org.grails.gradle.plugin.dependencies.DependencyConfigurerFactory
+import org.grails.gradle.plugin.eclipse.GrailsEclipseConfigurator
 import org.grails.gradle.plugin.idea.GrailsIdeaConfigurator
 import org.grails.gradle.plugin.internal.DefaultGrailsProject
 import org.grails.gradle.plugin.tasks.GrailsTask
@@ -144,6 +145,7 @@ class GrailsPlugin implements Plugin<Project> {
             }
         }
         configureIdea(project)
+        configureEclipse(project)
     }
 
     void configureTasks(Project project, GrailsProject grailsProject) {
@@ -156,6 +158,10 @@ class GrailsPlugin implements Plugin<Project> {
 
     void configureIdea(Project project) {
         new GrailsIdeaConfigurator().configure(project)
+    }
+
+    void configureEclipse(Project project) {
+        new GrailsEclipseConfigurator().configure(project)
     }
 
     Configuration getOrCreateConfiguration(Project project, String name) {
