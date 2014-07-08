@@ -25,6 +25,7 @@ import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.internal.ConventionMapping
 import org.gradle.api.internal.file.FileResolver
 import org.gradle.api.plugins.BasePlugin
+import org.gradle.api.plugins.JavaBasePlugin
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.language.base.ProjectSourceSet
 import org.gradle.language.base.plugins.LanguageBasePlugin
@@ -52,6 +53,9 @@ class GrailsPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.plugins.apply(BasePlugin)
         project.plugins.apply(LanguageBasePlugin)
+
+        // Eclipse/GGTS IDE integration. Gradle eclipse plugin needs minimum java base plugin for classpath & jdt settings
+        project.plugins.apply(JavaBasePlugin)
 
         DefaultGrailsProject grailsProject = project.extensions.create('grails', DefaultGrailsProject, project, instantiator)
         project.convention.plugins.put('grails', grailsProject)
@@ -153,7 +157,7 @@ class GrailsPlugin implements Plugin<Project> {
     }
 
     void configureSourceSets(Project project, GrailsProject grailsProject) {
-        new GrailsSourceSetConfigurator(instantiator, fileResolver).configure(project.extensions.getByType(ProjectSourceSet), grailsProject)
+        new GrailsSourceSetConfigurator(instantiator, fileResolver).configure(project, grailsProject)
     }
 
     void configureIdea(Project project) {
