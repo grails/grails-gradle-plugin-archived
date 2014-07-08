@@ -44,7 +44,7 @@ class GrailsEclipseConfigurator {
         }
     }
 
-    void createEclipseProject(Project project, EclipseModel model) {
+    private void createEclipseProject(Project project, EclipseModel model) {
         model.project {
             buildCommand 'org.eclipse.wst.common.project.facet.core.builder'
             buildCommand 'org.eclipse.jdt.core.javabuilder'
@@ -57,10 +57,49 @@ class GrailsEclipseConfigurator {
             linkedResource name: GRADLE_GRAILS_PLUGIN_DIR_LINK_NAME,
                 type: '2',
                 location: "${project.projectDir.absolutePath}${File.separator}${GRADLE_GRAILS_PLUGIN_RELATIVE_DIR}"
+
+            file.withXml {
+                def node = it.asNode()
+
+                /*
+                 *  Project filters for build, .gradle, target
+                 */
+                Node filteredResources = new XmlParser().parseText("""<filteredResources>
+                        <filter>
+                            <id>1407523962826</id>
+                            <name/>
+                            <type>10</type>
+                            <matcher>
+                                <id>org.eclipse.ui.ide.multiFilter</id>
+                                <arguments>1.0-name-matches-false-false-target</arguments>
+                            </matcher>
+                        </filter>
+                        <filter>
+                            <id>1407523962836</id>
+                            <name/>
+                            <type>10</type>
+                            <matcher>
+                                <id>org.eclipse.ui.ide.multiFilter</id>
+                                <arguments>1.0-name-matches-false-false-build</arguments>
+                            </matcher>
+                        </filter>
+                        <filter>
+                            <id>1407529877923</id>
+                            <name/>
+                            <type>10</type>
+                            <matcher>
+                                <id>org.eclipse.ui.ide.multiFilter</id>
+                                <arguments>1.0-name-matches-false-false-.gradle</arguments>
+                            </matcher>
+                        </filter>
+                    </filteredResources>""")
+
+                node.append(filteredResources)
+            }
         }
     }
 
-    void createEclipseClasspath(Project project, EclipseModel model) {
+    private void createEclipseClasspath(Project project, EclipseModel model) {
         model.classpath {
             defaultOutputDir = new File(GRADLE_GRAILS_OUTPUT_RELATIVE_DIR)
 
