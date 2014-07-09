@@ -31,10 +31,6 @@ class GrailsEclipseConfigurator {
     static final GRADLE_GRAILS_PLUGIN_DIR_LINK_NAME = '.link_to_grails_plugins'
     static final GRADLE_GRAILS_PLUGIN_RELATIVE_DIR = 'buildPlugins'
     static final GRADLE_GRAILS_OUTPUT_RELATIVE_DIR = 'build/classes'
-    static final ECLIPSE_GROOVY_JDT_PREFS_FILE_NAME = 'org.eclipse.jdt.groovy.core.prefs'
-    static final ECLIPSE_SETTINGS_DIR_NAME = '.settings'
-    static final ECLIPSE_JDT_GROOVY_CLEAN_TASK_NAME = "cleanEclipseJdtGroovy"
-    static final ECLIPSE_JDT_GROOVY_TASK_NAME = "eclipseJdtGroovy"
 
     /**
      * Registering Eclipse IDE project configuration
@@ -137,19 +133,14 @@ class GrailsEclipseConfigurator {
     }
 
     private void configureTasksAndHooks(Project project) {
-        project.afterEvaluate {
-            // cleanEclipseJdtGroovy task
-            project.tasks.create(ECLIPSE_JDT_GROOVY_CLEAN_TASK_NAME, Delete.class).with {
-                description = 'Cleans the Eclipse JDT Groovy settings file.'
-                delete "${ECLIPSE_SETTINGS_DIR_NAME}${File.separator}${ECLIPSE_GROOVY_JDT_PREFS_FILE_NAME}"
-            }
-            project.tasks.findByName('cleanEclipse')?.dependsOn(ECLIPSE_JDT_GROOVY_CLEAN_TASK_NAME)
-
-            // eclipseJdtGroovy task
-            project.task(ECLIPSE_JDT_GROOVY_TASK_NAME, type: GrailsEclipseJdtGroovyTask) {
-                groovyVersion = "${project.grails.groovyVersion}"
-                outputFile = project.file("${ECLIPSE_SETTINGS_DIR_NAME}${File.separator}${ECLIPSE_GROOVY_JDT_PREFS_FILE_NAME}")
-            }
+        // cleanEclipseJdtGroovy task
+        project.tasks.create(GrailsEclipseJdtGroovyTask.ECLIPSE_JDT_GROOVY_CLEAN_TASK_NAME, Delete.class).with {
+            description = 'Cleans the Eclipse JDT Groovy settings file.'
+            delete GrailsEclipseJdtGroovyTask.ECLIPSE_GROOVY_JDT_PREFS_FILE
         }
+        project.tasks.findByName('cleanEclipse')?.dependsOn(GrailsEclipseJdtGroovyTask.ECLIPSE_JDT_GROOVY_CLEAN_TASK_NAME)
+
+        // eclipseJdtGroovy task
+        project.task(GrailsEclipseJdtGroovyTask.ECLIPSE_JDT_GROOVY_TASK_NAME, type: GrailsEclipseJdtGroovyTask)
     }
 }

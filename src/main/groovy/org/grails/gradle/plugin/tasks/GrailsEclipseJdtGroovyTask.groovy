@@ -21,14 +21,21 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.plugins.ide.eclipse.EclipsePlugin
-import org.grails.gradle.plugin.eclipse.GrailsEclipseConfigurator
 
 /**
  * Created by Jeevanandam M. (jeeva@myjeeva.com) on 7/8/14.
  */
 class GrailsEclipseJdtGroovyTask extends ConventionTask {
+    // Constants
+    static final ECLIPSE_SETTINGS_DIR_NAME = '.settings'
+    static final ECLIPSE_GROOVY_JDT_PREFS_FILE = "${ECLIPSE_SETTINGS_DIR_NAME}${File.separator}org.eclipse.jdt.groovy.core.prefs"
+    static final ECLIPSE_JDT_GROOVY_CLEAN_TASK_NAME = "cleanEclipseJdtGroovy"
+    static final ECLIPSE_JDT_GROOVY_TASK_NAME = "eclipseJdtGroovy"
+
     @Input
-    def groovyVersion
+    String getGroovyVersion() {
+        return project.grails.groovyVersion ?: '2.1.9' // Just defaulting to 2.1 compiler for IDE
+    }
 
     @OutputFile
     File outputFile
@@ -36,13 +43,14 @@ class GrailsEclipseJdtGroovyTask extends ConventionTask {
     GrailsEclipseJdtGroovyTask() {
         super()
         description = 'Generates the Eclipse JDT Groovy settings file.'
+        outputFile = project.file(ECLIPSE_GROOVY_JDT_PREFS_FILE)
 
-        project.tasks.findByName(EclipsePlugin.ECLIPSE_TASK_NAME)?.dependsOn(GrailsEclipseConfigurator.ECLIPSE_JDT_GROOVY_TASK_NAME)
+        project.tasks.findByName(EclipsePlugin.ECLIPSE_TASK_NAME)?.dependsOn(ECLIPSE_JDT_GROOVY_TASK_NAME)
     }
 
     @TaskAction
     def createJdtGroovyPrefs() {
-        def groovyCompilerVersion = groovyVersion[0..2].replaceAll(/\./, "")
+        def groovyCompilerVersion = getGroovyVersion()[0..2].replaceAll(/\./, "")
 
         def file = getOutputFile()
         if (!file.isFile()) {
