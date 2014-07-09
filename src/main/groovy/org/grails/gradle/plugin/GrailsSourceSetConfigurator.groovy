@@ -34,10 +34,11 @@ class GrailsSourceSetConfigurator {
         }
 
         //Add the 'groovy' DSL extension to the source sets
-        project.sourceSets.all(sourceSetAction)
+        project.sourceSets.clear()
 
         // Technically not need, can be fulfilled using project instance itself
         // however existing codebase uses this grailsProject object. So preserving it!
+        grailsProject.sourceSets.clear()
         grailsProject.sourceSets.all(sourceSetAction)
 
         createMainSourceSet(project, grailsProject)
