@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 the original author or authors.
+ * Copyright 2014 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.grails.gradle.plugin.tasks
 
-import org.gradle.api.DefaultTask
+import org.gradle.api.internal.ConventionTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.plugins.ide.eclipse.EclipsePlugin
 import org.grails.gradle.plugin.eclipse.GrailsEclipseConfigurator
@@ -24,22 +26,34 @@ import org.grails.gradle.plugin.eclipse.GrailsEclipseConfigurator
 /**
  * Created by Jeevanandam M. (jeeva@myjeeva.com) on 7/8/14.
  */
-class GrailsEclipseJdtGroovyTask extends DefaultTask {
+class GrailsEclipseJdtGroovyTask extends ConventionTask {
+    @Input
+    def groovyVersion
+
+    @OutputFile
+    File outputFile
 
     GrailsEclipseJdtGroovyTask() {
         super()
         description = 'Generates the Eclipse JDT Groovy settings file.'
-
 
         project.tasks.findByName(EclipsePlugin.ECLIPSE_TASK_NAME)?.dependsOn(GrailsEclipseConfigurator.ECLIPSE_JDT_GROOVY_TASK_NAME)
     }
 
     @TaskAction
     def createJdtGroovyPrefs() {
-        println 'This is new task ' + "${project.grails.groovyVersion}"
+        def groovyCompilerVersion = groovyVersion[0..2].replaceAll(/\./, "")
 
+        def file = getOutputFile()
+        if (!file.isFile()) {
+            file.parentFile.mkdirs()
+            file.createNewFile()
+        }
 
-
+        def props = new Properties()
+        props.load(file.newDataInputStream())
+        props.setProperty('eclipse.preferences.version', '1')
+        props.setProperty('groovy.compiler.level', groovyCompilerVersion)
+        props.store(file.newWriter(), null)
     }
-
 }

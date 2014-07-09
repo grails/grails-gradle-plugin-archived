@@ -17,8 +17,10 @@
 package org.grails.gradle.plugin.eclipse
 
 import org.gradle.api.Project
+import org.gradle.api.tasks.Delete
 import org.gradle.plugins.ide.eclipse.EclipsePlugin
 import org.gradle.plugins.ide.eclipse.model.EclipseModel
+import org.grails.gradle.plugin.tasks.GrailsEclipseJdtGroovyTask
 
 /**
  * Configure the Eclipse IDE integration for the project.
@@ -26,9 +28,13 @@ import org.gradle.plugins.ide.eclipse.model.EclipseModel
  * Created by Jeevanandam M. (jeeva@myjeeva.com) on 7/4/14.
  */
 class GrailsEclipseConfigurator {
-    final GRADLE_GRAILS_PLUGIN_DIR_LINK_NAME = '.link_to_grails_plugins'
-    final GRADLE_GRAILS_PLUGIN_RELATIVE_DIR = 'buildPlugins'
-    final GRADLE_GRAILS_OUTPUT_RELATIVE_DIR = 'build/classes'
+    static final GRADLE_GRAILS_PLUGIN_DIR_LINK_NAME = '.link_to_grails_plugins'
+    static final GRADLE_GRAILS_PLUGIN_RELATIVE_DIR = 'buildPlugins'
+    static final GRADLE_GRAILS_OUTPUT_RELATIVE_DIR = 'build/classes'
+    static final ECLIPSE_GROOVY_JDT_PREFS_FILE_NAME = 'org.eclipse.jdt.groovy.core.prefs'
+    static final ECLIPSE_SETTINGS_DIR_NAME = '.settings'
+    static final ECLIPSE_JDT_GROOVY_CLEAN_TASK_NAME = "cleanEclipseJdtGroovy"
+    static final ECLIPSE_JDT_GROOVY_TASK_NAME = "eclipseJdtGroovy"
 
     /**
      * Registering Eclipse IDE project configuration
@@ -41,6 +47,8 @@ class GrailsEclipseConfigurator {
                 createEclipseProject(project, model)
                 createEclipseClasspath(project, model)
             }
+
+            configureTasksAndHooks(project)
         }
     }
 
@@ -115,7 +123,7 @@ class GrailsEclipseConfigurator {
 
                 // Excluding resources source directories
                 (project.sourceSets.main.resources.srcDirs as LinkedHashSet).each {
-                    def path = it.absolutePath.minus("${project.projectDir.absolutePath}${File.separator}")
+                    def path = project.relativePath(it)
                     node.remove(node.'**'.find {
                         it.@path == path
                     })
@@ -124,6 +132,23 @@ class GrailsEclipseConfigurator {
                 // Containers
                 node.appendNode 'classpathentry', [kind: 'con', path: 'org.eclipse.jdt.launching.JRE_CONTAINER']
                 node.appendNode 'classpathentry', [kind: 'con', path: 'GROOVY_DSL_SUPPORT']
+            }
+        }
+    }
+
+    private void configureTasksAndHooks(Project project) {
+        project.afterEvaluate {
+            // cleanEclipseJdtGroovy task
+            project.tasks.create(ECLIPSE_JDT_GROOVY_CLEAN_TASK_NAME, Delete.class).with {
+                description = 'Cleans the Eclipse JDT Groovy settings file.'
+                delete "${ECLIPSE_SETTINGS_DIR_NAME}${File.separator}${ECLIPSE_GROOVY_JDT_PREFS_FILE_NAME}"
+            }
+            project.tasks.findByName('cleanEclipse')?.dependsOn(ECLIPSE_JDT_GROOVY_CLEAN_TASK_NAME)
+
+            // eclipseJdtGroovy task
+            project.task(ECLIPSE_JDT_GROOVY_TASK_NAME, type: GrailsEclipseJdtGroovyTask) {
+                groovyVersion = "${project.grails.groovyVersion}"
+                outputFile = project.file("${ECLIPSE_SETTINGS_DIR_NAME}${File.separator}${ECLIPSE_GROOVY_JDT_PREFS_FILE_NAME}")
             }
         }
     }
