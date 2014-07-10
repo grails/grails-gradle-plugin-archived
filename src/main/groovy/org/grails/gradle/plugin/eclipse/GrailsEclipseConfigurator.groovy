@@ -120,9 +120,13 @@ class GrailsEclipseConfigurator {
                 // Excluding resources source directories
                 (project.sourceSets.main.resources.srcDirs as LinkedHashSet).each {
                     def path = project.relativePath(it)
-                    node.remove(node.'**'.find {
+                    def removeNode = node.'**'.find {
                         it.@path == path
-                    })
+                    }
+
+                    if (removeNode) {
+                        node.remove(removeNode)
+                    }
                 }
 
                 // Containers
