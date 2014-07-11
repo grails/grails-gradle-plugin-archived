@@ -50,6 +50,7 @@ class GrailsEclipseConfigurator {
 
     private void createEclipseProject(Project project, EclipseModel model) {
         model.project {
+            buildCommands.clear()
             buildCommand 'org.eclipse.wst.common.project.facet.core.builder'
             buildCommand 'org.eclipse.jdt.core.javabuilder'
 
@@ -118,7 +119,8 @@ class GrailsEclipseConfigurator {
                 def node = it.asNode()
 
                 // Excluding resources source directories
-                (project.sourceSets.main.resources.srcDirs as LinkedHashSet).each {
+                def resourcesDirs = (project.sourceSets.main.resources.srcDirs as LinkedHashSet) + ['grails-app/conf']
+                resourcesDirs.each {
                     def path = project.relativePath(it)
                     def removeNode = node.'**'.find {
                         it.@path == path
@@ -128,6 +130,7 @@ class GrailsEclipseConfigurator {
                         node.remove(removeNode)
                     }
                 }
+                node.appendNode('classpathentry', [kind: 'src', path: 'grails-app/conf', excluding: 'spring/|hibernate/'])
 
                 // Containers
                 node.appendNode 'classpathentry', [kind: 'con', path: 'org.eclipse.jdt.launching.JRE_CONTAINER']
