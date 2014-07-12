@@ -119,11 +119,10 @@ class GrailsEclipseConfigurator {
                 def node = it.asNode()
 
                 // Excluding resources source directories
-                def resourcesDirs = (project.sourceSets.main.resources.srcDirs as LinkedHashSet) + ['grails-app/conf']
-                resourcesDirs.each {
-                    def path = project.relativePath(it)
+                ['grails-app/conf', 'grails-app/conf/hibernate', 'grails-app/conf/spring',
+                 'grails-app/views', 'web-app'].collect { dirPath ->
                     def removeNode = node.'**'.find {
-                        it.@path == path
+                        it.@path == dirPath
                     }
 
                     if (removeNode) {
