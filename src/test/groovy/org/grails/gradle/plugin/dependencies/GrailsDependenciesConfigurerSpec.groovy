@@ -44,6 +44,7 @@ class GrailsDependenciesConfigurerSpec extends Specification {
         springLoadedVersion || dependencyTarget
         '1.1.4' || 'org.springsource.springloaded:springloaded-core:1.1.4'
         '1.1.5.RELEASE' || 'org.springframework:springloaded:1.1.5.RELEASE'
+        '1.2.0' || 'org.springframework:springloaded:1.2.0.RELEASE'
     }
 
     def "configure base dependencies"() {
