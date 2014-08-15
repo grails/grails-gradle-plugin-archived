@@ -8,7 +8,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath "org.grails:grails-gradle-plugin:2.0.0"
+    classpath "org.grails:grails-gradle-plugin:2.1.0"
   }
 }
 
@@ -22,8 +22,8 @@ repositories {
 }
 
 grails {
-  grailsVersion = '2.3.5'
-  groovyVersion = '2.1.9'
+  grailsVersion = '2.4.3'
+  groovyVersion = '2.3.6'
   springLoadedVersion '1.1.3'
 }
 
