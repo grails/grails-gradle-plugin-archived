@@ -76,6 +76,7 @@ class GrailsTask extends DefaultTask {
     private boolean pluginProject
 
     boolean forwardStdIn
+    boolean captureOutputToInfo
 
     GrailsTask() {
         this.jvmOptions = new DefaultJavaForkOptions(getServices().get(FileResolver))
@@ -121,8 +122,12 @@ class GrailsTask extends DefaultTask {
 
         def launcher = new GrailsLaunchConfigureAction(launchContext, springloadedJar, file)
 
-        OutputStream out = System.out
-        OutputStream err = System.out
+        // Capture output and only display to console in error conditions
+        // if capture is enabled and info logging is not enabled.
+        def capture = captureOutputToInfo && !logger.infoEnabled
+        OutputStream out = capture ? new ByteArrayOutputStream() : System.out
+        OutputStream err = capture ? new ByteArrayOutputStream() : System.err
+
         ExecResult result = project.javaexec {
             JavaExecAction action = delegate
             action.ignoreExitValue = true
@@ -139,9 +144,13 @@ class GrailsTask extends DefaultTask {
             result.rethrowFailure()
             result.assertNormalExitValue()
         } catch (ExecException e) {
-            if (!logger.infoEnabled) {
-                out.writeTo(System.out)
-                err.writeTo(System.err)
+            if (capture) {
+                if (out instanceof ByteArrayOutputStream) {
+                    out.writeTo(System.out)
+                }
+                if (err instanceof ByteArrayOutputStream) {
+                    err.writeTo(System.err)
+                }
             }
             throw e
         }
