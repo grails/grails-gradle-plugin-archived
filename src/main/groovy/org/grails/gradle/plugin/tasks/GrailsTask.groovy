@@ -212,7 +212,7 @@ class GrailsTask extends DefaultTask {
         launchContext.env = getEnv()
 
         launchContext.scriptName = NameUtils.toScriptName(getCommand())
-        launchContext.args = getArgs() + ' --non-interactive'
+        launchContext.args = (getArgs() ? getArgs() + ' ' : '') + '--non-interactive'
 
         Iterable<File> files = getEffectiveBootstrapClasspath()
         if (files) {
