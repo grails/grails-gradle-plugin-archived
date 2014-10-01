@@ -86,7 +86,7 @@ class GrailsDependenciesConfigurer extends DependencyConfigurer {
         if (version >= '1.1.5' && !version.endsWith('.RELEASE')) {
             version += '.RELEASE'
         }
-        if (grailsProject.springLoadedVersion.endsWith('.RELEASE')) {
+        if (version.endsWith('.RELEASE')) {
             addDependency("org.springframework:springloaded:$version", configuration)
         } else {
             addDependency("org.springsource.springloaded:springloaded-core:$version", configuration)
