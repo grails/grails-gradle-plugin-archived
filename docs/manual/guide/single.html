@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
-        <title>Grails Gradle Plugin 2.1.0</title>
+        <title>Grails Gradle Plugin 2.1.1</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
         <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
@@ -56,7 +56,7 @@ function addJsClass(el) {
                         <div class="project">
                             <h1>Grails Gradle Plugin - Reference Documentation</h1>
                             <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
-                            <p><strong>Version:</strong> 2.1.0</p>
+                            <p><strong>Version:</strong> 2.1.1</p>
                             
                         </div>
 
@@ -102,7 +102,9 @@ function addJsClass(el) {
                             
                             <div class="toc-item" style="margin-left:10px"><a href="#memory"><strong>3.5</strong><span>Configuring JVM Memory for Grails Tasks</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#plugins"><strong>3.6</strong><span>Managing Grails Plugins with Gradle</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#logging"><strong>3.6</strong><span>Capturing Grails task output to INFO log</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#plugins"><strong>3.7</strong><span>Managing Grails Plugins with Gradle</span></a></div>
                             
                             <div style="clear:both" ></div>
                         </div>
@@ -175,7 +177,12 @@ the script name with <code>grails-</code>
 
 
 <h2 id="changes">1.3 Change Log</h2>
-<h4>v2.1.0</h4>
+<h4>2.1.1</h4>
+<ul class="star">
+<li>Configure <code>war</code> task to use <code>production</code> environment by default - <a href="https://github.com/grails/grails-gradle-plugin/issues/101" target="blank">ISSUE-101</a></li>
+<li>Handle No signature of method: LinePerThreadBufferingOutputStream.writeTo(LinePerThreadBufferingOutputStream) error - <a href="https://github.com/grails/grails-gradle-plugin/issues/120" target="blank">ISSUE-120</a></li>
+<li>Add <code>captureOutputToInfo</code> property to <code>GrailsTask</code> which properly captures streams to INFO logger unless error occurs. Disabled by default</li>
+</ul><p class="paragraph"/><h4>v2.1.0</h4>
 <ul class="star">
 <li>Renamed default tasks created by plugin: - <a href="https://github.com/grails/grails-gradle-plugin/issues/81" target="blank">ISSUE-81</a></li>
 <ul class="star">
@@ -465,7 +472,20 @@ and all the properties and methods from that class are available.<p class="parag
 &#125;</pre></div>
 
 
-<h2 id="plugins">3.6 Managing Grails Plugins with Gradle</h2>
+<h2 id="logging">3.6 Capturing Grails task output to INFO log</h2>
+By default <code>GrailsTask</code>s will send their output and error stream to <code>System.out</code> and <code>System.err</code> respectively.
+However, any task can be configured to instead capture their output to the <code>Logger.INFO</code> level by setting the
+<code>captureOutputToInfo</code> property to <code>true</code> on the task. When enabled, the task will capture its output and error streams
+to a buffer. If the task encounters an error, then both the output and error streams will be rendered onto <code>System.out</code>
+and <code>System.err</code> respectively.<p class="paragraph"/>This allows a successful build to minimize the amount of logging produced to the console during the build and also
+allows the output from failed tasks in a parallel multi-project build to rendered their output without interleaving
+it with the output of other tasks.<p class="paragraph"/>The property can be configured on all <code>GrailsTask</code> instances using the following:<p class="paragraph"/><div class="code"><pre><div class="error">code: null</div>
+project.tasks.withType(GrailsTask) {
+  captureOutputToInfo = true
+}
+
+
+<h2 id="plugins">3.7 Managing Grails Plugins with Gradle</h2>
 The plugin configures the <code>build</code> task to call the appropriate <code>package-plugin</code> task for Grails plugin projects to produce
 the plugin zip file. Additionally, the plugin configures the Gradle configuration inheritance so that including Grails
 plugin projects via a Gradle <code>project</code> dependency should include the transitive dependencies for the plugin.<p class="paragraph"/><h4>Plugin Publication</h4><p class="paragraph"/><blockquote class="warning">
@@ -498,10 +518,34 @@ resulting plugin in a project did not resolve transitive dependencies correctly.
                 </div>
                 <div class="menu">
                     
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Task Rules</h1><div class="menu-sub">
+                        
+                        
+                        <div class="menu-item"><a href="../ref/Task%20Rules/grails-.html">grails-</a>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    
                     <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tasks</h1><div class="menu-sub">
                         
                         
+                        <div class="menu-item"><a href="../ref/Tasks/init-plugin.html">init-plugin</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tasks/init.html">init</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tasks/packagePlugin.html">packagePlugin</a>
+                        </div>
+                        
                         <div class="menu-item"><a href="../ref/Tasks/run.html">run</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tasks/test.html">test</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Tasks/war.html">war</a>
                         </div>
                         
                         </div>

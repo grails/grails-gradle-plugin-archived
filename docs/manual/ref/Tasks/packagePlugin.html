@@ -2,12 +2,12 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>2.3 Running a Grails Project 2.1.1</title>
+    <title>Grails Gradle Plugin 2.1.1</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
-    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <link rel="stylesheet" href="../../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
     <script type="text/javascript">
-function addJsClass() {
+function addJsClass(el) {
     var classes = document.body.className.split(" ");
     classes.push("js");
     document.body.className = classes.join(" ");
@@ -16,13 +16,14 @@ function addJsClass() {
 </head>
 
 <body class="body" onload="addJsClass();">
+
 <div id="navigation">
     <ul>
         <li>
             <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
                 <a href="../../guide/index.html" class="button">Table of contents</a>
 
-                <div id="nav-summary-childs" style="display:none;">
+                <div id="nav-summary-childs">
                     
                     <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
                     </div>
@@ -53,54 +54,12 @@ function addJsClass() {
 <table id="colset" border="0" cellpadding="0" cellspacing="0">
     <tr>
         <td id="col1">
-            <div id="main" class="corner-all">
-
-                
-                    <div class="toc-item prev-left"><a href="../../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
-                
+            <div id="main" class="reference corner-all">
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
-                
-                    <div class="toc-item next-right"><a href="../../guide/advanced.html"><strong>3</strong><span>Advanced Plugin Configuration &amp; Usage</span> >></a></div>
-                
-
-
-                <div class="project">
-                    <h1>2.3 Running a Grails Project - Reference Documentation</h1>
-
-                    <p><strong>Authors:</strong> Luke Daley, Graeme Rocher, Peter Ledbrook, John Engelman</p>
-
-                    <p><strong>Version:</strong> 2.1.1</p>
-
-                    
-                </div>
-
-                
-
-                
-
-<h2 id="run">2.3 Running a Grails Project</h2>
-The Grails Gradle Plugin creates a <code>run</code> task on the project that will start the Grails application container
-in the normal development environment by executing the Grails <code>run-app</code> script.<p class="paragraph"/><div class="code"><pre>$ gradle run</pre></div><p class="paragraph"/>Grails does not ship with an application container provided, so the build must specify a Grails plugin dependency. Typically,
-this will be the Grails tomcat plugin:<p class="paragraph"/><div class="code"><pre>depedencies &#123;
-    bootstrap 'org.grails.plugins:tomcat:7.0.50'
-&#125;</pre></div><p class="paragraph"/>By default, the plugin configures the <code>run</code> task and dynamic <code>grails-run-app</code> task to enabled class reloading via
-SpringLoaded. Other other tasks created by the plugin or dynamically created via the Grails Script pattern will
-have reloading disabled. To enable reloading for <code>GrailsTask</code>, define the task and configure the <code>reload</code> property
-to <code>true</code>.<p class="paragraph"/><blockquote class="note">
-Running the <code>run</code> task will prevent the Gradle execution from completing (i.e. the task blocks on the running container).
-To terminate the Grails application, use Ctrl+C to terminate the Gradle run
-</blockquote>
-
-
-                <div style="clear:both;margin-top:15px;"></div>
-                
-                    <div class="toc-item prev-left"><a href="../../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
-                
-                    <div class="toc-item next-right"><a href="../../guide/advanced.html"><strong>3</strong><span>Advanced Plugin Configuration &amp; Usage</span> >></a></div>
-                
-                <div style="clear:both"></div>
+                <h1>packagePlugin</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/>Packages a Grails plugin project as a source ZIP file by default.<p class="paragraph"/><h3>Description</h3><p class="paragraph"/>Calls to the <code>package-plugin</code> Grails script.
+Configures the output artifact for the runtime and default Gradle configurations to the be the resulting ZIP file.
             </div>
         </td>
         <td id="col2">
@@ -111,17 +70,21 @@ To terminate the Grails application, use Ctrl+C to terminate the Gradle run
                 </div>
                 <div class="menu">
                     
-                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Task Rules</h1><div class="menu-sub">
-                        
+                    <div class="menu-block">
+                        <h1 class="menu-title" onclick="toggleRef(nextElement(this))">Task Rules</h1>
+                        <div class="menu-sub">
+                            
                             
                             <div class="menu-item"><a href="../../ref/Task%20Rules/grails-.html">grails-</a>
                             </div>
                             
-                            </div>
+                        </div>
                     </div>
                     
-                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tasks</h1><div class="menu-sub">
-                        
+                    <div class="menu-block">
+                        <h1 class="menu-title" onclick="toggleRef(nextElement(this))">Tasks</h1>
+                        <div class="menu-sub selected">
+                            
                             
                             <div class="menu-item"><a href="../../ref/Tasks/init-plugin.html">init-plugin</a>
                             </div>
@@ -141,7 +104,7 @@ To terminate the Grails application, use Ctrl+C to terminate the Gradle run
                             <div class="menu-item"><a href="../../ref/Tasks/war.html">war</a>
                             </div>
                             
-                            </div>
+                        </div>
                     </div>
                     
                 </div>
@@ -155,7 +118,8 @@ To terminate the Grails application, use Ctrl+C to terminate the Gradle run
     
 </div>
 
-<script type="text/javascript" src="../js/docs.js"></script>
+
+<script type="text/javascript" src="../../js/docs.js"></script>
 
 </body>
 </html>
