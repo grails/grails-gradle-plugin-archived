@@ -194,10 +194,10 @@ However, any task can be configured to instead capture their output to the <code
 to a buffer. If the task encounters an error, then both the output and error streams will be rendered onto <code>System.out</code>
 and <code>System.err</code> respectively.<p class="paragraph"/>This allows a successful build to minimize the amount of logging produced to the console during the build and also
 allows the output from failed tasks in a parallel multi-project build to rendered their output without interleaving
-it with the output of other tasks.<p class="paragraph"/>The property can be configured on all <code>GrailsTask</code> instances using the following:<p class="paragraph"/><div class="code"><pre><div class="error">code: null</div>
-project.tasks.withType(GrailsTask) {
-  captureOutputToInfo = true
-}
+it with the output of other tasks.<p class="paragraph"/>The property can be configured on all <code>GrailsTask</code> instances using the following:<p class="paragraph"/><div class="code"><pre>project.tasks.withType(GrailsTask) &#123;
+  captureOutputToInfo = <span class="java&#45;keyword">true</span>
+&#125;</pre></div>
+
 
 
 <h2 id="plugins">3.7 Managing Grails Plugins with Gradle</h2>
