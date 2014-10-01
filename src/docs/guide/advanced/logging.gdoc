@@ -14,3 +14,4 @@ The property can be configured on all @GrailsTask@ instances using the following
 project.tasks.withType(GrailsTask) {
   captureOutputToInfo = true
 }
+{code}
