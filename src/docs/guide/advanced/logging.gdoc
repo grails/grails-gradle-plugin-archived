@@ -1,0 +1,16 @@
+By default @GrailsTask@s will send their output and error stream to @System.out@ and @System.err@ respectively.
+However, any task can be configured to instead capture their output to the @Logger.INFO@ level by setting the
+@captureOutputToInfo@ property to @true@ on the task. When enabled, the task will capture its output and error streams
+to a buffer. If the task encounters an error, then both the output and error streams will be rendered onto @System.out@
+and @System.err@ respectively.
+
+This allows a successful build to minimize the amount of logging produced to the console during the build and also
+allows the output from failed tasks in a parallel multi-project build to rendered their output without interleaving
+it with the output of other tasks.
+
+The property can be configured on all @GrailsTask@ instances using the following:
+
+{code}
+project.tasks.withType(GrailsTask) {
+  captureOutputToInfo = true
+}

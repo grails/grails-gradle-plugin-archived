@@ -85,7 +85,8 @@ class GrailsTaskConfigurator {
     }
 
     private GrailsAssembleTask createWarTask(Project project) {
-        project.tasks.create(GRAILS_WAR_TASK, GrailsWarTask)
+        GrailsAssembleTask war = project.tasks.create(GRAILS_WAR_TASK, GrailsWarTask)
+        war.env = 'production'
         return project.tasks.findByName(GRAILS_WAR_TASK)
     }
 

@@ -1,3 +1,9 @@
+h4. 2.1.1
+
+* Configure @war@ task to use @production@ environment by default - "ISSUE-101":https://github.com/grails/grails-gradle-plugin/issues/101
+* Handle No signature of method: LinePerThreadBufferingOutputStream.writeTo(LinePerThreadBufferingOutputStream) error - "ISSUE-120":https://github.com/grails/grails-gradle-plugin/issues/120
+* Add @captureOutputToInfo@ property to @GrailsTask@ which properly captures streams to INFO logger unless error occurs. Disabled by default
+
 h4. v2.1.0
 
 * Renamed default tasks created by plugin: - "ISSUE-81":https://github.com/grails/grails-gradle-plugin/issues/81

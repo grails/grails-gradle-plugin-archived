@@ -1,0 +1,10 @@
+h1. war
+
+h2. Purpose
+
+Build an application WAR file.
+
+h3. Description
+
+Calls the @war@ Grails script. By default sets the environment to @production@.
+Configures the output artifact for the runtime and default Gradle configurations to the be the resulting WAR file.

@@ -1,0 +1,9 @@
+h1. init-plugin
+
+h2. Purpose
+
+Initializes a new Grails plugin project in the current working directory.
+
+h3. Description
+
+Calls to the @create-plugin@ Grails script and passes the @version@ property.

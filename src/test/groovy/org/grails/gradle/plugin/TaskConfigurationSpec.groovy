@@ -38,6 +38,11 @@ class TaskConfigurationSpec extends PluginSpec {
         project.configurations.default.extendsFrom.contains(project.configurations.runtime)
     }
 
+    def "war task defaults to production environment"() {
+        expect:
+        project.tasks.findByName('war').getEnv() == 'production'
+    }
+
     def "war file is configured as runtime artifact for application"() {
         given:
         project.evaluate()
@@ -80,8 +85,8 @@ class TaskConfigurationSpec extends PluginSpec {
         project.file("${project.name.capitalize()}GrailsPlugin.groovy") << """
 class ${project.name.capitalize()}GrailsPlugin { }
 """
-        project.grailsVersion = "2.0.0"
         project.apply plugin: "grails"
+        project.grails.grailsVersion = '2.0.0'
         project.evaluate()
         List<File> artifactFiles = project.configurations.runtime.artifacts.files.files as List
 
@@ -104,8 +109,8 @@ class ${project.name.capitalize()}GrailsPlugin { }
         project.file("${project.name.capitalize()}GrailsPlugin.groovy") << """
 class ${project.name.capitalize()}GrailsPlugin { }
 """
-        project.grailsVersion = "2.0.0"
         project.apply plugin: "grails"
+        project.grails.grailsVersion = '2.0.0'
         project.version = '1.0'
         project.evaluate()
         List<File> artifactFiles = project.configurations.runtime.artifacts.files.files as List

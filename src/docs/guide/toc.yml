@@ -20,4 +20,5 @@ advanced:
   env: Setting the Grails Environment
   debug: Debugging Grails tasks
   memory: Configuring JVM Memory for Grails Tasks
+  logging: Capturing Grails task output to INFO log
   plugins: Managing Grails Plugins with Gradle

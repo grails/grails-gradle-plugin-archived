@@ -26,8 +26,8 @@ class PluginSpec extends Specification {
     Project project = ProjectBuilder.builder().build()
 
     def setup() {
-        project.grailsVersion = "2.0.0"
         project.apply plugin: "grails"
+        project.grails.grailsVersion = '2.0.0'
     }
 
     GrailsTask grailsTask(String name, Closure config = {}) {
