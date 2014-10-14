@@ -30,7 +30,7 @@ import org.grails.gradle.plugin.tasks.GrailsEclipseJdtGroovyTask
 class GrailsEclipseConfigurator {
     static final GRADLE_GRAILS_PLUGIN_DIR_LINK_NAME = '.link_to_grails_plugins'
     static final GRADLE_GRAILS_PLUGIN_RELATIVE_DIR = 'buildPlugins'
-    static final GRADLE_GRAILS_OUTPUT_RELATIVE_DIR = 'build/classes'
+    static final GRADLE_GRAILS_OUTPUT_RELATIVE_DIR = 'target-eclipse/classes'
 
     /**
      * Registering Eclipse IDE project configuration
