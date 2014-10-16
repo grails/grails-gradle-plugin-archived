@@ -9,7 +9,7 @@ Grails does not ship with an application container provided, so the build must s
 this will be the Grails tomcat plugin:
 
 {code}
-depedencies {
+dependencies {
     bootstrap 'org.grails.plugins:tomcat:7.0.50'
 }
 {code}
