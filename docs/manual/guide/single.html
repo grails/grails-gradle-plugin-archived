@@ -270,7 +270,7 @@ the <code>org.grails.plugins</code> groupId. With Gradle, the groupId <strong cl
 <h2 id="run">2.3 Running a Grails Project</h2>
 The Grails Gradle Plugin creates a <code>run</code> task on the project that will start the Grails application container
 in the normal development environment by executing the Grails <code>run-app</code> script.<p class="paragraph"/><div class="code"><pre>$ gradle run</pre></div><p class="paragraph"/>Grails does not ship with an application container provided, so the build must specify a Grails plugin dependency. Typically,
-this will be the Grails tomcat plugin:<p class="paragraph"/><div class="code"><pre>depedencies &#123;
+this will be the Grails tomcat plugin:<p class="paragraph"/><div class="code"><pre>dependencies &#123;
     bootstrap 'org.grails.plugins:tomcat:7.0.50'
 &#125;</pre></div><p class="paragraph"/>By default, the plugin configures the <code>run</code> task and dynamic <code>grails-run-app</code> task to enabled class reloading via
 SpringLoaded. Other other tasks created by the plugin or dynamically created via the Grails Script pattern will
