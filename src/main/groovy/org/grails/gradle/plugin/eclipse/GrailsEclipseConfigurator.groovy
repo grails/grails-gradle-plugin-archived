@@ -17,6 +17,9 @@
 package org.grails.gradle.plugin.eclipse
 
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.tasks.Delete
 import org.gradle.plugins.ide.eclipse.EclipsePlugin
 import org.gradle.plugins.ide.eclipse.model.EclipseModel
@@ -31,6 +34,7 @@ class GrailsEclipseConfigurator {
     static final GRADLE_GRAILS_PLUGIN_DIR_LINK_NAME = '.link_to_grails_plugins'
     static final GRADLE_GRAILS_PLUGIN_RELATIVE_DIR = 'buildPlugins'
     static final GRADLE_GRAILS_OUTPUT_RELATIVE_DIR = 'target-eclipse/classes'
+    static final ECLIPSE_CLASS_PATH_ENTRY_NODE_NAME = 'classpathentry'
 
     /**
      * Registering Eclipse IDE project configuration
@@ -49,6 +53,8 @@ class GrailsEclipseConfigurator {
     }
 
     private void createEclipseProject(Project project, EclipseModel model) {
+        String pluginLinkLocation = "${project.projectDir.absolutePath}${File.separator}${GRADLE_GRAILS_PLUGIN_RELATIVE_DIR}"
+
         model.project {
             buildCommands.clear()
             buildCommand 'org.eclipse.wst.common.project.facet.core.builder'
@@ -61,7 +67,7 @@ class GrailsEclipseConfigurator {
 
             linkedResource name: GRADLE_GRAILS_PLUGIN_DIR_LINK_NAME,
                 type: '2',
-                location: "${project.projectDir.absolutePath}${File.separator}${GRADLE_GRAILS_PLUGIN_RELATIVE_DIR}"
+                location: pluginLinkLocation
 
             file.withXml {
                 def node = it.asNode()
@@ -97,6 +103,15 @@ class GrailsEclipseConfigurator {
                                 <arguments>1.0-name-matches-false-false-.gradle</arguments>
                             </matcher>
                         </filter>
+                        <filter>
+                            <id>1407529877926</id>
+                            <name/>
+                            <type>10</type>
+                            <matcher>
+                                <id>org.eclipse.ui.ide.multiFilter</id>
+                                <arguments>1.0-name-matches-false-false-buildPlugins</arguments>
+                            </matcher>
+                        </filter>
                     </filteredResources>""")
 
                 node.append(filteredResources)
@@ -119,21 +134,14 @@ class GrailsEclipseConfigurator {
                 def node = it.asNode()
 
                 // Excluding resources source directories
-                ['grails-app/conf', 'grails-app/conf/hibernate', 'grails-app/conf/spring',
-                 'grails-app/views', 'web-app'].collect { dirPath ->
-                    def removeNode = node.'**'.find {
-                        it.@path == dirPath
-                    }
+                handleResourceSourceDirs(node)
 
-                    if (removeNode) {
-                        node.remove(removeNode)
-                    }
-                }
-                node.appendNode('classpathentry', [kind: 'src', path: 'grails-app/conf', excluding: 'spring/|hibernate/'])
+                // Adding Plugin source directories
+                handlePluginSourceDirs(project, node)
 
                 // Containers
-                node.appendNode 'classpathentry', [kind: 'con', path: 'org.eclipse.jdt.launching.JRE_CONTAINER']
-                node.appendNode 'classpathentry', [kind: 'con', path: 'GROOVY_DSL_SUPPORT']
+                node.appendNode ECLIPSE_CLASS_PATH_ENTRY_NODE_NAME, [kind: 'con', path: 'org.eclipse.jdt.launching.JRE_CONTAINER']
+                node.appendNode ECLIPSE_CLASS_PATH_ENTRY_NODE_NAME, [kind: 'con', path: 'GROOVY_DSL_SUPPORT']
             }
         }
     }
@@ -148,5 +156,73 @@ class GrailsEclipseConfigurator {
 
         // eclipseJdtGroovy task
         project.task(GrailsEclipseJdtGroovyTask.ECLIPSE_JDT_GROOVY_TASK_NAME, type: GrailsEclipseJdtGroovyTask)
+
+        // eclipseClasspath depends on assemble to resolve plugins
+        project.tasks.findByName('eclipseClasspath')?.dependsOn(BasePlugin.ASSEMBLE_TASK_NAME)
+    }
+
+    private void handleResourceSourceDirs(Node node) {
+        ['grails-app/conf', 'grails-app/conf/hibernate', 'grails-app/conf/spring',
+         'grails-app/views', 'web-app'].collect { dirPath ->
+            def removeNode = node.'**'.find {
+                it.@path == dirPath
+            }
+
+            if (removeNode) {
+                node.remove(removeNode)
+            }
+        }
+        node.appendNode(ECLIPSE_CLASS_PATH_ENTRY_NODE_NAME, [kind: 'src', path: 'grails-app/conf', excluding: 'spring/|hibernate/'])
+    }
+
+    private void handlePluginSourceDirs(Project project, Node node) {
+        // Cleanup .zip from lib kind in the classpathentry
+        node.'**'.findAll {
+            it.@path?.toLowerCase()?.endsWith('.zip')
+        }?.each {
+            node.remove(it)
+        }
+
+        pluginSourceDirs(project).each { path ->
+            def nodeValues = [kind: 'src', path: path]
+            if (path.endsWith('grails-app/conf')) {
+                nodeValues << [excluding: 'BuildConfig.groovy|*DataSource.groovy|UrlMappings.groovy|Config.groovy|BootStrap.groovy|spring/resources.groovy']
+            }
+
+            node.appendNode(ECLIPSE_CLASS_PATH_ENTRY_NODE_NAME, nodeValues)
+                .appendNode('attributes')
+                .appendNode('attribute', [name: 'org.grails.ide.eclipse.core.SOURCE_FOLDER', value: 'true'])
+        }
+    }
+
+    /**
+     * Note: Same hacky approach as GrailsIdeaConfigurator for plugin
+     * directories processing. It assumes that all plugins have the 'org.grails.plugins' group.
+     * */
+    private pluginSourceDirs(Project project) {
+        def plugins = [] as Set
+
+        ['bootstrap', 'compile', 'runtime'].each { name ->
+            Configuration configuration = project.configurations.getByName(name)
+            if (configuration) {
+                plugins.addAll(configuration.allDependencies.findAll {
+                    !(it instanceof ProjectDependency) && it.group == 'org.grails.plugins'
+                })
+            }
+        }
+
+        def pluginPaths = []
+        plugins.each { dependency ->
+            ['src/groovy', 'grails-app/i18n', 'grails-app/controllers', 'grails-app/domain',
+             'grails-app/services', 'grails-app/taglib', 'src/java', 'grails-app/conf'].each { relativePath ->
+                String path = "${File.separator}${dependency.name}-${dependency.version}${File.separator}${relativePath}"
+                File dir = new File(project.projectDir, "${File.separator}buildPlugins${path}")
+                if (dir.exists()) {
+                    pluginPaths << "${GRADLE_GRAILS_PLUGIN_DIR_LINK_NAME}${path}"
+                }
+            }
+        }
+
+        pluginPaths
     }
 }
