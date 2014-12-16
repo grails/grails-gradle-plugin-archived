@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 
 group = 'org.grails'
-version = file('version.txt').text
+version = file('version.txt').text.trim()
 archivesBaseName = 'grails-gradle-plugin'
 
 sourceCompatibility = '1.6'
