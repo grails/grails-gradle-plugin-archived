@@ -4,15 +4,14 @@ import org.gradle.api.Action
 import org.gradle.api.internal.file.FileResolver
 import org.gradle.api.internal.plugins.DslObject
 import org.gradle.api.internal.tasks.DefaultGroovySourceSet
-import org.gradle.language.java.internal.DefaultJavaSourceSet
 import org.gradle.api.internal.tasks.DefaultSourceSet
 import org.gradle.api.internal.tasks.SourceSetCompileClasspath
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.language.base.FunctionalSourceSet
+import org.gradle.language.base.LanguageSourceSet
 import org.gradle.language.base.ProjectSourceSet
-import org.gradle.language.jvm.ResourceSet
-import org.gradle.language.jvm.internal.DefaultResourceSet
+import org.gradle.language.java.internal.DefaultJavaSourceSet
 
 /**
  * Configures the source sets with the Grails source structure. Much of this code is replicated from the Java and
@@ -37,7 +36,8 @@ class GrailsSourceSetConfigurator {
                 SourceSetCompileClasspath compileClasspath = new SourceSetCompileClasspath(sourceSet)
                 DefaultJavaSourceSet javaSourceSet = instantiator.newInstance(DefaultJavaSourceSet.class, "java", sourceSet.getJava(), compileClasspath, functionalSourceSet)
                 functionalSourceSet.add(javaSourceSet)
-                ResourceSet resourceSet = instantiator.newInstance(DefaultResourceSet.class, "resources", sourceSet.getResources(), functionalSourceSet)
+
+                LanguageSourceSet resourceSet = createResourceSet(sourceSet, functionalSourceSet)
                 functionalSourceSet.add(resourceSet)
 
                 DefaultGroovySourceSet groovySourceSet = new DefaultGroovySourceSet(((DefaultSourceSet) sourceSet).displayName, fileResolver)
@@ -49,6 +49,26 @@ class GrailsSourceSetConfigurator {
 
         createMainSourceSet(project)
         createTestSourceSet(project)
+    }
+
+    private LanguageSourceSet createResourceSet(final SourceSet sourceSet, final FunctionalSourceSet functionalSourceSet) {
+        LanguageSourceSet resourceSet
+        if (isResourceSetAvailable('org.gradle.language.jvm.ResourceSet')) { // Before Gradle 2.2.
+            resourceSet = instantiator.newInstance(Class.forName('org.gradle.language.jvm.internal.DefaultResourceSet'), "resources", sourceSet.getResources(), functionalSourceSet)
+            return resourceSet
+        } else if (isResourceSetAvailable('org.gradle.language.jvm.JvmResourceSet')) { // Since Gradle 2.2.
+            resourceSet = instantiator.newInstance(Class.forName('org.gradle.language.jvm.internal.DefaultJvmResourceSet'), "resources", sourceSet.getResources(), functionalSourceSet)
+
+        }
+        return resourceSet
+    }
+
+    private boolean isResourceSetAvailable(final String resourceSetClassName) {
+        try {
+            Class.forName(resourceSetClassName)
+        } catch (ClassNotFoundException classNotFoundException) {
+            return false
+        }
     }
 
     /**
