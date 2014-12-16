@@ -1,3 +1,7 @@
+h4. 2.1.2
+
+* Support Gradle 2.2 - "ISSUE-128":https://github.com/grails/grails-gradle-plugin/issues/128
+
 h4. 2.1.1
 
 * Configure @war@ task to use @production@ environment by default - "ISSUE-101":https://github.com/grails/grails-gradle-plugin/issues/101

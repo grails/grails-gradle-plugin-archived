@@ -12,6 +12,7 @@ import org.gradle.language.base.FunctionalSourceSet
 import org.gradle.language.base.LanguageSourceSet
 import org.gradle.language.base.ProjectSourceSet
 import org.gradle.language.java.internal.DefaultJavaSourceSet
+import org.gradle.util.GradleVersion
 
 /**
  * Configures the source sets with the Grails source structure. Much of this code is replicated from the Java and
@@ -53,22 +54,14 @@ class GrailsSourceSetConfigurator {
 
     private LanguageSourceSet createResourceSet(final SourceSet sourceSet, final FunctionalSourceSet functionalSourceSet) {
         LanguageSourceSet resourceSet
-        if (isResourceSetAvailable('org.gradle.language.jvm.ResourceSet')) { // Before Gradle 2.2.
-            resourceSet = instantiator.newInstance(Class.forName('org.gradle.language.jvm.internal.DefaultResourceSet'), "resources", sourceSet.getResources(), functionalSourceSet)
+        if (GradleVersion.current() < GradleVersion.version('2.2')) {
+            resourceSet = instantiator.newInstance(this.class.classLoader.loadClass('org.gradle.language.jvm.internal.DefaultResourceSet'), "resources", sourceSet.getResources(), functionalSourceSet)
             return resourceSet
-        } else if (isResourceSetAvailable('org.gradle.language.jvm.JvmResourceSet')) { // Since Gradle 2.2.
-            resourceSet = instantiator.newInstance(Class.forName('org.gradle.language.jvm.internal.DefaultJvmResourceSet'), "resources", sourceSet.getResources(), functionalSourceSet)
+        } else {
+            resourceSet = instantiator.newInstance(this.class.classLoader.loadClass('org.gradle.language.jvm.internal.DefaultJvmResourceSet'), "resources", sourceSet.getResources(), functionalSourceSet)
 
         }
         return resourceSet
-    }
-
-    private boolean isResourceSetAvailable(final String resourceSetClassName) {
-        try {
-            Class.forName(resourceSetClassName)
-        } catch (ClassNotFoundException classNotFoundException) {
-            return false
-        }
     }
 
     /**
