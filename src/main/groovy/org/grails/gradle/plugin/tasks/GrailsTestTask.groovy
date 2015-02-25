@@ -5,6 +5,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectories
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.process.ExecResult
 import org.grails.launcher.context.GrailsLaunchContext
 
 /**
@@ -27,6 +28,7 @@ class GrailsTestTask extends GrailsTask {
 
     private List<String> phases
     private String grailsArgs
+    private boolean ignoreFailures = false;
 
     GrailsTestTask() {
         super()
@@ -62,6 +64,10 @@ class GrailsTestTask extends GrailsTask {
         grailsArgs = args
     }
 
+    void setIgnoreFailures(boolean ignoreFailures) {
+        this.ignoreFailures = ignoreFailures
+    }
+
     @Override
     @Input
     String getArgs() {
@@ -70,5 +76,12 @@ class GrailsTestTask extends GrailsTask {
 
     String getTestSingle() {
         return System.getProperty('test.single', '')
+    }
+
+    @Override
+    protected void checkExitValue(ExecResult result) {
+        if(!ignoreFailures) {
+            super.checkExitValue(result)
+        }
     }
 }

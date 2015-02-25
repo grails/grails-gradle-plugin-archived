@@ -27,7 +27,6 @@ import org.gradle.process.JavaForkOptions
 import org.gradle.process.internal.DefaultJavaForkOptions
 import org.gradle.process.internal.ExecException
 import org.gradle.process.internal.JavaExecAction
-import org.grails.gradle.plugin.GrailsProject
 import org.grails.gradle.plugin.internal.GrailsLaunchConfigureAction
 import org.grails.launcher.context.GrailsLaunchContext
 import org.grails.launcher.context.SerializableGrailsLaunchContext
@@ -141,8 +140,7 @@ class GrailsTask extends DefaultTask {
         }
 
         try {
-            result.rethrowFailure()
-            result.assertNormalExitValue()
+            checkExitValue(result)
         } catch (ExecException e) {
             if (capture) {
                 if (out instanceof ByteArrayOutputStream) {
@@ -154,6 +152,11 @@ class GrailsTask extends DefaultTask {
             }
             throw e
         }
+    }
+
+    protected void checkExitValue(ExecResult result) {
+        result.rethrowFailure()
+        result.assertNormalExitValue()
     }
 
     File getEffectiveGrailsHome() {
