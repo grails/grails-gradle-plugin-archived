@@ -8,7 +8,7 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath "org.grails:grails-gradle-plugin:2.0.0"
+    classpath "org.grails:grails-gradle-plugin:2.1.2"
   }
 }
 
@@ -22,14 +22,14 @@ repositories {
 }
 
 grails {
-  grailsVersion = '2.3.5'
-  groovyVersion = '2.1.9'
-  springLoadedVersion '1.1.3'
+  grailsVersion = '2.4.3'
+  groovyVersion = '2.3.7'
+  springLoadedVersion '1.2.0.RELEASE'
 }
 
 dependencies {
   bootstrap "org.grails.plugins:tomcat:7.0.50" // No container is deployed by default, so add this
-  compile 'org.grails.plugins:resources:1.2' // Just an example of adding a Grails plugin
+  compile 'org.grails.plugins:asset-pipeline:2.1.3' // Just an example of adding a Grails plugin
 }
 ```
 You must specify the `grails.grailsVersion` property before executing any Grails commands.

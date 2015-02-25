@@ -14,8 +14,8 @@ buildscript {
 apply plugin: 'grails'
 
 grails {
-    grailsVersion = '2.4.0' // Specifies the Grails version to use
-    groovyVersion = '2.3.1' // Specify the Groovy version to use (should match the version that ships with the above Grails version)
+    grailsVersion = '2.4.4' // Specifies the Grails version to use
+    groovyVersion = '2.3.7' // Specify the Groovy version to use (should match the version that ships with the above Grails version)
     springLoadedVersion = '1.2.0.RELEASE' // Specify the Spring Loaded version to use
 }
 
@@ -27,13 +27,12 @@ repositories {
 dependencies {
     bootstrap 'org.grails.plugins:tomcat:7.0.50.1'
 
-    compile 'org.grails.plugins:scaffolding:2.0.2'
-    compile 'org.grails.plugins:cache:1.1.1'
+    compile 'org.grails.plugins:scaffolding:2.1.2'
+    compile 'org.grails.plugins:cache:1.1.8'
 
     runtime 'org.grails.plugins:hibernate:3.6.10.8' //or 'org.grails.plugins:hibernate4:4.3.1.1'
     runtime 'org.grails.plugins:database-migration:1.3.8'
     runtime 'org.grails.plugins:jquery:1.11.0'
-    runtime 'org.grails.plugins:resources:1.2.2'
 
     //runtime 'mysql:mysql-connector-java:5.1.24'
     //runtime 'org.postgresql:postgresql:9.3.1100-jdbc41'
@@ -43,8 +42,7 @@ dependencies {
     //runtime 'org.grails.plugins:cached-resources:1.1'
     //runtime 'org.grails.plugins:yui-minify-resources:0.1.5'
 
-    //Alternate to the resources plugin
-    //compile 'org.grails.plugins:asset-pipeline:1.5.0'
+    //compile 'org.grails.plugins:asset-pipeline:2.1.3'
 
     //Additional asset-pipeline capabilities
     //compile 'org.grails.plugins:sass-asset-pipeline:1.5.1'
