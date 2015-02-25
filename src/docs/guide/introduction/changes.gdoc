@@ -2,6 +2,7 @@ h4. 2.2.0
 
 * Add support for Eclipse/GGTS IDE integration. Thanks to "jeevatkm":https://github.com/jeevatkm
 * Support Gradle 2.3 - "ISSUE-136":https://github.com/grails/grails-gradle-plugin/issues/136 - Actual fix is provided by the Eclipse/GGTS IDE integration
+* Add @ignoreFailures@ support to @GrailsTestTask@ tasks. Thanks to "omerozkan":https://github.com/omerozkan
 
 h4. 2.1.2
 
