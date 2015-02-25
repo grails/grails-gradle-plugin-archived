@@ -25,11 +25,11 @@ import org.gradle.api.artifacts.DependencyResolveDetails
 import org.gradle.api.internal.ConventionMapping
 import org.gradle.api.internal.file.FileResolver
 import org.gradle.api.plugins.BasePlugin
+import org.gradle.api.plugins.GroovyBasePlugin
 import org.gradle.internal.reflect.Instantiator
-import org.gradle.language.base.ProjectSourceSet
-import org.gradle.language.base.plugins.LanguageBasePlugin
 import org.grails.gradle.plugin.dependencies.DependencyConfigurer
 import org.grails.gradle.plugin.dependencies.DependencyConfigurerFactory
+import org.grails.gradle.plugin.eclipse.GrailsEclipseConfigurator
 import org.grails.gradle.plugin.idea.GrailsIdeaConfigurator
 import org.grails.gradle.plugin.internal.DefaultGrailsProject
 import org.grails.gradle.plugin.tasks.GrailsTask
@@ -50,7 +50,7 @@ class GrailsPlugin implements Plugin<Project> {
 
     void apply(Project project) {
         project.plugins.apply(BasePlugin)
-        project.plugins.apply(LanguageBasePlugin)
+        project.plugins.apply(GroovyBasePlugin)
 
         DefaultGrailsProject grailsProject = project.extensions.create('grails', DefaultGrailsProject, project, instantiator)
         project.convention.plugins.put('grails', grailsProject)
@@ -144,6 +144,7 @@ class GrailsPlugin implements Plugin<Project> {
             }
         }
         configureIdea(project)
+        configureEclipse(project)
     }
 
     void configureTasks(Project project, GrailsProject grailsProject) {
@@ -151,11 +152,15 @@ class GrailsPlugin implements Plugin<Project> {
     }
 
     void configureSourceSets(Project project, GrailsProject grailsProject) {
-        new GrailsSourceSetConfigurator(instantiator, fileResolver).configure(project.extensions.getByType(ProjectSourceSet), grailsProject)
+        new GrailsSourceSetConfigurator(instantiator, fileResolver).configure(project, grailsProject)
     }
 
     void configureIdea(Project project) {
         new GrailsIdeaConfigurator().configure(project)
+    }
+
+    void configureEclipse(Project project) {
+        new GrailsEclipseConfigurator().configure(project)
     }
 
     Configuration getOrCreateConfiguration(Project project, String name) {

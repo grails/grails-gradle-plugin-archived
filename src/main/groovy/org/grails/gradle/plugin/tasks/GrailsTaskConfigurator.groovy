@@ -33,7 +33,7 @@ class GrailsTaskConfigurator {
         }
 
         project.tasks.getByName(BasePlugin.CLEAN_TASK_NAME) {
-            delete('buildPlugins')
+            delete 'buildPlugins', 'plugin.xml', "grails-${project.name}-${-> project.version}.zip"
         }
 
         //Set up the proper assemble task and adds it's artifact to the configuration
@@ -138,7 +138,7 @@ class GrailsTaskConfigurator {
         //Depending on the project type, configure either the package-plugin or war tasks
         //as the assemble task
         GrailsAssembleTask grailsAssemble = grailsProject.pluginProject ?
-                createPackagePluginTask(project) : createWarTask(project)
+            createPackagePluginTask(project) : createWarTask(project)
 
         project.tasks.getByName(BasePlugin.ASSEMBLE_TASK_NAME).dependsOn grailsAssemble
         project.configurations.default.extendsFrom(project.configurations.runtime)
