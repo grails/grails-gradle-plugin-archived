@@ -21,7 +21,7 @@ class GrailsDependenciesConfigurerSpec extends Specification {
 
     def setup() {
         project = ProjectBuilder.builder().withName('dependency-spec').build()
-        grailsProject = new DefaultGrailsProject(project, project.services.get(Instantiator))
+        grailsProject = new DefaultGrailsProject(project)
         version = GrailsVersion.parse('2.3.5')
         dependenciesConfigurer = new GrailsDependenciesConfigurer(project, grailsProject, version)
     }

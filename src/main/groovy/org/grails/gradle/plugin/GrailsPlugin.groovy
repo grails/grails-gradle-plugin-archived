@@ -52,7 +52,7 @@ class GrailsPlugin implements Plugin<Project> {
         project.plugins.apply(BasePlugin)
         project.plugins.apply(GroovyBasePlugin)
 
-        DefaultGrailsProject grailsProject = project.extensions.create('grails', DefaultGrailsProject, project, instantiator)
+        DefaultGrailsProject grailsProject = project.extensions.create('grails', DefaultGrailsProject, project)
         project.convention.plugins.put('grails', grailsProject)
 
         grailsProject.conventionMapping.with {
@@ -118,7 +118,7 @@ class GrailsPlugin implements Plugin<Project> {
                 map("compileClasspath") { compileConfiguration }
                 map("runtimeClasspath") { runtimeConfiguration }
                 map("testClasspath") { testConfiguration }
-                map("sourceSets") { grailsProject.sourceSets }
+                map("sourceSets") { project.sourceSets }
 
                 map("springloaded") {
                     if (springloadedConfiguration.dependencies.empty) {

@@ -16,10 +16,6 @@
 
 package org.grails.gradle.plugin
 
-import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.SourceSetContainer
-
 interface GrailsProject {
 
     void setGrailsVersion(String grailsVersion)
@@ -29,10 +25,6 @@ interface GrailsProject {
     String getSpringLoadedVersion()
 
     void setSpringLoadedVersion(String springLoadedVersion)
-
-    NamedDomainObjectContainer<SourceSet> sourceSets(Closure configure)
-
-    SourceSetContainer getSourceSets()
 
     boolean isPluginProject()
 
