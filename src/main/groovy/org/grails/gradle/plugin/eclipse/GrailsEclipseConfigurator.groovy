@@ -44,6 +44,7 @@ class GrailsEclipseConfigurator {
     void configure(Project project) {
         project.plugins.withType(EclipsePlugin) {
             project.eclipse {
+                def model = project.extensions.getByType(EclipseModel.class)
                 createEclipseProject(project, model)
                 createEclipseClasspath(project, model)
             }
